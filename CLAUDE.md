@@ -29,12 +29,14 @@ Cloudflare Workers + Hono + D1 (SQLite) + R2 (存储) + KV (缓存)
 ```
 
 ### 第三方服务
-| 服务 | 用途 |
-|------|------|
-| Clerk | 用户认证 |
-| Stripe | 支付订阅 |
-| OpenAI / 腾讯云 TTS | 语音合成 |
-| Vercel | 前端托管 |
+| 服务 | 用途 | 文档 |
+|------|------|------|
+| Clerk | 用户认证 | `docs/design/auth-design.md` |
+| Stripe | 支付订阅 | `docs/design/payment-integration.md` |
+| TTS | 语音合成 | `docs/planning/tts-free-providers.md` |
+| LLM | 播客脚本生成 | `docs/planning/llm-asr-providers.md` |
+| ASR | 语音识别 | `docs/planning/llm-asr-providers.md` |
+| Vercel | 前端托管 | `docs/development/deployment-architecture.md` |
 
 ---
 
@@ -63,7 +65,12 @@ aimake/
 │
 ├── docs/                      # 📚 设计文档 (已完成)
 │   ├── README.md              # 文档索引 (必读)
-│   ├── planning/              # 产品规划 (6 个文档)
+│   ├── planning/              # 产品规划 (7 个文档)
+│   │   ├── product-plan.md
+│   │   ├── ai-providers-overview.md      # 🎯 AI 供应商选型总览
+│   │   ├── tts-free-providers.md         # TTS 快速接入
+│   │   ├── llm-asr-providers.md          # LLM & ASR 快速接入
+│   │   └── ...
 │   ├── design/                # 技术设计 (14 个文档)
 │   └── development/           # 开发运维 (4 个文档)
 │
@@ -81,6 +88,7 @@ aimake/
 | 优先级 | 文档 | 用途 |
 |--------|------|------|
 | ⭐⭐⭐⭐⭐ | `docs/README.md` | **文档索引** - 完整导航 |
+| ⭐⭐⭐⭐⭐ | `docs/planning/ai-providers-overview.md` | **AI 供应商选型** - TTS/LLM/ASR 快速决策 |
 | ⭐⭐⭐⭐⭐ | `docs/design/api-design.md` | API 接口定义、TypeScript 类型 |
 | ⭐⭐⭐⭐⭐ | `docs/design/database-schema.md` | D1 数据库表结构、Drizzle schema |
 | ⭐⭐⭐⭐ | `docs/design/frontend-architecture.md` | 组件结构、Hooks、Store |
@@ -171,10 +179,20 @@ VITE_CLERK_PUBLISHABLE_KEY
 ```
 CLERK_SECRET_KEY
 STRIPE_SECRET_KEY
-OPENAI_API_KEY (或 TENCENT_SECRET_ID/KEY)
+
+# TTS (选一个)
+TENCENT_SECRET_ID + TENCENT_SECRET_KEY  # 推荐: 800万字符免费
+OPENAI_API_KEY                          # 备选: $15/百万字符
+
+# LLM (播客脚本生成)
+LLM_API_KEY                             # 硅基流动: 2000万 tokens 免费
+LLM_BASE_URL=https://api.siliconflow.cn/v1
+LLM_MODEL=Qwen/Qwen2.5-7B-Instruct
 ```
+
+详见 `docs/planning/ai-providers-overview.md` 的零成本启动方案。
 
 ---
 
 **最后更新**: 2026-01-09
-**文档总数**: 24 个设计文档
+**文档总数**: 25 个设计文档 (planning: 7, design: 14, development: 4)
