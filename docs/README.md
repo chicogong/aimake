@@ -81,6 +81,7 @@
 | [landing-page-design.md](./design/landing-page-design.md) | **主页设计** | Landing Page 结构、响应式、FAQ、社会证明 |
 | [i18n-design.md](./design/i18n-design.md) | **国际化** | 多语言支持、react-i18next 配置、翻译文件 |
 | [seo-analytics.md](./design/seo-analytics.md) | **SEO 与分析** | Meta 标签、结构化数据、事件埋点、A/B 测试 |
+| [figma-integration.md](./design/figma-integration.md) | **Figma 集成** | Figma MCP、v0.dev、设计转代码工作流 |
 
 **AI Coding 提示**: 
 - 新建组件参考 `frontend-architecture.md` 的组件结构
@@ -291,6 +292,7 @@ docs/
 │   ├── landing-page-design.md   # 主页设计
 │   ├── i18n-design.md           # 国际化方案
 │   ├── seo-analytics.md         # SEO 与数据分析
+│   ├── figma-integration.md     # Figma 集成与 AI 代码生成
 │   ├── auth-design.md           # 登录鉴权
 │   ├── payment-integration.md   # 支付集成
 │   ├── prompt-engineering.md    # Prompt 工程
@@ -303,7 +305,7 @@ docs/
     └── release-verification.md  # 上线验证
 ```
 
-**总计: 24 个文档，覆盖完整开发流程**
+**总计: 25 个文档，覆盖完整开发流程**
 
 ---
 
