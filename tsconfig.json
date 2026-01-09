@@ -14,9 +14,13 @@
     /* Paths */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
+      "@/*": ["./src/*"],
       "@components/*": ["./frontend-components/*"],
-      "@types/*": ["./frontend-types/*"]
+      "@types/*": ["./frontend-types/*"],
+      "@stores/*": ["./src/stores/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@api/*": ["./src/api/*"]
     },
 
     /* Type Checking */
@@ -39,6 +43,7 @@
     "skipLibCheck": true
   },
   "include": [
+    "src/**/*",
     "frontend-components/**/*",
     "frontend-types/**/*"
   ],
