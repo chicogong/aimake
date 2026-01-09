@@ -34,23 +34,69 @@
 
 ---
 
-## 文档
+## 📚 文档
 
-- [产品规划](./docs/product-plan.md) - 功能、技术栈、开发计划
-- [方向探索](./docs/content-generation-directions.md) - 可做的内容类型
+完整的技术文档位于 `docs/` 目录：
+
+### 产品与规划
+- 📖 **[文档索引](./docs/README.md)** - 完整文档导航
+- 🎯 **[产品规划](./docs/planning/product-plan.md)** - 功能、定价、开发计划
+- 🤖 **[AI 供应商选型](./docs/planning/ai-providers-overview.md)** - TTS/LLM/ASR 快速决策
+- 🎙️ [TTS 供应商对比](./docs/planning/tts-providers-comparison.md)
+- 💬 [LLM & ASR 接入](./docs/planning/llm-asr-providers.md)
+
+### 技术设计
+- 🏗️ [系统架构](./docs/design/design-research.md)
+- 🔌 [API 设计](./docs/design/api-design.md)
+- 💾 [数据库设计](./docs/design/database-schema.md)
+- ⚛️ [前端架构](./docs/design/frontend-architecture.md)
+
+### 开发运维
+- ⚙️ **[环境配置](./docs/development/env-config.md)** - 环境变量完整说明
+- 🚀 [部署架构](./docs/development/deployment-architecture.md)
+- ✅ [上线验证](./docs/development/release-verification.md)
 
 ---
 
 ## 快速开始
 
+### 1. 环境变量配置
+
 ```bash
-# 安装依赖
+# 复制环境变量模板
+cp .env.example .env
+
+# 编辑 .env 文件，填入必需的 API Keys:
+# - VITE_CLERK_PUBLISHABLE_KEY (认证)
+# - TENCENT_SECRET_ID / TENCENT_SECRET_KEY (TTS)
+# - LLM_API_KEY (播客脚本生成)
+#
+# 详见 .env.example 文件中的注释说明
+```
+
+📄 **完整的配置说明**: [.env.example](./.env.example) | [环境配置文档](./docs/development/env-config.md)
+
+### 2. 安装依赖
+
+```bash
+# 安装前端依赖
+cd frontend
 npm install
 
-# 启动开发服务器
+# 安装后端依赖
+cd ../api
+npm install
+```
+
+### 3. 启动开发服务器
+
+```bash
+# 在项目根目录
 npm run dev
 
-# 打开 http://localhost:3000
+# 或分别启动
+npm run dev:frontend  # http://localhost:5173
+npm run dev:api       # http://localhost:8787
 ```
 
 ---

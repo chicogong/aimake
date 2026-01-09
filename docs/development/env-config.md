@@ -2,6 +2,44 @@
 
 > 创建日期: 2026-01-09
 > 策略: 分环境配置 + 密钥安全管理
+>
+> **快速开始**: 复制根目录的 `.env.example` 文件并按照注释填写
+
+---
+
+## 📋 快速配置
+
+### 环境变量模板文件
+
+项目根目录提供了完整的环境变量模板文件：
+
+📄 **[.env.example](../../.env.example)**
+
+包含以下完整配置：
+- ✅ 前端环境变量（Vite）
+- ✅ 后端环境变量（Cloudflare Workers）
+- ✅ TTS 供应商配置（腾讯云、Google、Azure、OpenAI、MiniMax、ElevenLabs）
+- ✅ LLM 供应商配置（硅基流动、智谱、DeepSeek、Moonshot、阿里云）
+- ✅ ASR 供应商配置（腾讯云、讯飞、火山引擎、阿里云）
+- ✅ 认证与支付（Clerk、Stripe）
+- ✅ 存储、缓存、监控等
+
+### 快速开始步骤
+
+```bash
+# 1. 复制模板文件
+cp .env.example .env
+
+# 2. 编辑 .env 填入实际值
+# 参考文件中的注释说明
+
+# 3. 前端开发（复制到前端目录）
+cp .env frontend/.env.local
+
+# 4. 后端开发（Cloudflare Workers）
+# 复制敏感变量到 api/.dev.vars
+# 或使用 wrangler secret put 命令
+```
 
 ---
 
