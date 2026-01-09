@@ -1,6 +1,23 @@
 # AIMake - AI 语音内容生成
 
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-25%20files-green.svg)](docs/)
+[![Status](https://img.shields.io/badge/status-planning-yellow.svg)](#项目状态)
+
 > 用 AI 快速生成播客、有声书、配音、教育内容
+
+---
+
+## 项目状态
+
+**📋 规划期** - 文档完成，代码开发中
+
+- ✅ 产品规划文档（7 个）
+- ✅ 技术设计文档（14 个）
+- ✅ 开发运维文档（4 个）
+- ✅ 环境配置模板
+- ⏳ 前端开发（待开始）
+- ⏳ 后端开发（待开始）
 
 ---
 
@@ -105,10 +122,12 @@ npm run dev:api       # http://localhost:8787
 
 | 类别 | 技术 |
 |------|------|
-| 前端 | React, TypeScript, Vite, Tailwind |
-| 后端 | Python, FastAPI |
-| TTS | ElevenLabs / OpenAI TTS / 自建 |
-| 数据库 | PostgreSQL, Redis |
+| 前端 | React 18, TypeScript, Vite, Tailwind CSS |
+| 后端 | Cloudflare Workers, Hono, D1, R2, KV |
+| TTS | 腾讯云 / Google / Azure / OpenAI |
+| LLM | 硅基流动 / DeepSeek / 智谱 AI |
+| 认证 | Clerk |
+| 支付 | Stripe |
 
 ---
 
