@@ -8,180 +8,173 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > 用 AI 快速生成播客、有声书、配音、教育内容
 
-## 🚨 核心约定
+## 项目状态
 
-### 项目状态
-- **当前阶段**: 规划期 - 只有设计文档和 landing page HTML
-- **技术栈**: 计划使用 React + TypeScript + Vite (前端) + Python/FastAPI (后端)
-- **关键决策**: 尚未开始实际开发，所有实现细节在 docs/ 中
-
-### 代码风格原则
-- **简洁至上**: 不要过度设计，不要创建冗余文档
-- **文档管理**: 只保留 README.md 和 docs/ 目录
-- **严格禁止**: 不要添加 SETUP.md, DEVELOPMENT.md, CONTRIBUTING.md 等冗余文档
-
-## 📁 项目结构
-
-当前项目处于**规划阶段**，目录结构：
-
-```
-aimake/
-├── docs/                           # 📚 完整设计文档
-│   ├── product-plan.md             # 产品规划和功能定义
-│   ├── frontend-architecture.md    # 前端架构设计（React）
-│   ├── database-schema.md          # PostgreSQL 数据库设计
-│   ├── deployment-architecture.md  # 部署架构（Vercel + Railway）
-│   ├── auth-design.md              # 认证方案（推荐 Clerk）
-│   ├── design-research.md          # 设计调研
-│   ├── prompt-engineering.md       # AI prompt 设计
-│   └── content-generation-directions.md  # 内容生成方向
-│
-├── landing-page.html               # 落地页（唯一的代码文件）
-├── README.md                       # 项目概述
-├── LICENSE                         # MIT 许可证
-└── .gitignore                      # Git 忽略规则（Python + Node.js）
-
-注意: 没有 frontend/, backend/, src/ 等目录 - 这些都还未创建
-```
-
-## 🛠️ 开发计划
-
-当开始实际开发时，按照以下顺序进行：
-
-### Phase 1: 基础架构（Week 1-2）
-```bash
-# 前端初始化（未创建）
-npm create vite@latest frontend -- --template react-ts
-cd frontend
-npm install @clerk/clerk-react zustand react-router-dom
-
-# 后端初始化（未创建）
-mkdir backend
-cd backend
-pip install fastapi uvicorn supabase
-```
-
-### Phase 2: 核心功能（Week 3-4）
-- TTS API 集成（OpenAI/ElevenLabs）
-- 用户认证（推荐使用 Clerk，见 docs/auth-design.md）
-- 音频存储（Cloudflare R2 或 S3）
-
-### Phase 3: 进阶功能（Week 5-6）
-- 播客对话生成
-- 长文本处理
-- 音频库管理
-
-## 🏗️ 计划的技术栈
-
-根据 docs/ 中的设计文档，技术选型如下：
-
-### 前端（未实现）
-- **框架**: React 18 + TypeScript 5.3
-- **构建**: Vite 5
-- **样式**: Tailwind CSS 3.4
-- **状态**: Zustand + Immer
-- **认证**: Clerk（推荐）或 Supabase Auth
-- **路由**: React Router v6
-
-### 后端（未实现）
-- **框架**: Python FastAPI 或 Cloudflare Workers (Hono)
-- **数据库**: PostgreSQL (Supabase 托管)
-- **缓存**: Redis (Upstash)
-- **存储**: Cloudflare R2 或 AWS S3
-- **TTS**: OpenAI TTS API / ElevenLabs API
-
-### 部署（计划）
-- **前端**: Vercel（免费层）
-- **后端**: Railway 或 Fly.io（$5-50/月）
-- **数据库**: Supabase（免费层）
-- **CDN**: Cloudflare（免费）
-
-详见 `docs/deployment-architecture.md`
-
-## 📊 核心功能规划
-
-根据 `docs/product-plan.md`，核心功能包括：
-
-### MVP 功能
-1. **文本转语音** - 输入文字，生成音频
-2. **多音色选择** - 10+ 种自然音色
-3. **音频播放/下载** - MP3/WAV 导出
-4. **历史记录** - 保存已生成的音频
-
-### 进阶功能
-5. **双人对话生成** - 输入话题，生成播客
-6. **长文转有声书** - 文章/小说转音频
-7. **情感/语速控制** - 调节语调、语速
-
-### 高级功能
-8. **语音克隆** - 用户上传样本克隆音色
-9. **多语言支持** - 英语、日语等
-10. **API 接口** - 开发者接入
-
-## 🎨 设计原则
-
-### 用户体验
-- **目标用户**: 内容创作者、知识博主、短视频作者
-- **交互方式**: 简单直观，类似在线工具
-- **响应速度**: TTS 生成 < 5 秒
-
-### 定价策略（计划）
-- **免费版**: $0 - 10 分钟/月
-- **Pro 版**: $19/月 - 300 分钟/月
-- **团队版**: $99/月 - 无限量
-
-## 🚫 重要禁令
-
-1. **不要创建冗余文档** - docs/ 目录已经很完整，不要添加 SETUP.md, CONTRIBUTING.md 等
-2. **不要猜测 API URLs** - 所有 URL 应由用户提供或从配置读取
-3. **不要提前实现** - 当前是规划期，除非用户明确要求开始开发
-4. **保持简洁** - 遵循"最小可行产品"原则
-
-## 📚 关键设计文档
-
-在开始开发前，务必阅读以下文档：
-
-| 文档 | 用途 | 重要性 |
-|------|------|--------|
-| `docs/product-plan.md` | 产品规划和功能定义 | ⭐⭐⭐⭐⭐ |
-| `docs/frontend-architecture.md` | 完整的前端组件设计 | ⭐⭐⭐⭐⭐ |
-| `docs/database-schema.md` | PostgreSQL 表结构 | ⭐⭐⭐⭐⭐ |
-| `docs/auth-design.md` | 认证方案对比（推荐 Clerk）| ⭐⭐⭐⭐ |
-| `docs/deployment-architecture.md` | 部署和 CI/CD 配置 | ⭐⭐⭐⭐ |
-| `docs/design-research.md` | UI/UX 设计调研 | ⭐⭐⭐ |
-
-## ⚙️ 环境变量（未来需要）
-
-当开始开发时，需要配置以下环境变量：
-
-### 前端 (.env)
-```bash
-VITE_API_URL=http://localhost:8000/api
-VITE_CLERK_PUBLISHABLE_KEY=pk_test_xxx
-VITE_SENTRY_DSN=https://xxx
-```
-
-### 后端 (.env)
-```bash
-DATABASE_URL=postgresql://xxx
-REDIS_URL=redis://xxx
-OPENAI_API_KEY=sk-xxx
-ELEVENLABS_API_KEY=xxx
-S3_ENDPOINT=https://xxx
-CLERK_SECRET_KEY=sk_test_xxx
-JWT_SECRET=xxx
-CORS_ORIGINS=http://localhost:5173,https://aimake.cc
-```
-
-## 🔐 安全提示
-
-- **仓库状态**: 私有仓库
-- **密钥管理**: 使用 doppler 或 infisical 管理环境变量
-- **认证**: 推荐使用 Clerk（见 `docs/auth-design.md`）
-- **限流**: 计划实现 100 req/min per user
+**当前阶段**: 规划期 - 设计文档完成，代码未开始开发
+- 只有 `landing-page.html` 和 `docs/` 目录
+- 没有 `frontend/`、`api/` 等代码目录
 
 ---
 
-**项目状态**: 📋 规划期（设计文档已完成）
-**下一步**: 等待用户决定何时开始实际开发
+## 技术栈
+
+### 前端 (计划)
+```
+React 18 + TypeScript + Vite + Tailwind CSS + Zustand + React Query
+```
+
+### 后端 (计划)
+```
+Cloudflare Workers + Hono + D1 (SQLite) + R2 (存储) + KV (缓存)
+```
+
+### 第三方服务
+| 服务 | 用途 |
+|------|------|
+| Clerk | 用户认证 |
+| Stripe | 支付订阅 |
+| OpenAI / 腾讯云 TTS | 语音合成 |
+| Vercel | 前端托管 |
+
+---
+
+## 项目结构 (计划)
+
+```
+aimake/
+├── frontend/                  # React 前端 (未创建)
+│   ├── src/
+│   │   ├── components/        # UI 组件
+│   │   ├── pages/             # 页面
+│   │   ├── hooks/             # 自定义 Hooks
+│   │   ├── stores/            # Zustand 状态
+│   │   ├── services/          # API 调用
+│   │   └── i18n/              # 国际化
+│   └── package.json
+│
+├── api/                       # Cloudflare Workers 后端 (未创建)
+│   ├── src/
+│   │   ├── index.ts           # Hono 入口
+│   │   ├── routes/            # API 路由
+│   │   ├── middleware/        # 中间件 (auth, rateLimit)
+│   │   ├── services/          # 业务逻辑 (TTS, Storage)
+│   │   └── db/                # Drizzle ORM
+│   └── wrangler.toml
+│
+├── docs/                      # 📚 设计文档 (已完成)
+│   ├── README.md              # 文档索引 (必读)
+│   ├── planning/              # 产品规划 (6 个文档)
+│   ├── design/                # 技术设计 (14 个文档)
+│   └── development/           # 开发运维 (4 个文档)
+│
+├── landing-page.html          # 静态落地页
+├── .env.example               # 环境变量模板
+└── README.md
+```
+
+---
+
+## 核心设计文档
+
+开发前必须阅读的文档：
+
+| 优先级 | 文档 | 用途 |
+|--------|------|------|
+| ⭐⭐⭐⭐⭐ | `docs/README.md` | **文档索引** - 完整导航 |
+| ⭐⭐⭐⭐⭐ | `docs/design/api-design.md` | API 接口定义、TypeScript 类型 |
+| ⭐⭐⭐⭐⭐ | `docs/design/database-schema.md` | D1 数据库表结构、Drizzle schema |
+| ⭐⭐⭐⭐ | `docs/design/frontend-architecture.md` | 组件结构、Hooks、Store |
+| ⭐⭐⭐⭐ | `docs/design/backend-architecture.md` | Hono 路由、中间件、服务层 |
+| ⭐⭐⭐⭐ | `docs/design/error-handling.md` | 错误码定义、处理规范 |
+| ⭐⭐⭐ | `docs/planning/product-plan.md` | 功能规划、定价策略 |
+
+---
+
+## 开发命令 (未来)
+
+项目开始开发后将使用以下命令：
+
+```bash
+# 环境配置
+cp .env.example .env           # 复制环境变量模板
+
+# 前端开发
+cd frontend
+npm install
+npm run dev                    # http://localhost:5173
+npm run build                  # 生产构建
+npm run lint                   # ESLint 检查
+
+# 后端开发
+cd api
+npm install
+npm run dev                    # http://localhost:8787 (wrangler dev)
+npm run deploy                 # 部署到 Cloudflare Workers
+
+# 数据库
+npx wrangler d1 migrations apply aimake-db  # 应用迁移
+
+# 测试
+npm run test                   # Vitest 单元测试
+npm run test:e2e               # Playwright E2E 测试
+```
+
+---
+
+## AI Coding 参考
+
+### 添加新 API 接口
+1. 接口定义 → `docs/design/api-design.md`
+2. 数据库表 → `docs/design/database-schema.md`
+3. 错误码 → `docs/design/error-handling.md`
+4. 路由结构 → `api/src/routes/`
+
+### 添加新页面
+1. 页面线框 → `docs/design/pages-design.md`
+2. 组件结构 → `docs/design/frontend-architecture.md`
+3. UI 规范 → `docs/design/ui-ux-design.md`
+4. 页面目录 → `frontend/src/pages/`
+
+### 多语言文案
+1. 翻译 Key → `docs/design/i18n-design.md`
+2. 翻译文件 → `frontend/src/i18n/locales/`
+
+---
+
+## 约定
+
+### 代码风格
+- TypeScript 严格模式
+- 函数式组件 + Hooks
+- Tailwind CSS 样式
+- 错误码使用 `docs/design/error-handling.md` 定义的格式
+
+### 禁止事项
+- 不要创建冗余文档 (SETUP.md, CONTRIBUTING.md 等)
+- 不要猜测 API URLs
+- 不要在代码中硬编码密钥
+- 当前是规划期，除非用户明确要求开始开发
+
+---
+
+## 环境变量
+
+完整配置见 `.env.example` 和 `docs/development/env-config.md`
+
+**前端必需**:
+```
+VITE_API_URL
+VITE_CLERK_PUBLISHABLE_KEY
+```
+
+**后端必需**:
+```
+CLERK_SECRET_KEY
+STRIPE_SECRET_KEY
+OPENAI_API_KEY (或 TENCENT_SECRET_ID/KEY)
+```
+
+---
+
 **最后更新**: 2026-01-09
+**文档总数**: 24 个设计文档
