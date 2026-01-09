@@ -211,9 +211,25 @@ dist-ssr/
 # Environment variables
 .env
 .env.local
+.env.*.local
+.env.development
+.env.staging
+.env.production
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Cloudflare Workers
+.dev.vars
+.wrangler/
+wrangler.toml.local
+
+# Credentials
+*.pem
+*.key
+*.p12
+credentials.json
+service-account*.json
 
 # Testing
 coverage/
