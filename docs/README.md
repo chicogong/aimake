@@ -55,6 +55,7 @@
 
 | 文档 | 说明 | 包含内容 |
 |------|------|----------|
+| [backend-architecture.md](./design/backend-architecture.md) | **后端架构** | 项目结构、中间件、服务层、Bindings |
 | [api-design.md](./design/api-design.md) | **API 接口设计** | RESTful 接口定义、TypeScript 类型、Hono 路由示例 |
 | [database-schema.md](./design/database-schema.md) | **数据库设计** | ER 图、表结构、SQL、索引、查询示例 |
 | [auth-design.md](./design/auth-design.md) | **登录鉴权** | Clerk 集成、JWT 验证、Webhook 同步 |
@@ -269,6 +270,7 @@ docs/
 │
 ├── design/                      # 技术设计
 │   ├── design-research.md       # 设计总览
+│   ├── backend-architecture.md  # 后端架构
 │   ├── api-design.md            # API 接口设计
 │   ├── database-schema.md       # 数据库设计
 │   ├── frontend-architecture.md # 前端架构
