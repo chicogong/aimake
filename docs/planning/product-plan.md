@@ -91,15 +91,28 @@
 | Vite | 构建工具 |
 | Tailwind CSS | 样式 |
 | Zustand | 状态管理 |
+| React Query | 数据请求 |
+| React Router | 路由 |
 
 ### 后端
 
 | 技术 | 用途 |
 |------|------|
-| Python / FastAPI | API 服务 |
-| PostgreSQL | 用户数据 |
-| Redis | 缓存/队列 |
-| S3/MinIO | 音频存储 |
+| Cloudflare Workers | 边缘运行时 |
+| Hono | Web 框架 |
+| D1 (SQLite) | 数据库 |
+| R2 | 音频存储 |
+| KV | 缓存 |
+| Drizzle ORM | 数据库 ORM |
+
+### 第三方服务
+
+| 服务 | 用途 |
+|------|------|
+| Clerk | 用户认证 |
+| Stripe | 支付订阅 |
+| Vercel | 前端托管 |
+| Sentry | 错误监控 |
 
 ### AI/TTS
 

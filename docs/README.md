@@ -35,7 +35,10 @@
 |------|------|----------|
 | [product-plan.md](./planning/product-plan.md) | 产品定位、目标用户、功能规划、定价策略、开发计划 | PM、全员 |
 | [content-generation-directions.md](./planning/content-generation-directions.md) | 内容类型探索、用户群体分析、竞品参考 | PM、产品 |
-| [tts-providers-comparison.md](./planning/tts-providers-comparison.md) | TTS 供应商对比、成本分析、多供应商策略 | 后端、架构 |
+| **[ai-providers-overview.md](./planning/ai-providers-overview.md)** | **🎯 AI 供应商选型总览** - TTS/LLM/ASR 快速决策表、成本估算 | **后端、架构** |
+| [tts-free-providers.md](./planning/tts-free-providers.md) | TTS 免费供应商快速接入、代码示例 | 后端 |
+| [tts-providers-comparison.md](./planning/tts-providers-comparison.md) | TTS 供应商深度对比、多供应商架构策略 | 后端、架构 |
+| [llm-asr-providers.md](./planning/llm-asr-providers.md) | LLM & ASR 供应商快速接入、免费额度、成本估算 | 后端、架构 |
 
 **AI Coding 提示**: 开发新功能前，先查阅 `product-plan.md` 确认功能优先级和需求描述。
 
@@ -74,10 +77,15 @@
 |------|------|----------|
 | [frontend-architecture.md](./design/frontend-architecture.md) | **前端架构** | 项目结构、组件设计、Hooks、状态管理、API 调用 |
 | [ui-ux-design.md](./design/ui-ux-design.md) | **UI/UX 设计** | 色彩、字体、组件规范、页面布局、交互规范 |
+| [pages-design.md](./design/pages-design.md) | **页面设计** | 所有页面线框图、认证页、设置页、错误页 |
+| [landing-page-design.md](./design/landing-page-design.md) | **主页设计** | Landing Page 结构、响应式、FAQ、社会证明 |
+| [i18n-design.md](./design/i18n-design.md) | **国际化** | 多语言支持、react-i18next 配置、翻译文件 |
+| [seo-analytics.md](./design/seo-analytics.md) | **SEO 与分析** | Meta 标签、结构化数据、事件埋点、A/B 测试 |
 
 **AI Coding 提示**: 
 - 新建组件参考 `frontend-architecture.md` 的组件结构
-- 使用文档中定义的 Hooks 和 Store 模式
+- 页面布局参考 `pages-design.md` 的线框图
+- 多语言文案使用 `i18n-design.md` 的翻译 Key
 
 ---
 
@@ -267,7 +275,10 @@ docs/
 ├── planning/                    # 产品与规划
 │   ├── product-plan.md          # 产品规划
 │   ├── content-generation-directions.md  # 方向探索
-│   └── tts-providers-comparison.md       # TTS 供应商对比
+│   ├── ai-providers-overview.md # 🎯 AI 供应商选型总览（必读）
+│   ├── tts-free-providers.md    # TTS 免费供应商快速接入
+│   ├── tts-providers-comparison.md  # TTS 供应商深度对比
+│   └── llm-asr-providers.md     # LLM & ASR 供应商快速接入
 │
 ├── design/                      # 技术设计
 │   ├── design-research.md       # 设计总览
@@ -276,6 +287,10 @@ docs/
 │   ├── database-schema.md       # 数据库设计
 │   ├── frontend-architecture.md # 前端架构
 │   ├── ui-ux-design.md          # UI/UX 设计规范
+│   ├── pages-design.md          # 页面设计（所有页面）
+│   ├── landing-page-design.md   # 主页设计
+│   ├── i18n-design.md           # 国际化方案
+│   ├── seo-analytics.md         # SEO 与数据分析
 │   ├── auth-design.md           # 登录鉴权
 │   ├── payment-integration.md   # 支付集成
 │   ├── prompt-engineering.md    # Prompt 工程
@@ -288,7 +303,7 @@ docs/
     └── release-verification.md  # 上线验证
 ```
 
-**总计: 17 个文档，覆盖完整开发流程**
+**总计: 24 个文档，覆盖完整开发流程**
 
 ---
 
