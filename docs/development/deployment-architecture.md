@@ -23,16 +23,16 @@
                     ┌────────────────────────┼────────────────────────┐
                     │                        │                        │
            ┌────────▼────────┐      ┌────────▼────────┐      ┌────────▼────────┐
-           │    Vercel       │      │  Railway/Fly    │      │      S3         │
-           │   Frontend      │      │    Backend      │      │   音频存储       │
-           │   (React SPA)   │      │   (FastAPI)     │      │                 │
+           │  Cloudflare     │      │  Cloudflare     │      │  Cloudflare     │
+           │    Pages        │      │    Workers      │      │       R2        │
+           │  (React SPA)    │      │   (Hono API)    │      │   音频存储       │
            └─────────────────┘      └────────┬────────┘      └─────────────────┘
                                              │
                     ┌────────────────────────┼────────────────────────┐
                     │                        │                        │
            ┌────────▼────────┐      ┌────────▼────────┐      ┌────────▼────────┐
-           │   Supabase      │      │    Upstash      │      │  External APIs  │
-           │   PostgreSQL    │      │     Redis       │      │  OpenAI/11Labs  │
+           │  Cloudflare     │      │    Upstash      │      │  External APIs  │
+           │       D1        │      │     Redis       │      │  TTS/LLM/ASR    │
            └─────────────────┘      └─────────────────┘      └─────────────────┘
 ```
 
@@ -40,12 +40,12 @@
 
 | 服务 | 推荐方案 | 备选方案 | 月成本估算 |
 |------|----------|----------|------------|
-| **前端托管** | Vercel | Cloudflare Pages | 免费-$20 |
-| **后端托管** | Railway | Fly.io / Render | $5-50 |
-| **数据库** | Supabase | PlanetScale / Neon | 免费-$25 |
-| **Redis** | Upstash | Railway Redis | 免费-$10 |
-| **对象存储** | Cloudflare R2 | AWS S3 / Backblaze | $5-20 |
-| **CDN** | Cloudflare | Vercel Edge | 免费 |
+| **前端托管** | Cloudflare Pages | Vercel | 免费 |
+| **后端托管** | Cloudflare Workers | Railway / Fly.io | 免费-$5 |
+| **数据库** | Cloudflare D1 | Supabase / Neon | 免费 |
+| **Redis** | Upstash | Cloudflare KV | 免费-$10 |
+| **对象存储** | Cloudflare R2 | AWS S3 | 免费-$5 |
+| **CDN** | Cloudflare | - | 免费 |
 | **域名** | Cloudflare | Namecheap | $10-15/年 |
 | **监控** | Sentry + Axiom | Datadog | 免费-$30 |
 
@@ -198,7 +198,67 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload
 
 ## 三、生产环境部署
 
-### 3.1 前端部署 (Vercel)
+### 3.1 前端部署 (Cloudflare Pages)
+
+```json
+// frontend/wrangler.toml (可选，用于高级配置)
+
+name = "aimake-frontend"
+pages_build_output_dir = "dist"
+
+[env.production]
+vars = { VITE_ENV = "production" }
+```
+
+**部署步骤:**
+
+```bash
+# 方式一: 通过 Git 自动部署 (推荐)
+# 1. 在 Cloudflare Dashboard 创建 Pages 项目
+# 2. 连接 GitHub 仓库
+# 3. 配置构建设置:
+#    - 构建命令: npm run build
+#    - 构建输出目录: dist
+#    - 根目录: frontend
+# 4. 设置环境变量 (Pages Dashboard)
+#    VITE_API_URL=https://api.aimake.cc
+#    VITE_CLERK_PUBLISHABLE_KEY=pk_live_xxx
+#    VITE_STRIPE_PUBLISHABLE_KEY=pk_live_xxx
+
+# 方式二: 通过 Wrangler CLI 部署
+npm i -g wrangler
+wrangler login
+
+cd frontend
+npm run build
+wrangler pages deploy dist --project-name=aimake-frontend
+```
+
+**自定义域名配置:**
+
+```bash
+# 在 Cloudflare Pages 设置中添加自定义域名
+# 1. Pages 项目 → Custom domains → Set up a custom domain
+# 2. 输入域名: aimake.cc 或 www.aimake.cc
+# 3. Cloudflare 会自动配置 DNS 记录
+```
+
+**环境变量管理:**
+
+```bash
+# 通过 Wrangler 设置环境变量
+wrangler pages secret put VITE_CLERK_PUBLISHABLE_KEY --project-name=aimake-frontend
+wrangler pages secret put VITE_STRIPE_PUBLISHABLE_KEY --project-name=aimake-frontend
+
+# 或在 Cloudflare Dashboard 设置:
+# Pages 项目 → Settings → Environment variables
+```
+
+---
+
+### 3.1.2 备选方案: Vercel 部署
+
+如果选择 Vercel 作为前端托管:
 
 ```json
 // frontend/vercel.json
@@ -238,7 +298,85 @@ vercel --prod
 # VITE_API_URL=https://api.aimake.cc
 ```
 
-### 3.2 后端部署 (Railway)
+### 3.2 后端部署 (Cloudflare Workers)
+
+```toml
+# api/wrangler.toml
+
+name = "aimake-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# 生产环境变量
+[env.production]
+vars = { ENV = "production", CORS_ORIGIN = "https://aimake.cc" }
+
+# D1 数据库
+[[d1_databases]]
+binding = "DB"
+database_name = "aimake-db"
+database_id = "xxx"  # 从 wrangler d1 create 获取
+
+# KV 存储
+[[kv_namespaces]]
+binding = "KV"
+id = "xxx"  # 从 wrangler kv:namespace create 获取
+
+# R2 存储
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "aimake-audio"
+```
+
+**部署步骤:**
+
+```bash
+# 1. 安装 Wrangler
+npm i -g wrangler
+
+# 2. 登录
+wrangler login
+
+# 3. 创建 D1 数据库
+cd api
+wrangler d1 create aimake-db
+# 复制返回的 database_id 到 wrangler.toml
+
+# 4. 应用数据库迁移
+wrangler d1 migrations apply aimake-db --remote
+
+# 5. 创建 KV 命名空间
+wrangler kv:namespace create KV
+# 复制返回的 id 到 wrangler.toml
+
+# 6. 创建 R2 存储桶
+wrangler r2 bucket create aimake-audio
+
+# 7. 设置 Secrets
+wrangler secret put CLERK_SECRET_KEY
+wrangler secret put STRIPE_SECRET_KEY
+wrangler secret put TENCENT_SECRET_ID
+wrangler secret put TENCENT_SECRET_KEY
+wrangler secret put LLM_API_KEY
+
+# 8. 部署
+wrangler deploy
+```
+
+**自定义域名配置:**
+
+```bash
+# 在 Cloudflare Workers 设置中添加自定义域名
+# 1. Workers & Pages → aimake-api → Settings → Triggers
+# 2. Add Custom Domain → api.aimake.cc
+# 3. Cloudflare 会自动配置 DNS 记录
+```
+
+---
+
+### 3.2.2 备选方案: Railway 部署
+
+如果选择 Railway 作为后端托管:
 
 ```toml
 # backend/railway.toml
@@ -380,23 +518,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
-      
+
       - name: Install dependencies
         run: cd frontend && npm ci
-      
+
       - name: Run linter
         run: cd frontend && npm run lint
-      
+
       - name: Run tests
         run: cd frontend && npm run test
-      
+
       - name: Build
         run: cd frontend && npm run build
 
@@ -406,15 +544,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-          working-directory: frontend
+          node-version: '20'
+
+      - name: Install dependencies
+        run: cd frontend && npm ci
+
+      - name: Build
+        run: cd frontend && npm run build
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy frontend/dist --project-name=aimake-frontend
 ```
 
 ### 4.2 GitHub Actions - 后端
@@ -428,60 +575,34 @@ on:
   push:
     branches: [main]
     paths:
-      - 'backend/**'
+      - 'api/**'
   pull_request:
     branches: [main]
     paths:
-      - 'backend/**'
+      - 'api/**'
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      
-      redis:
-        image: redis:7
-        ports:
-          - 6379:6379
-    
+
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup Python
-        uses: actions/setup-python@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.11'
-          cache: 'pip'
-          cache-dependency-path: backend/requirements.txt
-      
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: api/package-lock.json
+
       - name: Install dependencies
-        run: |
-          cd backend
-          pip install -r requirements.txt
-          pip install pytest pytest-asyncio httpx
-      
+        run: cd api && npm ci
+
       - name: Run linter
-        run: cd backend && ruff check .
-      
+        run: cd api && npm run lint
+
       - name: Run tests
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test
-          REDIS_URL: redis://localhost:6379
-        run: cd backend && pytest
+        run: cd api && npm run test
 
   deploy:
     needs: test
@@ -489,16 +610,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Install Railway CLI
-        run: npm i -g @railway/cli
-      
-      - name: Deploy to Railway
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: |
-          cd backend
-          railway up --service backend
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+          workingDirectory: api
 ```
 
 ---
@@ -882,12 +1001,20 @@ echo "Restore completed!"
 ### 9.2 免费层最大化
 
 ```
-Vercel:     100GB 带宽免费
-Supabase:   500MB 数据库 + 1GB 存储免费
-Upstash:    10K 命令/天免费
-R2:         10GB 存储 + 无出口费用
-Railway:    $5 免费额度/月
+Cloudflare Pages:  无限带宽 + 500 次构建/月
+Cloudflare Workers: 100K 请求/天免费
+Cloudflare D1:     5GB 存储 + 500万行读取/天
+Cloudflare R2:     10GB 存储 + 无出口费用
+Cloudflare KV:     100K 读取/天 + 1K 写入/天
+Upstash Redis:     10K 命令/天免费
 ```
+
+**Cloudflare 全家桶优势:**
+- 统一账单和管理
+- 零延迟边缘网络
+- 无跨平台费用
+- 免费 SSL 和 DDoS 防护
+- 全球 CDN 加速
 
 ### 9.3 成本监控
 

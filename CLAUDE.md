@@ -36,7 +36,8 @@ Cloudflare Workers + Hono + D1 (SQLite) + R2 (存储) + KV (缓存)
 | TTS | 语音合成 | `docs/planning/tts-free-providers.md` |
 | LLM | 播客脚本生成 | `docs/planning/llm-asr-providers.md` |
 | ASR | 语音识别 | `docs/planning/llm-asr-providers.md` |
-| Vercel | 前端托管 | `docs/development/deployment-architecture.md` |
+| Cloudflare Pages | 前端托管 | `docs/development/deployment-architecture.md` |
+| Cloudflare Workers | 后端运行时 | `docs/development/deployment-architecture.md` |
 
 ---
 
