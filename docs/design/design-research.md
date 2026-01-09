@@ -147,9 +147,9 @@ Step 4: 后处理输出
 
 | 文档 | 描述 | 链接 |
 |------|------|------|
-| **产品规划** | 功能规划、定价、开发计划 | [product-plan.md](./product-plan.md) |
-| **方向探索** | 内容类型、用户群体分析 | [content-generation-directions.md](./content-generation-directions.md) |
-| **TTS 供应商对比** | 多供应商选型、成本分析 | [tts-providers-comparison.md](./tts-providers-comparison.md) |
+| **产品规划** | 功能规划、定价、开发计划 | [product-plan.md](../planning/product-plan.md) |
+| **方向探索** | 内容类型、用户群体分析 | [content-generation-directions.md](../planning/content-generation-directions.md) |
+| **TTS 供应商对比** | 多供应商选型、成本分析 | [tts-providers-comparison.md](../planning/tts-providers-comparison.md) |
 
 ### 技术设计
 
@@ -167,10 +167,10 @@ Step 4: 后处理输出
 
 | 文档 | 描述 | 链接 |
 |------|------|------|
-| **环境配置** | 环境变量、密钥管理 | [env-config.md](./env-config.md) |
-| **部署架构** | 生产环境部署、CI/CD、监控 | [deployment-architecture.md](./deployment-architecture.md) |
-| **自动化开发** | AI 工具、MCP、自动化测试 | [automation-plan.md](./automation-plan.md) |
-| **上线验证** | 冒烟测试、回归测试、发布流程 | [release-verification.md](./release-verification.md) |
+| **环境配置** | 环境变量、密钥管理 | [env-config.md](../development/env-config.md) |
+| **部署架构** | 生产环境部署、CI/CD、监控 | [deployment-architecture.md](../development/deployment-architecture.md) |
+| **自动化开发** | AI 工具、MCP、自动化测试 | [automation-plan.md](../development/automation-plan.md) |
+| **上线验证** | 冒烟测试、回归测试、发布流程 | [release-verification.md](../development/release-verification.md) |
 
 ---
 
