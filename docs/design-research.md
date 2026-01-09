@@ -143,15 +143,34 @@ Step 4: 后处理输出
 
 以下是各个模块的详细设计文档：
 
+### 产品与规划
+
 | 文档 | 描述 | 链接 |
 |------|------|------|
-| **登录鉴权** | Clerk/Supabase Auth 集成 | [auth-design.md](./auth-design.md) |
-| **数据库设计** | 表结构、索引、查询示例 | [database-schema.md](./database-schema.md) |
-| **Prompt 工程** | 播客对话生成的 Prompt 设计 | [prompt-engineering.md](./prompt-engineering.md) |
-| **前端架构** | 组件结构、状态管理、Hooks | [frontend-architecture.md](./frontend-architecture.md) |
-| **部署架构** | 生产环境部署、CI/CD、监控 | [deployment-architecture.md](./deployment-architecture.md) |
 | **产品规划** | 功能规划、定价、开发计划 | [product-plan.md](./product-plan.md) |
 | **方向探索** | 内容类型、用户群体分析 | [content-generation-directions.md](./content-generation-directions.md) |
+| **TTS 供应商对比** | 多供应商选型、成本分析 | [tts-providers-comparison.md](./tts-providers-comparison.md) |
+
+### 技术设计
+
+| 文档 | 描述 | 链接 |
+|------|------|------|
+| **API 接口设计** | RESTful 接口定义、请求响应格式 | [api-design.md](./api-design.md) |
+| **数据库设计** | 表结构、索引、查询示例 | [database-schema.md](./database-schema.md) |
+| **前端架构** | 组件结构、状态管理、Hooks | [frontend-architecture.md](./frontend-architecture.md) |
+| **登录鉴权** | Clerk 集成方案 | [auth-design.md](./auth-design.md) |
+| **支付集成** | Stripe 订阅支付流程 | [payment-integration.md](./payment-integration.md) |
+| **Prompt 工程** | 播客对话生成的 Prompt 设计 | [prompt-engineering.md](./prompt-engineering.md) |
+| **错误处理** | 错误码、消息、前后端处理规范 | [error-handling.md](./error-handling.md) |
+
+### 开发与运维
+
+| 文档 | 描述 | 链接 |
+|------|------|------|
+| **环境配置** | 环境变量、密钥管理 | [env-config.md](./env-config.md) |
+| **部署架构** | 生产环境部署、CI/CD、监控 | [deployment-architecture.md](./deployment-architecture.md) |
+| **自动化开发** | AI 工具、MCP、自动化测试 | [automation-plan.md](./automation-plan.md) |
+| **上线验证** | 冒烟测试、回归测试、发布流程 | [release-verification.md](./release-verification.md) |
 
 ---
 
@@ -160,15 +179,24 @@ Step 4: 后处理输出
 ### 立即开始
 
 1. [ ] 初始化前端项目 (Vite + React + TypeScript)
-2. [ ] 初始化后端项目 (FastAPI + PostgreSQL)
-3. [ ] 测试 OpenAI TTS API
-4. [ ] 搭建本地 Docker 开发环境
+2. [ ] 初始化后端项目 (Cloudflare Workers + Hono)
+3. [ ] 配置 Clerk 认证
+4. [ ] 测试 OpenAI TTS API
 
 ### 本周目标
 
 - [ ] 完成用户注册/登录
 - [ ] 完成基础 TTS 功能
 - [ ] 完成音频播放/下载
+
+---
+
+## 八、文档更新日志
+
+| 日期 | 更新内容 |
+|------|----------|
+| 2026-01-09 | 创建初始设计文档 |
+| 2026-01-09 | 添加 API 接口设计、支付集成、环境配置、错误处理文档 |
 
 ---
 
