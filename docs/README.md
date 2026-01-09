@@ -73,6 +73,7 @@
 | 文档 | 说明 | 包含内容 |
 |------|------|----------|
 | [frontend-architecture.md](./design/frontend-architecture.md) | **前端架构** | 项目结构、组件设计、Hooks、状态管理、API 调用 |
+| [ui-ux-design.md](./design/ui-ux-design.md) | **UI/UX 设计** | 色彩、字体、组件规范、页面布局、交互规范 |
 
 **AI Coding 提示**: 
 - 新建组件参考 `frontend-architecture.md` 的组件结构
@@ -274,6 +275,7 @@ docs/
 │   ├── api-design.md            # API 接口设计
 │   ├── database-schema.md       # 数据库设计
 │   ├── frontend-architecture.md # 前端架构
+│   ├── ui-ux-design.md          # UI/UX 设计规范
 │   ├── auth-design.md           # 登录鉴权
 │   ├── payment-integration.md   # 支付集成
 │   ├── prompt-engineering.md    # Prompt 工程
@@ -286,7 +288,7 @@ docs/
     └── release-verification.md  # 上线验证
 ```
 
-**总计: 16 个文档，覆盖完整开发流程**
+**总计: 17 个文档，覆盖完整开发流程**
 
 ---
 
