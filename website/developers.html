@@ -1,772 +1,871 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AIMake - 开发者文档 | 技术架构与设计</title>
-    <meta name="description" content="AIMake 技术文档 - React + Cloudflare Workers + AI 集成">
+    <meta name="description" content="AIMake 技术文档 - React + Cloudflare Workers + AI 集成" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-        }
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
 
-        .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 60px 40px;
-            text-align: center;
-        }
+      .header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 60px 40px;
+        text-align: center;
+      }
 
+      .header h1 {
+        font-size: 3em;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      .header .tagline {
+        font-size: 1.3em;
+        opacity: 0.95;
+        margin-bottom: 20px;
+      }
+
+      .header .tech-stack {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .header .tech-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-family: 'Courier New', monospace;
+      }
+
+      .content {
+        padding: 60px 40px;
+      }
+
+      .doc-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 30px;
+        margin-bottom: 60px;
+      }
+
+      .doc-section {
+        background: #f8f9fa;
+        border-radius: 15px;
+        overflow: hidden;
+        transition:
+          transform 0.3s,
+          box-shadow 0.3s;
+      }
+
+      .doc-section:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .doc-section-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px 30px;
+      }
+
+      .doc-section-header h2 {
+        font-size: 1.5em;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .doc-section-header .count {
+        font-size: 0.7em;
+        opacity: 0.9;
+      }
+
+      .doc-section-header p {
+        opacity: 0.95;
+        font-size: 0.95em;
+      }
+
+      .doc-list {
+        padding: 20px 30px;
+        list-style: none;
+      }
+
+      .doc-item {
+        padding: 15px;
+        margin-bottom: 12px;
+        background: white;
+        border-radius: 8px;
+        border-left: 3px solid #e0e0e0;
+        transition: all 0.3s;
+      }
+
+      .doc-item:hover {
+        border-left-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+      }
+
+      .doc-item.priority-high {
+        border-left-color: #f59e0b;
+      }
+
+      .doc-item.priority-high:hover {
+        border-left-color: #d97706;
+      }
+
+      .doc-item a {
+        color: #333;
+        text-decoration: none;
+        display: block;
+      }
+
+      .doc-item-title {
+        font-weight: bold;
+        font-size: 1.05em;
+        margin-bottom: 5px;
+        color: #667eea;
+      }
+
+      .doc-item-desc {
+        font-size: 0.9em;
+        color: #666;
+        line-height: 1.5;
+      }
+
+      .doc-item-meta {
+        display: flex;
+        gap: 10px;
+        margin-top: 8px;
+        font-size: 0.85em;
+      }
+
+      .doc-item-meta .tag {
+        background: #f0f0f0;
+        padding: 3px 10px;
+        border-radius: 12px;
+        color: #666;
+      }
+
+      .doc-item-meta .priority {
+        background: #fef3c7;
+        color: #d97706;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-weight: bold;
+      }
+
+      .architecture-diagram {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        margin-bottom: 40px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .architecture-diagram h2 {
+        color: #1e3c72;
+        margin-bottom: 30px;
+        font-size: 2em;
+        text-align: center;
+      }
+
+      .diagram {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .diagram-box {
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        border: 2px solid #667eea;
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        transition: all 0.3s;
+      }
+
+      .diagram-box:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+      }
+
+      .diagram-box .icon {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
+
+      .diagram-box h3 {
+        color: #667eea;
+        margin-bottom: 8px;
+      }
+
+      .diagram-box p {
+        font-size: 0.9em;
+        color: #666;
+      }
+
+      .arrow {
+        text-align: center;
+        font-size: 2em;
+        color: #667eea;
+        margin: 10px 0;
+      }
+
+      .quick-start {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 15px;
+        margin-bottom: 40px;
+      }
+
+      .quick-start h2 {
+        margin-bottom: 25px;
+        font-size: 2em;
+      }
+
+      .quick-steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+      }
+
+      .step {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 20px;
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
+      }
+
+      .step-number {
+        font-size: 2em;
+        font-weight: bold;
+        margin-bottom: 10px;
+        opacity: 0.8;
+      }
+
+      .step h3 {
+        margin-bottom: 8px;
+      }
+
+      .step p {
+        font-size: 0.9em;
+        opacity: 0.95;
+      }
+
+      .back-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .back-link:hover {
+        text-decoration: underline;
+      }
+
+      .footer {
+        text-align: center;
+        padding: 30px;
+        background: #f8f9fa;
+        color: #666;
+        border-top: 1px solid #e0e0e0;
+      }
+
+      .footer a {
+        color: #667eea;
+        text-decoration: none;
+      }
+
+      @media (max-width: 768px) {
         .header h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .header .tagline {
-            font-size: 1.3em;
-            opacity: 0.95;
-            margin-bottom: 20px;
-        }
-
-        .header .tech-stack {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .header .tech-badge {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-family: 'Courier New', monospace;
+          font-size: 2em;
         }
 
         .content {
-            padding: 60px 40px;
+          padding: 40px 20px;
         }
 
         .doc-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin-bottom: 60px;
+          grid-template-columns: 1fr;
         }
-
-        .doc-section {
-            background: #f8f9fa;
-            border-radius: 15px;
-            overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .doc-section:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .doc-section-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px 30px;
-        }
-
-        .doc-section-header h2 {
-            font-size: 1.5em;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .doc-section-header .count {
-            font-size: 0.7em;
-            opacity: 0.9;
-        }
-
-        .doc-section-header p {
-            opacity: 0.95;
-            font-size: 0.95em;
-        }
-
-        .doc-list {
-            padding: 20px 30px;
-            list-style: none;
-        }
-
-        .doc-item {
-            padding: 15px;
-            margin-bottom: 12px;
-            background: white;
-            border-radius: 8px;
-            border-left: 3px solid #e0e0e0;
-            transition: all 0.3s;
-        }
-
-        .doc-item:hover {
-            border-left-color: #667eea;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-        }
-
-        .doc-item.priority-high {
-            border-left-color: #f59e0b;
-        }
-
-        .doc-item.priority-high:hover {
-            border-left-color: #d97706;
-        }
-
-        .doc-item a {
-            color: #333;
-            text-decoration: none;
-            display: block;
-        }
-
-        .doc-item-title {
-            font-weight: bold;
-            font-size: 1.05em;
-            margin-bottom: 5px;
-            color: #667eea;
-        }
-
-        .doc-item-desc {
-            font-size: 0.9em;
-            color: #666;
-            line-height: 1.5;
-        }
-
-        .doc-item-meta {
-            display: flex;
-            gap: 10px;
-            margin-top: 8px;
-            font-size: 0.85em;
-        }
-
-        .doc-item-meta .tag {
-            background: #f0f0f0;
-            padding: 3px 10px;
-            border-radius: 12px;
-            color: #666;
-        }
-
-        .doc-item-meta .priority {
-            background: #fef3c7;
-            color: #d97706;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-weight: bold;
-        }
-
-        .architecture-diagram {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            margin-bottom: 40px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .architecture-diagram h2 {
-            color: #1e3c72;
-            margin-bottom: 30px;
-            font-size: 2em;
-            text-align: center;
-        }
-
-        .diagram {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .diagram-box {
-            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-            border: 2px solid #667eea;
-            border-radius: 12px;
-            padding: 25px;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .diagram-box:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-        }
-
-        .diagram-box .icon {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        .diagram-box h3 {
-            color: #667eea;
-            margin-bottom: 8px;
-        }
-
-        .diagram-box p {
-            font-size: 0.9em;
-            color: #666;
-        }
-
-        .arrow {
-            text-align: center;
-            font-size: 2em;
-            color: #667eea;
-            margin: 10px 0;
-        }
-
-        .quick-start {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: white;
-            padding: 40px;
-            border-radius: 15px;
-            margin-bottom: 40px;
-        }
-
-        .quick-start h2 {
-            margin-bottom: 25px;
-            font-size: 2em;
-        }
-
-        .quick-steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .step {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 20px;
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-        }
-
-        .step-number {
-            font-size: 2em;
-            font-weight: bold;
-            margin-bottom: 10px;
-            opacity: 0.8;
-        }
-
-        .step h3 {
-            margin-bottom: 8px;
-        }
-
-        .step p {
-            font-size: 0.9em;
-            opacity: 0.95;
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-top: 20px;
-            color: #667eea;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 30px;
-            background: #f8f9fa;
-            color: #666;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .footer a {
-            color: #667eea;
-            text-decoration: none;
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2em;
-            }
-
-            .content {
-                padding: 40px 20px;
-            }
-
-            .doc-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <header class="header">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <a href="index.html" style="color: white; text-decoration: none; display: flex; align-items: center; gap: 8px; opacity: 0.9; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">
-                    <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                    返回首页
+      <header class="header">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          "
+        >
+          <a
+            href="index.html"
+            style="
+              color: white;
+              text-decoration: none;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              opacity: 0.9;
+              transition: opacity 0.2s;
+            "
+            onmouseover="this.style.opacity = '1'"
+            onmouseout="this.style.opacity = '0.9'"
+          >
+            <svg
+              style="width: 20px; height: 20px"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              ></path>
+            </svg>
+            返回首页
+          </a>
+          <a
+            href="docs.html"
+            style="
+              background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+              color: white;
+              text-decoration: none;
+              padding: 12px 24px;
+              border-radius: 10px;
+              font-weight: 600;
+              box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+              transition:
+                transform 0.2s,
+                box-shadow 0.2s;
+            "
+            onmouseover="
+              this.style.transform = 'translateY(-2px)';
+              this.style.boxShadow = '0 6px 20px rgba(245, 158, 11, 0.4)';
+            "
+            onmouseout="
+              this.style.transform = 'translateY(0)';
+              this.style.boxShadow = '0 4px 15px rgba(245, 158, 11, 0.3)';
+            "
+          >
+            📖 打开文档查看器
+          </a>
+        </div>
+        <h1>👨‍💻 AIMake 开发者文档</h1>
+        <p class="tagline">React + Cloudflare Workers + AI 集成</p>
+        <div class="tech-stack">
+          <span class="tech-badge">React 18</span>
+          <span class="tech-badge">TypeScript</span>
+          <span class="tech-badge">Cloudflare Workers</span>
+          <span class="tech-badge">Hono</span>
+          <span class="tech-badge">D1</span>
+          <span class="tech-badge">R2</span>
+          <span class="tech-badge">TTS</span>
+          <span class="tech-badge">LLM</span>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- 快速开始 -->
+        <section class="quick-start">
+          <h2>🚀 快速开始</h2>
+          <div class="quick-steps">
+            <div class="step">
+              <div class="step-number">1</div>
+              <h3>阅读文档</h3>
+              <p>从 docs/README.md 开始,了解完整文档结构</p>
+            </div>
+            <div class="step">
+              <div class="step-number">2</div>
+              <h3>配置环境</h3>
+              <p>复制 .env.example,填入 API Keys</p>
+            </div>
+            <div class="step">
+              <div class="step-number">3</div>
+              <h3>本地开发</h3>
+              <p>前端: npm run dev<br />后端: wrangler dev</p>
+            </div>
+            <div class="step">
+              <div class="step-number">4</div>
+              <h3>部署上线</h3>
+              <p>前端: Vercel<br />后端: Cloudflare Workers</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 架构概览 -->
+        <section class="architecture-diagram">
+          <h2>🏗️ 技术架构</h2>
+          <div class="diagram">
+            <div class="diagram-box">
+              <div class="icon">⚛️</div>
+              <h3>React 前端</h3>
+              <p>Vite + TypeScript<br />Tailwind CSS<br />Zustand + React Query</p>
+            </div>
+            <div class="diagram-box">
+              <div class="icon">☁️</div>
+              <h3>Workers 后端</h3>
+              <p>Hono 框架<br />D1 数据库<br />R2 存储</p>
+            </div>
+            <div class="diagram-box">
+              <div class="icon">🤖</div>
+              <h3>AI 服务</h3>
+              <p>腾讯云 TTS<br />硅基流动 LLM<br />Clerk 认证</p>
+            </div>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="diagram">
+            <div class="diagram-box">
+              <div class="icon">📦</div>
+              <h3>Vercel</h3>
+              <p>前端托管<br />自动部署<br />全球 CDN</p>
+            </div>
+            <div class="diagram-box">
+              <div class="icon">🌐</div>
+              <h3>Cloudflare</h3>
+              <p>Workers 运行时<br />Pages 托管<br />D1 数据库</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 文档导航 -->
+        <div class="doc-grid">
+          <!-- 产品与规划 -->
+          <div class="doc-section">
+            <div class="doc-section-header">
+              <h2>
+                <span>📋</span>
+                产品与规划
+                <span class="count">7 个文档</span>
+              </h2>
+              <p>产品定位、功能规划、AI 供应商选型</p>
+            </div>
+            <ul class="doc-list">
+              <li class="doc-item priority-high">
+                <a href="../docs/planning/product-plan.md">
+                  <div class="doc-item-title">📊 产品规划 (product-plan.md)</div>
+                  <div class="doc-item-desc">功能规划、目标用户、定价策略、开发计划</div>
+                  <div class="doc-item-meta">
+                    <span class="priority">⭐ 必读</span>
+                    <span class="tag">PM</span>
+                    <span class="tag">全员</span>
+                  </div>
                 </a>
-                <a href="docs.html" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(245, 158, 11, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(245, 158, 11, 0.3)';">
-                    📖 打开文档查看器
+              </li>
+              <li class="doc-item priority-high">
+                <a href="../docs/planning/ai-providers-overview.md">
+                  <div class="doc-item-title">🤖 AI 供应商选型 (ai-providers-overview.md)</div>
+                  <div class="doc-item-desc">TTS/LLM/ASR 快速决策表、成本估算、零成本启动方案</div>
+                  <div class="doc-item-meta">
+                    <span class="priority">⭐⭐ 必读</span>
+                    <span class="tag">后端</span>
+                    <span class="tag">架构</span>
+                  </div>
                 </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/planning/content-generation-directions.md">
+                  <div class="doc-item-title">🎨 内容生成方向探索</div>
+                  <div class="doc-item-desc">内容类型探索、用户群体分析、竞品参考</div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/planning/tts-free-providers.md">
+                  <div class="doc-item-title">🎙️ TTS 免费供应商接入</div>
+                  <div class="doc-item-desc">腾讯云、Google、Azure TTS 快速接入指南</div>
+                  <div class="doc-item-meta">
+                    <span class="tag">后端</span>
+                  </div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/planning/tts-providers-comparison.md">
+                  <div class="doc-item-title">🔍 TTS 供应商深度对比</div>
+                  <div class="doc-item-desc">多供应商架构策略、性能对比、成本分析</div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/planning/llm-asr-providers.md">
+                  <div class="doc-item-title">💬 LLM & ASR 供应商接入</div>
+                  <div class="doc-item-desc">硅基流动、DeepSeek 等免费 LLM,ASR 服务集成</div>
+                  <div class="doc-item-meta">
+                    <span class="tag">后端</span>
+                  </div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/planning/ai-agents-design.md">
+                  <div class="doc-item-title">🤝 AI Agents 设计</div>
+                  <div class="doc-item-desc">AI Agent 工作流设计、多 Agent 协作</div>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- 技术设计 -->
+          <div class="doc-section">
+            <div class="doc-section-header">
+              <h2>
+                <span>🔧</span>
+                技术设计
+                <span class="count">15 个文档</span>
+              </h2>
+              <p>系统架构、API 设计、数据库、前后端设计</p>
             </div>
-            <h1>👨‍💻 AIMake 开发者文档</h1>
-            <p class="tagline">React + Cloudflare Workers + AI 集成</p>
-            <div class="tech-stack">
-                <span class="tech-badge">React 18</span>
-                <span class="tech-badge">TypeScript</span>
-                <span class="tech-badge">Cloudflare Workers</span>
-                <span class="tech-badge">Hono</span>
-                <span class="tech-badge">D1</span>
-                <span class="tech-badge">R2</span>
-                <span class="tech-badge">TTS</span>
-                <span class="tech-badge">LLM</span>
+            <ul class="doc-list">
+              <li class="doc-item priority-high">
+                <a href="../docs/design/design-research.md">
+                  <div class="doc-item-title">🏗️ 设计总览 (design-research.md)</div>
+                  <div class="doc-item-desc">系统架构、流程图、技术选型、用户旅程</div>
+                  <div class="doc-item-meta">
+                    <span class="priority">⭐ 必读</span>
+                  </div>
+                </a>
+              </li>
+              <li class="doc-item priority-high">
+                <a href="../docs/design/api-design.md">
+                  <div class="doc-item-title">🔌 API 接口设计 (api-design.md)</div>
+                  <div class="doc-item-desc">RESTful 接口���义、TypeScript 类型、Hono 路由示例</div>
+                  <div class="doc-item-meta">
+                    <span class="priority">⭐⭐⭐ 必读</span>
+                    <span class="tag">后端</span>
+                  </div>
+                </a>
+              </li>
+              <li class="doc-item priority-high">
+                <a href="../docs/design/database-schema.md">
+                  <div class="doc-item-title">💾 数据库设计 (database-schema.md)</div>
+                  <div class="doc-item-desc">ER 图、表结构、Drizzle schema、查询示例</div>
+                  <div class="doc-item-meta">
+                    <span class="priority">⭐⭐⭐ 必读</span>
+                    <span class="tag">后端</span>
+                  </div>
+                </a>
+              </li>
+              <li class="doc-item priority-high">
+                <a href="../docs/design/backend-architecture.md">
+                  <div class="doc-item-title">⚙️ 后端架构 (backend-architecture.md)</div>
+                  <div class="doc-item-desc">Hono 中间件链、服务层、Bindings、项目结构</div>
+                  <div class="doc-item-meta">
+                    <span class="priority">⭐⭐ 必读</span>
+                    <span class="tag">后端</span>
+                  </div>
+                </a>
+              </li>
+              <li class="doc-item priority-high">
+                <a href="../docs/design/frontend-architecture.md">
+                  <div class="doc-item-title">⚛️ 前端架构 (frontend-architecture.md)</div>
+                  <div class="doc-item-desc">组件设计、Hooks、Store、状态管理、API 调用</div>
+                  <div class="doc-item-meta">
+                    <span class="priority">⭐⭐ 必读</span>
+                    <span class="tag">前端</span>
+                  </div>
+                </a>
+              </li>
+              <li class="doc-item priority-high">
+                <a href="../docs/design/error-handling.md">
+                  <div class="doc-item-title">❌ 错误处理 (error-handling.md)</div>
+                  <div class="doc-item-desc">错误码定义 (ERR_TTS_XXX)、中间件、处理规范</div>
+                  <div class="doc-item-meta">
+                    <span class="priority">⭐⭐ 必读</span>
+                    <span class="tag">前后端</span>
+                  </div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/design/auth-design.md">
+                  <div class="doc-item-title">🔐 登录鉴权 (auth-design.md)</div>
+                  <div class="doc-item-desc">Clerk 集成、JWT 验证、Webhook 同步</div>
+                  <div class="doc-item-meta">
+                    <span class="tag">后端</span>
+                  </div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/design/payment-integration.md">
+                  <div class="doc-item-title">💳 支付集成 (payment-integration.md)</div>
+                  <div class="doc-item-desc">Stripe Checkout、订阅管理、Webhook 处理</div>
+                  <div class="doc-item-meta">
+                    <span class="tag">后端</span>
+                  </div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/design/prompt-engineering.md">
+                  <div class="doc-item-title">💭 Prompt 工程 (prompt-engineering.md)</div>
+                  <div class="doc-item-desc">播客生成 Prompt 模板、LLM 调用流程</div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/design/ui-ux-design.md">
+                  <div class="doc-item-title">🎨 UI/UX 设计 (ui-ux-design.md)</div>
+                  <div class="doc-item-desc">色彩、字体、组件规范、交互规范</div>
+                  <div class="doc-item-meta">
+                    <span class="tag">前端</span>
+                  </div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/design/pages-design.md">
+                  <div class="doc-item-title">📄 页面设计 (pages-design.md)</div>
+                  <div class="doc-item-desc">所有页面线框图、认证页、设置页、错误页</div>
+                  <div class="doc-item-meta">
+                    <span class="tag">前端</span>
+                  </div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/design/i18n-design.md">
+                  <div class="doc-item-title">🌍 国际化 (i18n-design.md)</div>
+                  <div class="doc-item-desc">多语言支持、react-i18next 配置</div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/design/seo-analytics.md">
+                  <div class="doc-item-title">📊 SEO 与分析 (seo-analytics.md)</div>
+                  <div class="doc-item-desc">Meta 标签、结构化数据、事件埋点</div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/design/figma-integration.md">
+                  <div class="doc-item-title">🎨 Figma 集成 (figma-integration.md)</div>
+                  <div class="doc-item-desc">Figma MCP、v0.dev、设计转代码工作流</div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/design/user-guide-pages.md">
+                  <div class="doc-item-title">📖 用户导向页面 (user-guide-pages.md)</div>
+                  <div class="doc-item-desc">功能介绍、教程、帮助中心、定价</div>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- 开发与运维 -->
+          <div class="doc-section">
+            <div class="doc-section-header">
+              <h2>
+                <span>🚀</span>
+                开发与运维
+                <span class="count">4 个文档</span>
+              </h2>
+              <p>环境配置、自动化、部署、验证</p>
             </div>
-        </header>
-
-        <div class="content">
-            <!-- 快速开始 -->
-            <section class="quick-start">
-                <h2>🚀 快速开始</h2>
-                <div class="quick-steps">
-                    <div class="step">
-                        <div class="step-number">1</div>
-                        <h3>阅读文档</h3>
-                        <p>从 docs/README.md 开始,了解完整文档结构</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">2</div>
-                        <h3>配置环境</h3>
-                        <p>复制 .env.example,填入 API Keys</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">3</div>
-                        <h3>本地开发</h3>
-                        <p>前端: npm run dev<br>后端: wrangler dev</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">4</div>
-                        <h3>部署上线</h3>
-                        <p>前端: Vercel<br>后端: Cloudflare Workers</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 架构概览 -->
-            <section class="architecture-diagram">
-                <h2>🏗️ 技术架构</h2>
-                <div class="diagram">
-                    <div class="diagram-box">
-                        <div class="icon">⚛️</div>
-                        <h3>React 前端</h3>
-                        <p>Vite + TypeScript<br>Tailwind CSS<br>Zustand + React Query</p>
-                    </div>
-                    <div class="diagram-box">
-                        <div class="icon">☁️</div>
-                        <h3>Workers 后端</h3>
-                        <p>Hono 框架<br>D1 数据库<br>R2 存储</p>
-                    </div>
-                    <div class="diagram-box">
-                        <div class="icon">🤖</div>
-                        <h3>AI 服务</h3>
-                        <p>腾讯云 TTS<br>硅基流动 LLM<br>Clerk 认证</p>
-                    </div>
-                </div>
-                <div class="arrow">↓</div>
-                <div class="diagram">
-                    <div class="diagram-box">
-                        <div class="icon">📦</div>
-                        <h3>Vercel</h3>
-                        <p>前端托管<br>自动部署<br>全球 CDN</p>
-                    </div>
-                    <div class="diagram-box">
-                        <div class="icon">🌐</div>
-                        <h3>Cloudflare</h3>
-                        <p>Workers 运行时<br>Pages 托管<br>D1 数据库</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 文档导航 -->
-            <div class="doc-grid">
-                <!-- 产品与规划 -->
-                <div class="doc-section">
-                    <div class="doc-section-header">
-                        <h2>
-                            <span>📋</span>
-                            产品与规划
-                            <span class="count">7 个文档</span>
-                        </h2>
-                        <p>产品定位、功能规划、AI 供应商选型</p>
-                    </div>
-                    <ul class="doc-list">
-                        <li class="doc-item priority-high">
-                            <a href="../docs/planning/product-plan.md">
-                                <div class="doc-item-title">📊 产品规划 (product-plan.md)</div>
-                                <div class="doc-item-desc">功能规划、目标用户、定价策略、开发计划</div>
-                                <div class="doc-item-meta">
-                                    <span class="priority">⭐ 必读</span>
-                                    <span class="tag">PM</span>
-                                    <span class="tag">全员</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item priority-high">
-                            <a href="../docs/planning/ai-providers-overview.md">
-                                <div class="doc-item-title">🤖 AI 供应商选型 (ai-providers-overview.md)</div>
-                                <div class="doc-item-desc">TTS/LLM/ASR 快速决策表、成本估算、零成本启动方案</div>
-                                <div class="doc-item-meta">
-                                    <span class="priority">⭐⭐ 必读</span>
-                                    <span class="tag">后端</span>
-                                    <span class="tag">架构</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/planning/content-generation-directions.md">
-                                <div class="doc-item-title">🎨 内容生成方向探索</div>
-                                <div class="doc-item-desc">内容类型探索、用户群体分析、竞品参考</div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/planning/tts-free-providers.md">
-                                <div class="doc-item-title">🎙️ TTS 免费供应商接入</div>
-                                <div class="doc-item-desc">腾讯云、Google、Azure TTS 快速接入指南</div>
-                                <div class="doc-item-meta">
-                                    <span class="tag">后端</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/planning/tts-providers-comparison.md">
-                                <div class="doc-item-title">🔍 TTS 供应商深度对比</div>
-                                <div class="doc-item-desc">多供应商架构策略、性能对比、成本分析</div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/planning/llm-asr-providers.md">
-                                <div class="doc-item-title">💬 LLM & ASR 供应商接入</div>
-                                <div class="doc-item-desc">硅基流动、DeepSeek 等免费 LLM,ASR 服务集成</div>
-                                <div class="doc-item-meta">
-                                    <span class="tag">后端</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/planning/ai-agents-design.md">
-                                <div class="doc-item-title">🤝 AI Agents 设计</div>
-                                <div class="doc-item-desc">AI Agent 工作流设计、多 Agent 协作</div>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- 技术设计 -->
-                <div class="doc-section">
-                    <div class="doc-section-header">
-                        <h2>
-                            <span>🔧</span>
-                            技术设计
-                            <span class="count">15 个文档</span>
-                        </h2>
-                        <p>系统架构、API 设计、数据库、前后端设计</p>
-                    </div>
-                    <ul class="doc-list">
-                        <li class="doc-item priority-high">
-                            <a href="../docs/design/design-research.md">
-                                <div class="doc-item-title">🏗️ 设计总览 (design-research.md)</div>
-                                <div class="doc-item-desc">系统架构、流程图、技术选型、用户旅程</div>
-                                <div class="doc-item-meta">
-                                    <span class="priority">⭐ 必读</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item priority-high">
-                            <a href="../docs/design/api-design.md">
-                                <div class="doc-item-title">🔌 API 接口设计 (api-design.md)</div>
-                                <div class="doc-item-desc">RESTful 接口���义、TypeScript 类型、Hono 路由示例</div>
-                                <div class="doc-item-meta">
-                                    <span class="priority">⭐⭐⭐ 必读</span>
-                                    <span class="tag">后端</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item priority-high">
-                            <a href="../docs/design/database-schema.md">
-                                <div class="doc-item-title">💾 数据库设计 (database-schema.md)</div>
-                                <div class="doc-item-desc">ER 图、表结构、Drizzle schema、查询示例</div>
-                                <div class="doc-item-meta">
-                                    <span class="priority">⭐⭐⭐ 必读</span>
-                                    <span class="tag">后端</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item priority-high">
-                            <a href="../docs/design/backend-architecture.md">
-                                <div class="doc-item-title">⚙️ 后端架构 (backend-architecture.md)</div>
-                                <div class="doc-item-desc">Hono 中间件链、服务层、Bindings、项目结构</div>
-                                <div class="doc-item-meta">
-                                    <span class="priority">⭐⭐ 必读</span>
-                                    <span class="tag">后端</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item priority-high">
-                            <a href="../docs/design/frontend-architecture.md">
-                                <div class="doc-item-title">⚛️ 前端架构 (frontend-architecture.md)</div>
-                                <div class="doc-item-desc">组件设计、Hooks、Store、状态管理、API 调用</div>
-                                <div class="doc-item-meta">
-                                    <span class="priority">⭐⭐ 必读</span>
-                                    <span class="tag">前端</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item priority-high">
-                            <a href="../docs/design/error-handling.md">
-                                <div class="doc-item-title">❌ 错误处理 (error-handling.md)</div>
-                                <div class="doc-item-desc">错误码定义 (ERR_TTS_XXX)、中间件、处理规范</div>
-                                <div class="doc-item-meta">
-                                    <span class="priority">⭐⭐ 必读</span>
-                                    <span class="tag">前后端</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/design/auth-design.md">
-                                <div class="doc-item-title">🔐 登录鉴权 (auth-design.md)</div>
-                                <div class="doc-item-desc">Clerk 集成、JWT 验证、Webhook 同步</div>
-                                <div class="doc-item-meta">
-                                    <span class="tag">后端</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/design/payment-integration.md">
-                                <div class="doc-item-title">💳 支付集成 (payment-integration.md)</div>
-                                <div class="doc-item-desc">Stripe Checkout、订阅管理、Webhook 处理</div>
-                                <div class="doc-item-meta">
-                                    <span class="tag">后端</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/design/prompt-engineering.md">
-                                <div class="doc-item-title">💭 Prompt 工程 (prompt-engineering.md)</div>
-                                <div class="doc-item-desc">播客生成 Prompt 模板、LLM 调用流程</div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/design/ui-ux-design.md">
-                                <div class="doc-item-title">🎨 UI/UX 设计 (ui-ux-design.md)</div>
-                                <div class="doc-item-desc">色彩、字体、组件规范、交互规范</div>
-                                <div class="doc-item-meta">
-                                    <span class="tag">前端</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/design/pages-design.md">
-                                <div class="doc-item-title">📄 页面设计 (pages-design.md)</div>
-                                <div class="doc-item-desc">所有页面线框图、认证页、设置页、错误页</div>
-                                <div class="doc-item-meta">
-                                    <span class="tag">前端</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/design/i18n-design.md">
-                                <div class="doc-item-title">🌍 国际化 (i18n-design.md)</div>
-                                <div class="doc-item-desc">多语言支持、react-i18next 配置</div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/design/seo-analytics.md">
-                                <div class="doc-item-title">📊 SEO 与分析 (seo-analytics.md)</div>
-                                <div class="doc-item-desc">Meta 标签、结构化数据、事件埋点</div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/design/figma-integration.md">
-                                <div class="doc-item-title">🎨 Figma 集成 (figma-integration.md)</div>
-                                <div class="doc-item-desc">Figma MCP、v0.dev、设计转代码工作流</div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/design/user-guide-pages.md">
-                                <div class="doc-item-title">📖 用户导向页面 (user-guide-pages.md)</div>
-                                <div class="doc-item-desc">功能介绍、教程、帮助中心、定价</div>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- 开发与运维 -->
-                <div class="doc-section">
-                    <div class="doc-section-header">
-                        <h2>
-                            <span>🚀</span>
-                            开发与运维
-                            <span class="count">4 个文档</span>
-                        </h2>
-                        <p>环境配置、自动化、部署、验证</p>
-                    </div>
-                    <ul class="doc-list">
-                        <li class="doc-item priority-high">
-                            <a href="../docs/development/env-config.md">
-                                <div class="doc-item-title">⚙️ 环境配置 (env-config.md)</div>
-                                <div class="doc-item-desc">环境变量完整清单、密钥管理、本地开发设置</div>
-                                <div class="doc-item-meta">
-                                    <span class="priority">⭐⭐ 必读</span>
-                                    <span class="tag">全员</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/development/automation-plan.md">
-                                <div class="doc-item-title">🤖 自动化开发 (automation-plan.md)</div>
-                                <div class="doc-item-desc">AI 工具矩阵、MCP 配置、测试自动化、CI/CD</div>
-                                <div class="doc-item-meta">
-                                    <span class="tag">开发</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/development/deployment-architecture.md">
-                                <div class="doc-item-title">🌐 部署架构 (deployment-architecture.md)</div>
-                                <div class="doc-item-desc">Vercel + Cloudflare、CI/CD、监控告警</div>
-                                <div class="doc-item-meta">
-                                    <span class="tag">运维</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="doc-item">
-                            <a href="../docs/development/release-verification.md">
-                                <div class="doc-item-title">✅ 上线验证 (release-verification.md)</div>
-                                <div class="doc-item-desc">冒烟测试、回归测试、发布流程、回滚脚本</div>
-                                <div class="doc-item-meta">
-                                    <span class="tag">运维</span>
-                                </div>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- AI Coding 指南 -->
-            <section style="background: #f8f9fa; padding: 30px; border-radius: 15px; margin-bottom: 40px;">
-                <h2 style="color: #1e3c72; margin-bottom: 20px; font-size: 1.8em;">🤖 AI Coding 开发指南</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                    <div style="background: white; padding: 20px; border-radius: 10px; border-left: 4px solid #667eea;">
-                        <h3 style="color: #667eea; margin-bottom: 10px;">添加 API 接口</h3>
-                        <p style="color: #666; font-size: 0.95em;">
-                            1. api-design.md - 定义路由<br>
-                            2. database-schema.md - 确认表结构<br>
-                            3. error-handling.md - 选择错误码<br>
-                            4. backend-architecture.md - 理解架构
-                        </p>
-                    </div>
-                    <div style="background: white; padding: 20px; border-radius: 10px; border-left: 4px solid #764ba2;">
-                        <h3 style="color: #764ba2; margin-bottom: 10px;">添加页面</h3>
-                        <p style="color: #666; font-size: 0.95em;">
-                            1. pages-design.md - 查看线框图<br>
-                            2. frontend-architecture.md - 理解组件<br>
-                            3. ui-ux-design.md - 遵循规范<br>
-                            4. i18n-design.md - 添加翻译
-                        </p>
-                    </div>
-                    <div style="background: white; padding: 20px; border-radius: 10px; border-left: 4px solid #11998e;">
-                        <h3 style="color: #11998e; margin-bottom: 10px;">常见任务</h3>
-                        <p style="color: #666; font-size: 0.95em;">
-                            集成 TTS → tts-free-providers.md<br>
-                            播客模板 → prompt-engineering.md<br>
-                            定价策略 → product-plan.md<br>
-                            环境变量 → env-config.md
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 技术栈速查 -->
-            <section style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
-                <h2 style="color: #1e3c72; margin-bottom: 20px; font-size: 1.8em; text-align: center;">📚 技术栈速查</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                    <div style="text-align: center; padding: 20px;">
-                        <div style="font-size: 2.5em; margin-bottom: 10px;">⚛️</div>
-                        <h3 style="color: #667eea; margin-bottom: 8px;">React 18</h3>
-                        <p style="color: #666; font-size: 0.9em;">UI 框架</p>
-                    </div>
-                    <div style="text-align: center; padding: 20px;">
-                        <div style="font-size: 2.5em; margin-bottom: 10px;">📘</div>
-                        <h3 style="color: #667eea; margin-bottom: 8px;">TypeScript</h3>
-                        <p style="color: #666; font-size: 0.9em;">类型安全</p>
-                    </div>
-                    <div style="text-align: center; padding: 20px;">
-                        <div style="font-size: 2.5em; margin-bottom: 10px;">⚡</div>
-                        <h3 style="color: #667eea; margin-bottom: 8px;">Vite</h3>
-                        <p style="color: #666; font-size: 0.9em;">构建工具</p>
-                    </div>
-                    <div style="text-align: center; padding: 20px;">
-                        <div style="font-size: 2.5em; margin-bottom: 10px;">🎨</div>
-                        <h3 style="color: #667eea; margin-bottom: 8px;">Tailwind CSS</h3>
-                        <p style="color: #666; font-size: 0.9em;">样式框架</p>
-                    </div>
-                    <div style="text-align: center; padding: 20px;">
-                        <div style="font-size: 2.5em; margin-bottom: 10px;">🔧</div>
-                        <h3 style="color: #764ba2; margin-bottom: 8px;">Hono</h3>
-                        <p style="color: #666; font-size: 0.9em;">Web 框架</p>
-                    </div>
-                    <div style="text-align: center; padding: 20px;">
-                        <div style="font-size: 2.5em; margin-bottom: 10px;">🗄️</div>
-                        <h3 style="color: #764ba2; margin-bottom: 8px;">D1</h3>
-                        <p style="color: #666; font-size: 0.9em;">SQLite 数据库</p>
-                    </div>
-                    <div style="text-align: center; padding: 20px;">
-                        <div style="font-size: 2.5em; margin-bottom: 10px;">📦</div>
-                        <h3 style="color: #764ba2; margin-bottom: 8px;">R2</h3>
-                        <p style="color: #666; font-size: 0.9em;">对象存储</p>
-                    </div>
-                    <div style="text-align: center; padding: 20px;">
-                        <div style="font-size: 2.5em; margin-bottom: 10px;">🎙️</div>
-                        <h3 style="color: #11998e; margin-bottom: 8px;">腾讯云 TTS</h3>
-                        <p style="color: #666; font-size: 0.9em;">语音合成</p>
-                    </div>
-                </div>
-            </section>
-
-            <br>
-            <a href="index.html" class="back-link">← 返回首页</a>
+            <ul class="doc-list">
+              <li class="doc-item priority-high">
+                <a href="../docs/development/env-config.md">
+                  <div class="doc-item-title">⚙️ 环境配置 (env-config.md)</div>
+                  <div class="doc-item-desc">环境变量完整清单、密钥管理、本地开发设置</div>
+                  <div class="doc-item-meta">
+                    <span class="priority">⭐⭐ 必读</span>
+                    <span class="tag">全员</span>
+                  </div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/development/automation-plan.md">
+                  <div class="doc-item-title">🤖 自动化开发 (automation-plan.md)</div>
+                  <div class="doc-item-desc">AI 工具矩阵、MCP 配置、测试自动化、CI/CD</div>
+                  <div class="doc-item-meta">
+                    <span class="tag">开发</span>
+                  </div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/development/deployment-architecture.md">
+                  <div class="doc-item-title">🌐 部署架构 (deployment-architecture.md)</div>
+                  <div class="doc-item-desc">Vercel + Cloudflare、CI/CD、监控告警</div>
+                  <div class="doc-item-meta">
+                    <span class="tag">运维</span>
+                  </div>
+                </a>
+              </li>
+              <li class="doc-item">
+                <a href="../docs/development/release-verification.md">
+                  <div class="doc-item-title">✅ 上线验证 (release-verification.md)</div>
+                  <div class="doc-item-desc">冒烟测试、回归测试、发布流程、回滚脚本</div>
+                  <div class="doc-item-meta">
+                    <span class="tag">运维</span>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
 
-        <footer class="footer">
-            <p>📖 完整文档位于 <a href="../docs/README.md">docs/README.md</a></p>
-            <p style="margin-top: 10px;">
-                最后更新: 2026-01-10 | 文档总数: 26 个
-            </p>
-        </footer>
+        <!-- AI Coding 指南 -->
+        <section
+          style="background: #f8f9fa; padding: 30px; border-radius: 15px; margin-bottom: 40px"
+        >
+          <h2 style="color: #1e3c72; margin-bottom: 20px; font-size: 1.8em">
+            🤖 AI Coding 开发指南
+          </h2>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+              gap: 20px;
+            "
+          >
+            <div
+              style="
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                border-left: 4px solid #667eea;
+              "
+            >
+              <h3 style="color: #667eea; margin-bottom: 10px">添加 API 接口</h3>
+              <p style="color: #666; font-size: 0.95em">
+                1. api-design.md - 定义路由<br />
+                2. database-schema.md - 确认表结构<br />
+                3. error-handling.md - 选择错误码<br />
+                4. backend-architecture.md - 理解架构
+              </p>
+            </div>
+            <div
+              style="
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                border-left: 4px solid #764ba2;
+              "
+            >
+              <h3 style="color: #764ba2; margin-bottom: 10px">添加页面</h3>
+              <p style="color: #666; font-size: 0.95em">
+                1. pages-design.md - 查看线框图<br />
+                2. frontend-architecture.md - 理解组件<br />
+                3. ui-ux-design.md - 遵循规范<br />
+                4. i18n-design.md - 添加翻译
+              </p>
+            </div>
+            <div
+              style="
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                border-left: 4px solid #11998e;
+              "
+            >
+              <h3 style="color: #11998e; margin-bottom: 10px">常见任务</h3>
+              <p style="color: #666; font-size: 0.95em">
+                集成 TTS → tts-free-providers.md<br />
+                播客模板 → prompt-engineering.md<br />
+                定价策略 → product-plan.md<br />
+                环境变量 → env-config.md
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 技术栈速查 -->
+        <section
+          style="
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+          "
+        >
+          <h2 style="color: #1e3c72; margin-bottom: 20px; font-size: 1.8em; text-align: center">
+            📚 技术栈速查
+          </h2>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              gap: 20px;
+            "
+          >
+            <div style="text-align: center; padding: 20px">
+              <div style="font-size: 2.5em; margin-bottom: 10px">⚛️</div>
+              <h3 style="color: #667eea; margin-bottom: 8px">React 18</h3>
+              <p style="color: #666; font-size: 0.9em">UI 框架</p>
+            </div>
+            <div style="text-align: center; padding: 20px">
+              <div style="font-size: 2.5em; margin-bottom: 10px">📘</div>
+              <h3 style="color: #667eea; margin-bottom: 8px">TypeScript</h3>
+              <p style="color: #666; font-size: 0.9em">类型安全</p>
+            </div>
+            <div style="text-align: center; padding: 20px">
+              <div style="font-size: 2.5em; margin-bottom: 10px">⚡</div>
+              <h3 style="color: #667eea; margin-bottom: 8px">Vite</h3>
+              <p style="color: #666; font-size: 0.9em">构建工具</p>
+            </div>
+            <div style="text-align: center; padding: 20px">
+              <div style="font-size: 2.5em; margin-bottom: 10px">🎨</div>
+              <h3 style="color: #667eea; margin-bottom: 8px">Tailwind CSS</h3>
+              <p style="color: #666; font-size: 0.9em">样式框架</p>
+            </div>
+            <div style="text-align: center; padding: 20px">
+              <div style="font-size: 2.5em; margin-bottom: 10px">🔧</div>
+              <h3 style="color: #764ba2; margin-bottom: 8px">Hono</h3>
+              <p style="color: #666; font-size: 0.9em">Web 框架</p>
+            </div>
+            <div style="text-align: center; padding: 20px">
+              <div style="font-size: 2.5em; margin-bottom: 10px">🗄️</div>
+              <h3 style="color: #764ba2; margin-bottom: 8px">D1</h3>
+              <p style="color: #666; font-size: 0.9em">SQLite 数据库</p>
+            </div>
+            <div style="text-align: center; padding: 20px">
+              <div style="font-size: 2.5em; margin-bottom: 10px">📦</div>
+              <h3 style="color: #764ba2; margin-bottom: 8px">R2</h3>
+              <p style="color: #666; font-size: 0.9em">对象存储</p>
+            </div>
+            <div style="text-align: center; padding: 20px">
+              <div style="font-size: 2.5em; margin-bottom: 10px">🎙️</div>
+              <h3 style="color: #11998e; margin-bottom: 8px">腾讯云 TTS</h3>
+              <p style="color: #666; font-size: 0.9em">语音合成</p>
+            </div>
+          </div>
+        </section>
+
+        <br />
+        <a href="index.html" class="back-link">← 返回首页</a>
+      </div>
+
+      <footer class="footer">
+        <p>📖 完整文档位于 <a href="../docs/README.md">docs/README.md</a></p>
+        <p style="margin-top: 10px">最后更新: 2026-01-10 | 文档总数: 26 个</p>
+      </footer>
     </div>
-</body>
+  </body>
 </html>

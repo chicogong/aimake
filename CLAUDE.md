@@ -1,6 +1,7 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this
+repository.
 
 ---
 
@@ -23,25 +24,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 技术栈
 
 ### 前端
+
 ```
 React 18 + TypeScript + Vite + Tailwind CSS + Zustand + React Query
 ```
 
 ### 后端
+
 ```
 Cloudflare Workers + Hono + D1 (SQLite) + R2 (存储) + KV (缓存)
 ```
 
 ### 第三方服务
 
-| 服务               | 用途         | 免费额度/成本                      | 文档                                          |
-| ------------------ | ------------ | ---------------------------------- | --------------------------------------------- |
-| 腾讯云 TTS         | 语音合成     | 800 万字符免费 (3 年)              | `docs/planning/tts-free-providers.md`         |
-| 硅基流动 LLM       | 播客脚本生成 | 2000 万 tokens 免费                | `docs/planning/llm-asr-providers.md`          |
-| Clerk              | 用户认证     | 5,000 月活用户免费                 | `docs/design/auth-design.md`                  |
-| Stripe             | 支付订阅     | 按交易抽成                         | `docs/design/payment-integration.md`          |
-| Cloudflare Pages   | 前端托管     | 无限请求免费                       | `docs/development/deployment-architecture.md` |
-| Cloudflare Workers | 后端运行时   | 100,000 请求/天免费                | `docs/development/deployment-architecture.md` |
+| 服务               | 用途         | 免费额度/成本         | 文档                                          |
+| ------------------ | ------------ | --------------------- | --------------------------------------------- |
+| 腾讯云 TTS         | 语音合成     | 800 万字符免费 (3 年) | `docs/planning/tts-free-providers.md`         |
+| 硅基流动 LLM       | 播客脚本生成 | 2000 万 tokens 免费   | `docs/planning/llm-asr-providers.md`          |
+| Clerk              | 用户认证     | 5,000 月活用户免费    | `docs/design/auth-design.md`                  |
+| Stripe             | 支付订阅     | 按交易抽成            | `docs/design/payment-integration.md`          |
+| Cloudflare Pages   | 前端托管     | 无限请求免费          | `docs/development/deployment-architecture.md` |
+| Cloudflare Workers | 后端运行时   | 100,000 请求/天免费   | `docs/development/deployment-architecture.md` |
 
 **零成本启动**: 详见 `docs/planning/ai-providers-overview.md`
 
@@ -87,6 +90,7 @@ aimake/
 ```
 
 **待创建目录**:
+
 - `frontend/` - React 前端应用
 - `api/` - Cloudflare Workers 后端
 
@@ -96,17 +100,17 @@ aimake/
 
 开发前必读的优先级文档:
 
-| 优先级     | 文档                                       | 关键内容                                      |
-| ---------- | ------------------------------------------ | --------------------------------------------- |
-| ⭐⭐⭐⭐⭐ | `docs/README.md`                           | **文档索引** - 完整导航                       |
-| ⭐⭐⭐⭐⭐ | `docs/planning/ai-providers-overview.md`   | **AI 供应商选型** - TTS/LLM/ASR 快速决策表    |
-| ⭐⭐⭐⭐⭐ | `docs/design/api-design.md`                | **RESTful 接口** - 路由定义、TypeScript 类型  |
-| ⭐⭐⭐⭐⭐ | `docs/design/database-schema.md`           | **D1 数据库** - ER 图、表结构、Drizzle schema |
-| ⭐⭐⭐⭐   | `docs/design/backend-architecture.md`      | Hono 中间件链、服务层、Bindings               |
-| ⭐⭐⭐⭐   | `docs/design/frontend-architecture.md`     | 组件设计、Hooks 模式、Zustand Store 结构      |
-| ⭐⭐⭐⭐   | `docs/design/error-handling.md`            | 错误码定义 (`ERR_TTS_XXX`)、处理规范          |
-| ⭐⭐⭐⭐   | `docs/development/env-config.md`           | **环境变量** - 前后端完整配置清单             |
-| ⭐⭐⭐     | `docs/planning/product-plan.md`            | 功能规划、定价策略、MVP 范围                  |
+| 优先级     | 文档                                     | 关键内容                                      |
+| ---------- | ---------------------------------------- | --------------------------------------------- |
+| ⭐⭐⭐⭐⭐ | `docs/README.md`                         | **文档索引** - 完整导航                       |
+| ⭐⭐⭐⭐⭐ | `docs/planning/ai-providers-overview.md` | **AI 供应商选型** - TTS/LLM/ASR 快速决策表    |
+| ⭐⭐⭐⭐⭐ | `docs/design/api-design.md`              | **RESTful 接口** - 路由定义、TypeScript 类型  |
+| ⭐⭐⭐⭐⭐ | `docs/design/database-schema.md`         | **D1 数据库** - ER 图、表结构、Drizzle schema |
+| ⭐⭐⭐⭐   | `docs/design/backend-architecture.md`    | Hono 中间件链、服务层、Bindings               |
+| ⭐⭐⭐⭐   | `docs/design/frontend-architecture.md`   | 组件设计、Hooks 模式、Zustand Store 结构      |
+| ⭐⭐⭐⭐   | `docs/design/error-handling.md`          | 错误码定义 (`ERR_TTS_XXX`)、处理规范          |
+| ⭐⭐⭐⭐   | `docs/development/env-config.md`         | **环境变量** - 前后端完整配置清单             |
+| ⭐⭐⭐     | `docs/planning/product-plan.md`          | 功能规划、定价策略、MVP 范围                  |
 
 ---
 
@@ -171,6 +175,7 @@ npm run test:coverage      # 测试覆盖率
 ```
 
 **关键设计**:
+
 - **Middleware 链**: `auth.ts` → `rateLimit.ts` → `logger.ts` → `errorHandler.ts`
 - **服务层**: `tts.ts` (TTS 生成) / `podcast.ts` (LLM 脚本 + TTS) / `storage.ts` (R2 上传)
 - **数据库**: Drizzle ORM, D1 (SQLite), 表结构见 `database-schema.md`
@@ -184,6 +189,7 @@ Pages → Components → Hooks → Stores → Services
 ```
 
 **关键设计**:
+
 - **状态管理**: Zustand stores (`authStore`, `audioStore`, `uiStore`)
 - **数据请求**: React Query (`useQuery` / `useMutation`)
 - **组件结构**: `components/ui/` (基础) / `components/audio/` (音频) / `components/layout/` (布局)
@@ -211,12 +217,14 @@ Pages → Components → Hooks → Stores → Services
 ### 添加新 API 接口
 
 **参考文档顺序**:
+
 1. `api-design.md` - 定义路由路径、请求/响应类型
 2. `database-schema.md` - 确认相关表结构
 3. `error-handling.md` - 选择错误码 (`ERR_XXX_YYY`)
 4. `backend-architecture.md` - 理解中间件和服务层模式
 
 **代码位置**:
+
 - 路由: `api/src/routes/`
 - 服务: `api/src/services/`
 - 类型定义: `api/src/types/`
@@ -224,12 +232,14 @@ Pages → Components → Hooks → Stores → Services
 ### 添加新页面
 
 **参考文档顺序**:
+
 1. `pages-design.md` - 查看页面线框图
 2. `frontend-architecture.md` - 理解组件结构
 3. `ui-ux-design.md` - 遵循 UI 规范
 4. `i18n-design.md` - 添加多语言 Key (如需)
 
 **代码位置**:
+
 - 页面组件: `frontend/src/pages/`
 - 可复用组件: `frontend/src/components/`
 - 路由配置: `frontend/src/App.tsx`
@@ -255,12 +265,14 @@ Pages → Components → Hooks → Stores → Services
 ### 必需环境变量
 
 **前端 (frontend/.env.local)**:
+
 ```
 VITE_API_URL=http://localhost:8787/api
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_xxx
 ```
 
 **后端 (wrangler secret put)**:
+
 ```
 CLERK_SECRET_KEY=sk_test_xxx
 STRIPE_SECRET_KEY=sk_test_xxx
@@ -325,17 +337,16 @@ cp .env.example .dev.vars
 
 ## 常见开发场景
 
-| 任务                  | 参考文档                                               |
-| --------------------- | ------------------------------------------------------ |
-| 集成新的 TTS 供应商   | `tts-free-providers.md` → `backend-architecture.md`    |
-| 添加新的播客模板      | `prompt-engineering.md` → `api-design.md`              |
-| 修改定价策略          | `product-plan.md` → `payment-integration.md`           |
-| 添加新的音色          | `database-schema.md` (voices 表)                       |
-| 配置新的环境变量      | `env-config.md`                                        |
-| 写测试                | `automation-plan.md`                                    |
-| 部署到生产环境        | `deployment-architecture.md` → `release-verification.md` |
+| 任务                | 参考文档                                                 |
+| ------------------- | -------------------------------------------------------- |
+| 集成新的 TTS 供应商 | `tts-free-providers.md` → `backend-architecture.md`      |
+| 添加新的播客模板    | `prompt-engineering.md` → `api-design.md`                |
+| 修改定价策略        | `product-plan.md` → `payment-integration.md`             |
+| 添加新的音色        | `database-schema.md` (voices 表)                         |
+| 配置新的环境变量    | `env-config.md`                                          |
+| 写测试              | `automation-plan.md`                                     |
+| 部署到生产环境      | `deployment-architecture.md` → `release-verification.md` |
 
 ---
 
-**最后更新**: 2026-01-10
-**文档总数**: 26 个设计文档 (planning: 7, design: 15, development: 4)
+**最后更新**: 2026-01-10 **文档总数**: 26 个设计文档 (planning: 7, design: 15, development: 4)
