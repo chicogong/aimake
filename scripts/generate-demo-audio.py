@@ -4,7 +4,6 @@
 使用 edge-tts（微软 Edge 免费语音服务）
 """
 
-import os
 import sys
 import asyncio
 from pathlib import Path

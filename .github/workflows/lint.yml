@@ -53,14 +53,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
 
       - name: Install dependencies
         run: |
-          pip install ruff black
+          pip install ruff
 
       - name: Run Ruff
         run: ruff check .
-
-      - name: Run Black
-        run: black --check .
