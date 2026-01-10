@@ -119,12 +119,12 @@ Sentry (错误监控)
 
 #### 部署信息
 - **项目名称**: aimake-landing
-- **生产 URL**: https://aimake-landing.pages.dev
-- **部署 ID**: ec2ed8de
-- **分支别名**: https://content-generation.aimake-landing.pages.dev
-- **部署时间**: 2026-01-10 15:13 UTC+8
+- **生产 URL**: https://aimake-landing.pages.dev ✅ **已上线**
+- **部署 ID**: 9d81d41a (生产环境)
+- **部署时间**: 2026-01-10 15:19 UTC+8
 - **上传文件**: 20 个文件（HTML, CSS, JS, 图片, 音频）
-- **部署耗时**: 5.55 秒
+- **部署方式**: GitHub 自动部署（连接 master 分支）
+- **验证状态**: ✅ 所有资源正常加载（HTML, CSS, 音频）
 
 #### 配置文件
 - `landing/_headers` - HTTP 响应头（缓存策略、安全头）
