@@ -70,9 +70,46 @@
 - 更新 HTML meta 标签引用新的 Favicon 和 OG Image
 - 域名配置更正为 `aimake.cc`
 
+#### OG Image 生成
+- 新增 `landing/assets/images/og-image.png` - 1200x630px 社交分享图
+  - 使用 ImageMagick 从 SVG 模板生成
+  - 文件大小：31KB
+  - 包含品牌 Logo + 产品描述
+  - 深色渐变背景，专业科技感
+
+### 🏗️ APP 设计方案
+
+#### 新增文档
+- 新增 `docs/design/app-design.md` - 移动端 APP 完整设计方案
+  - **技术选型**：推荐 Flutter（跨平台 + 高性能）
+  - **架构设计**：Clean Architecture 分层结构
+  - **UI/UX 设计**：Material 3 + Cupertino 双主题
+  - **核心功能**：生成、播放、库管理、离线缓存
+  - **开发计划**：4.5 个月 MVP（3 个阶段）
+  - **商业化**：应用内购买（IAP）+ 订阅模式
+  - **发布策略**：App Store + Google Play 完整流程
+  - **性能指标**：启动 < 1.5s，生成 < 3s，崩溃 < 0.1%
+
+#### 技术栈
+```
+Flutter 3.x + Dart 3.x
+Riverpod (状态管理)
+Hive (本地存储)
+just_audio (音频播放)
+Dio + Retrofit (网络请求)
+Firebase (分析 + 推送)
+Sentry (错误监控)
+```
+
+#### 平台特性
+- **iOS**：Apple Sign In、Siri Shortcuts、CarPlay、Watch App
+- **Android**：Material You、Widget、Android Auto
+
 ### 待完成
 - ✅ ~~设计 Logo 和 Favicon~~ (已完成)
-- ⏳ 生成 PNG 资源（运行 `scripts/generate-brand-assets.sh`）
+- ✅ ~~生成 PNG 资源~~ (已完成)
+- ✅ ~~生成 OG Image~~ (已完成)
+- ✅ ~~APP 设计方案~~ (已完成)
 - ⏳ 生成 4 个音频演示文件（使用腾讯云 TTS）
 - ⏳ 部署到 Cloudflare Pages
 - ⏳ 性能测试和优化

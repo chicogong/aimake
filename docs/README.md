@@ -83,6 +83,8 @@
 | [seo-analytics.md](./design/seo-analytics.md) | **SEO 与分析** | Meta 标签、结构化数据、事件埋点、A/B 测试 |
 | [figma-integration.md](./design/figma-integration.md) | **Figma 集成** | Figma MCP、v0.dev、设计转代码工作流 |
 | [user-guide-pages.md](./design/user-guide-pages.md) | **用户导向页面** | 功能介绍、教程、帮助中心、定价、用例 |
+| [brand-identity.md](./design/brand-identity.md) | **品牌视觉识别** | Logo 规范、配色系统、字体系统、资源生成 |
+| [app-design.md](./design/app-design.md) | **移动端 APP 设计** | Flutter 架构、技术选型、UI/UX、开发计划 |
 
 **AI Coding 提示**: 
 - 新建组件参考 `frontend-architecture.md` 的组件结构
