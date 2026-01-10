@@ -1,0 +1,21 @@
+# Ruff ignore file - exclude directories from linting
+
+# Claude Code 配置和技能目录
+.claude/
+.codebuddy/
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# 依赖目录
+node_modules/
+
+# 构建输出
+dist/
+build/
+.wrangler/
+
+# Git
+.git/
