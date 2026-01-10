@@ -1,0 +1,15 @@
+# Cloudflare Pages 重定向规则
+# https://developers.cloudflare.com/pages/platform/redirects/
+
+# 短链接跳转到特定区域
+/start       /index.html#pricing       301
+/demo        /index.html#demo          301
+/features    /index.html#features      301
+/pricing     /index.html#pricing       301
+/faq         /index.html#faq           301
+
+# 旧路径兼容 (示例)
+# /old-page.html    /index.html    301
+
+# SPA 回退 (未来 React 应用需要)
+# /*    /index.html    200
