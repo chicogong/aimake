@@ -7,13 +7,23 @@
 ```
 landing/
 ├── index.html          # 主页面 (已优化)
+├── product.html        # 🆕 产品设计介绍页面 (面向用户)
+├── developers.html     # 🆕 开发者文档导航页面 (面向开发者)
+├── docs.html           # 🆕📖 文档查看器 - GitBook 风格,动态渲染 33 个 MD 文档
 ├── assets/
 │   ├── css/
-│   │   └── main.css    # 自定义样式
+│   │   ├── main.css    # 自定义样式
+│   │   └── docs.css    # 🆕 文档查看器样式
 │   ├── js/
-│   │   └── main.js     # 交互逻辑
+│   │   ├── main.js     # 交互逻辑
+│   │   └── docs.js     # 🆕 文档渲染逻辑
 │   ├── images/         # (待添加) Logo、图标、图片
 │   └── audio/          # (待添加) 音频演示文件
+├── lib/                # 🆕 第三方库 (文档查看器依赖)
+│   ├── marked.min.js   # Markdown 解析器
+│   ├── prism.js        # 代码高亮
+│   ├── dompurify.min.js # XSS 防护
+│   └── prism-tomorrow.css # Tomorrow 主题
 ├── _headers            # CF Pages 响应头配置
 ├── _redirects          # 重定向规则
 └── robots.txt          # SEO 配置
@@ -248,10 +258,70 @@ wrangler pages deploy landing --project-name=aimake-landing
 - ✅ 响应式布局
 - ✅ SEO meta 标签
 - ✅ CF Pages 配置
+- ✅ 产品设计页面 (product.html)
+- ✅ 开发者文档导航页面 (developers.html)
+- ✅ **文档查看器 (docs.html) - GitBook 风格,支持 33 个 MD 文档**
 - ⏳ 音频资源（待生成）
 - ⏳ 图片资源（待设计）
 - ⏳ 部署上线（待执行）
 
+## 📄 新增页面说明
+
+### 产品设计页面 (product.html)
+
+**面向用户**,展示产品设计的完整信息:
+
+- 🎯 产品定位和核心功能
+- 👥 目标用户群体分析
+- 💰 定价策略 (免费/Pro/团队)
+- ⚡ 核心功能详细介绍
+- 🗺️ 产品路线图 (MVP → 播客 → 高级功能 → 国际化)
+- 🚀 技术优势
+- 📧 联系方式
+
+**访问**: [product.html](product.html)
+
+### 开发者文档导航页面 (developers.html)
+
+**面向开发者**,技术文档和架构说明:
+
+- 🚀 快速开始指南
+- 🏗️ 技术架构概览 (React + Workers + AI)
+- 📚 完整文档导航 (26 个设计文档)
+  - 产品与规划 (7 个)
+  - 技术设计 (15 个)
+  - 开发与运维 (4 个)
+- 🤖 AI Coding 开发指南
+- 📊 技术栈速查
+
+**访问**: [developers.html](developers.html)
+
+### 文档查看器 (docs.html) 🆕📖
+
+**GitBook 风格的动态文档查看器**,直接渲染 Markdown 文件:
+
+- 📚 **动态渲染**: 使用 marked.js 运行时渲染 33 个 MD 文档
+- 🔍 **全文搜索**: 搜索标题和内容,300ms 防抖
+- 🎨 **代码高亮**: Prism.js + Tomorrow 深色主题
+- 🛡️ **XSS 防护**: DOMPurify 严格白名单
+- 📱 **响应式**: 左侧边栏 + 顶部导航 + 移动端友好
+- 🔗 **Hash 路由**: `#!/path/to/doc.md` 客户端路由
+- ⭐ **优先级标记**: 必读文档标注星号
+
+**技术栈**:
+- marked.js (Markdown 解析)
+- Prism.js (语法高亮)
+- DOMPurify (安全防护)
+- Tailwind CSS (样式框架)
+
+**访问**: [docs.html](docs.html)
+
+**支持的文档**:
+- 产品与规划: 7 个文档
+- 技术设计: 19 个文档
+- 开发与运维: 7 个文档
+- **总计: 33 个设计文档**
+
 ---
 
-**最后更新**: 2026-01-10 **状态**: 代码优化完成，等待资源和部署
+**最后更新**: 2026-01-10 **状态**: ✅ 文档查看器完成,所有页面已添加文档链接,等待资源和部署
