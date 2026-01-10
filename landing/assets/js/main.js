@@ -221,6 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==================== Simulate Generation ====================
+// Exported to window for HTML onclick usage
 function simulateGeneration() {
   const button = document.getElementById('generate-btn');
   const audioPlayer = document.getElementById('demo-audio-player');
@@ -256,6 +257,9 @@ function simulateGeneration() {
     }
   }, 50);
 }
+
+// Export to global scope for HTML inline event handlers
+window.simulateGeneration = simulateGeneration;
 
 // ==================== FAQ Smooth Toggle ====================
 document.addEventListener('DOMContentLoaded', () => {
@@ -310,27 +314,6 @@ if (stickyCTA) {
   });
 }
 
-// ==================== Pricing Toggle (Monthly/Yearly) ====================
-function toggleBilling() {
-  const toggle = document.getElementById('billing-toggle');
-  const monthlyPrices = document.querySelectorAll('.price-monthly');
-  const yearlyPrices = document.querySelectorAll('.price-yearly');
-
-  if (!toggle) return;
-
-  toggle.classList.toggle('active');
-
-  const isYearly = toggle.classList.contains('active');
-
-  monthlyPrices.forEach((el) => {
-    el.classList.toggle('hidden', isYearly);
-  });
-
-  yearlyPrices.forEach((el) => {
-    el.classList.toggle('hidden', !isYearly);
-  });
-}
-
 // ==================== Character Counter ====================
 document.addEventListener('DOMContentLoaded', () => {
   const textarea = document.getElementById('demo-textarea');
@@ -352,6 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==================== Voice Preview ====================
+// Exported to window for HTML onchange usage
 function previewVoice(voiceId) {
   const audio = new Audio(`/assets/audio/preview-${voiceId}.mp3`);
   audio.volume = 0.5;
@@ -359,6 +343,9 @@ function previewVoice(voiceId) {
     console.log('Audio preview not available:', err);
   });
 }
+
+// Export to global scope for HTML inline event handlers
+window.previewVoice = previewVoice;
 
 // ==================== Console Welcome Message ====================
 console.log('%c🎙️ AIMake - AI 语音内容生成', 'font-size: 20px; font-weight: bold; color: #3B82F6;');
