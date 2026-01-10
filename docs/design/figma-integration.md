@@ -6,11 +6,11 @@
 
 ## 工具链选项对比
 
-| 方案 | 优势 | 劣势 | 适用场景 |
-|------|------|------|----------|
-| **Figma MCP Server** | 直接读取 Figma 设计稿，保持设计一致性 | 需要配置，学习成本 | 有设计师参与的项目 |
-| **v0.dev** | 快速生成，交互式迭代 | 可能与现有样式不完全一致 | 快速原型，新页面 |
-| **AI 直接生成** | 无需额外工具，灵活 | 需要详细描述，一致性挑战 | 简单组件，快速修复 |
+| 方案                 | 优势                                  | 劣势                     | 适用场景           |
+| -------------------- | ------------------------------------- | ------------------------ | ------------------ |
+| **Figma MCP Server** | 直接读取 Figma 设计稿，保持设计一致性 | 需要配置，学习成本       | 有设计师参与的项目 |
+| **v0.dev**           | 快速生成，交互式迭代                  | 可能与现有样式不完全一致 | 快速原型，新页面   |
+| **AI 直接生成**      | 无需额外工具，灵活                    | 需要详细描述，一致性挑战 | 简单组件，快速修复 |
 
 ## 推荐工作流
 
@@ -146,17 +146,17 @@ https://www.figma.com/design/xxxxx/AIMake?node-id=123-456
 
 Figma Variables → Tailwind CSS 映射：
 
-| Figma Variable | Tailwind Class | CSS Value |
-|----------------|----------------|-----------|
-| `color/primary/500` | `text-primary` | `#1A6BA0` |
-| `color/primary/600` | `hover:text-primary-dark` | `#15567F` |
-| `color/secondary/500` | `text-secondary` | `#10B981` |
-| `color/gray/50` | `bg-gray-50` | `#F8FAFC` |
-| `color/gray/900` | `text-gray-900` | `#1E293B` |
-| `spacing/4` | `p-4` | `16px` |
-| `spacing/6` | `p-6` | `24px` |
-| `radius/lg` | `rounded-lg` | `8px` |
-| `shadow/md` | `shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` |
+| Figma Variable        | Tailwind Class            | CSS Value                   |
+| --------------------- | ------------------------- | --------------------------- |
+| `color/primary/500`   | `text-primary`            | `#1A6BA0`                   |
+| `color/primary/600`   | `hover:text-primary-dark` | `#15567F`                   |
+| `color/secondary/500` | `text-secondary`          | `#10B981`                   |
+| `color/gray/50`       | `bg-gray-50`              | `#F8FAFC`                   |
+| `color/gray/900`      | `text-gray-900`           | `#1E293B`                   |
+| `spacing/4`           | `p-4`                     | `16px`                      |
+| `spacing/6`           | `p-6`                     | `24px`                      |
+| `radius/lg`           | `rounded-lg`              | `8px`                       |
+| `shadow/md`           | `shadow-md`               | `0 4px 6px rgba(0,0,0,0.1)` |
 
 ### 3.3 组件库结构
 
@@ -201,10 +201,10 @@ Figma 组件库
 ```markdown
 ## 组件需求
 
-**名称**：AudioCard
-**用途**：显示单个音频文件的信息和操作
+**名称**：AudioCard **用途**：显示单个音频文件的信息和操作
 
 **Props**：
+
 - id: string
 - title: string
 - duration: number (秒)
@@ -214,15 +214,18 @@ Figma 组件库
 - onDelete: () => void
 
 **视觉要求**：
+
 - 卡片样式，圆角 8px
 - 悬停时显示阴影
 - 状态指示器（颜色点）
 
 **交互**：
+
 - 点击卡片播放
 - 右键菜单或更多按钮显示操作
 
 **参考**：
+
 - 遵循 docs/design/ui-ux-design.md 的设计系统
 - 使用 src/components/ui/Button 等现有组件
 ```
@@ -296,13 +299,13 @@ import { FigmaAPI } from '@figma/rest-api-spec';
 
 async function syncTokens() {
   const figma = new FigmaAPI(process.env.FIGMA_API_KEY);
-  
+
   // 获取设计变量
   const variables = await figma.getFileVariables('FILE_ID');
-  
+
   // 转换为 Tailwind 配置
   const tailwindConfig = transformToTailwind(variables);
-  
+
   // 写入配置文件
   await writeConfig('tailwind.config.js', tailwindConfig);
 }
@@ -393,15 +396,15 @@ export const AudioCard = {
 
 ### 8.1 生成代码审查要点
 
-| 检查项 | 说明 | 优先级 |
-|--------|------|--------|
-| TypeScript 类型完整 | Props 和返回值都有类型 | 高 |
-| 响应式设计 | 至少支持 mobile/desktop | 高 |
-| 可访问性 | ARIA 标签，键盘导航 | 高 |
-| 性能优化 | 避免不必要的重渲染 | 中 |
-| 代码风格 | 符合 ESLint/Prettier 规则 | 中 |
-| 测试覆盖 | 包含基本的单元测试 | 中 |
-| 文档注释 | JSDoc 注释说明用途 | 低 |
+| 检查项              | 说明                      | 优先级 |
+| ------------------- | ------------------------- | ------ |
+| TypeScript 类型完整 | Props 和返回值都有类型    | 高     |
+| 响应式设计          | 至少支持 mobile/desktop   | 高     |
+| 可访问性            | ARIA 标签，键盘导航       | 高     |
+| 性能优化            | 避免不必要的重渲染        | 中     |
+| 代码风格            | 符合 ESLint/Prettier 规则 | 中     |
+| 测试覆盖            | 包含基本的单元测试        | 中     |
+| 文档注释            | JSDoc 注释说明用途        | 低     |
 
 ### 8.2 常见问题修复
 
@@ -496,6 +499,6 @@ export const AudioCard = {
 
 ## 更新日志
 
-| 日期 | 版本 | 更新内容 |
-|------|------|----------|
+| 日期       | 版本  | 更新内容                                    |
+| ---------- | ----- | ------------------------------------------- |
 | 2024-01-09 | 1.0.0 | 初始版本，包含 Figma MCP 和 v0.dev 集成指南 |

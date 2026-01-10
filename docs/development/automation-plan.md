@@ -1,7 +1,6 @@
 # AIMake 自动化开发计划
 
-> 创建日期: 2026-01-09
-> 核心策略: 最大化使用 AI 工具和自动化服务
+> 创建日期: 2026-01-09 核心策略: 最大化使用 AI 工具和自动化服务
 
 ---
 
@@ -9,15 +8,15 @@
 
 ### 1.1 开发阶段工具
 
-| 阶段 | 工具 | 用途 | 自动化程度 |
-|------|------|------|------------|
-| **代码生成** | Claude Code / Cursor | 编写业务逻辑 | 90% |
-| **UI 生成** | v0.dev / Bolt.new | 生成 React 组件 | 95% |
-| **测试生成** | Claude + Vitest | 生成测试用例 | 80% |
-| **E2E 测试** | Playwright MCP | 浏览器自动化测试 | 90% |
-| **代码审查** | GitHub Copilot | PR 自动审查 | 70% |
-| **部署** | Vercel / Cloudflare | 自动部署 | 100% |
-| **监控** | Sentry | 错误自动上报 | 100% |
+| 阶段         | 工具                 | 用途             | 自动化程度 |
+| ------------ | -------------------- | ---------------- | ---------- |
+| **代码生成** | Claude Code / Cursor | 编写业务逻辑     | 90%        |
+| **UI 生成**  | v0.dev / Bolt.new    | 生成 React 组件  | 95%        |
+| **测试生成** | Claude + Vitest      | 生成测试用例     | 80%        |
+| **E2E 测试** | Playwright MCP       | 浏览器自动化测试 | 90%        |
+| **代码审查** | GitHub Copilot       | PR 自动审查      | 70%        |
+| **部署**     | Vercel / Cloudflare  | 自动部署         | 100%       |
+| **监控**     | Sentry               | 错误自动上报     | 100%       |
 
 ### 1.2 MCP Servers 配置
 
@@ -72,14 +71,14 @@
 
 ### 2.2 测试工具栈
 
-| 类型 | 工具 | 说明 |
-|------|------|------|
-| 单元测试 | Vitest | Vite 原生，速度快 |
-| 组件测试 | React Testing Library | DOM 测试 |
-| API Mock | MSW (Mock Service Worker) | 拦截网络请求 |
-| E2E 测试 | Playwright | 浏览器自动化 |
-| 覆盖率 | Vitest Coverage (c8) | 代码覆盖率 |
-| 快照测试 | Vitest Snapshot | UI 快照 |
+| 类型     | 工具                      | 说明              |
+| -------- | ------------------------- | ----------------- |
+| 单元测试 | Vitest                    | Vite 原生，速度快 |
+| 组件测试 | React Testing Library     | DOM 测试          |
+| API Mock | MSW (Mock Service Worker) | 拦截网络请求      |
+| E2E 测试 | Playwright                | 浏览器自动化      |
+| 覆盖率   | Vitest Coverage (c8)      | 代码覆盖率        |
+| 快照测试 | Vitest Snapshot           | UI 快照           |
 
 ### 2.3 AI 生成测试用例
 
@@ -117,7 +116,7 @@ describe('AudioPlayer', () => {
   it('toggles play/pause on button click', async () => {
     render(<AudioPlayer {...mockProps} />);
     const playButton = screen.getByRole('button', { name: /play/i });
-    
+
     fireEvent.click(playButton);
     expect(screen.getByRole('button', { name: /pause/i })).toBeInTheDocument();
   });
@@ -125,7 +124,7 @@ describe('AudioPlayer', () => {
   it('updates progress when seeking', () => {
     render(<AudioPlayer {...mockProps} />);
     const slider = screen.getByRole('slider');
-    
+
     fireEvent.change(slider, { target: { value: 60 } });
     expect(slider).toHaveValue('60');
   });
@@ -161,25 +160,25 @@ test.describe('TTS Generation Flow', () => {
     await page.fill('input[name="email"]', 'test@example.com');
     await page.fill('input[name="password"]', 'password123');
     await page.click('button[type="submit"]');
-    
+
     // 2. 等待跳转到应用
     await expect(page).toHaveURL('/app');
-    
+
     // 3. 进入创建页面
     await page.click('text=创建');
-    
+
     // 4. 输入文本
     await page.fill('textarea', '这是一段测试文本，用于生成语音。');
-    
+
     // 5. 选择音色
     await page.click('[data-voice-id="openai-alloy"]');
-    
+
     // 6. 点击生成
     await page.click('button:has-text("生成音频")');
-    
+
     // 7. 等待生成完成
     await expect(page.locator('.audio-player')).toBeVisible({ timeout: 30000 });
-    
+
     // 8. 验证可以播放
     await page.click('[aria-label="播放"]');
     await expect(page.locator('[aria-label="暂停"]')).toBeVisible();
@@ -204,19 +203,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run unit tests
         run: npm run test:unit
-      
+
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:
@@ -226,22 +225,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Install Playwright
         run: npx playwright install --with-deps
-      
+
       - name: Run E2E tests
         run: npm run test:e2e
-      
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: failure()
@@ -256,17 +255,17 @@ jobs:
 
 ### 3.1 开发步骤
 
-| 步骤 | 任务 | 工具 | 时间 |
-|------|------|------|------|
-| 1 | 创建 Clerk 应用 | Clerk Dashboard | 5 分钟 |
-| 2 | 配置 OAuth | Clerk Dashboard | 10 分钟 |
-| 3 | 安装前端 SDK | npm | 2 分钟 |
-| 4 | 生成登录页面 | v0.dev | 10 分钟 |
-| 5 | 集成 ClerkProvider | Claude Code | 5 分钟 |
-| 6 | 配置后端验证 | Claude Code | 15 分钟 |
-| 7 | 设置 Webhook 同步 | Clerk + Claude | 20 分钟 |
-| 8 | 编写测试 | Claude + Vitest | 15 分钟 |
-| **总计** | | | **~1.5 小时** |
+| 步骤     | 任务               | 工具            | 时间          |
+| -------- | ------------------ | --------------- | ------------- |
+| 1        | 创建 Clerk 应用    | Clerk Dashboard | 5 分钟        |
+| 2        | 配置 OAuth         | Clerk Dashboard | 10 分钟       |
+| 3        | 安装前端 SDK       | npm             | 2 分钟        |
+| 4        | 生成登录页面       | v0.dev          | 10 分钟       |
+| 5        | 集成 ClerkProvider | Claude Code     | 5 分钟        |
+| 6        | 配置后端验证       | Claude Code     | 15 分钟       |
+| 7        | 设置 Webhook 同步  | Clerk + Claude  | 20 分钟       |
+| 8        | 编写测试           | Claude + Vitest | 15 分钟       |
+| **总计** |                    |                 | **~1.5 小时** |
 
 ### 3.2 使用 v0.dev 生成登录页面
 
@@ -321,29 +320,35 @@ claude "创建 Clerk Webhook 处理：
 ## Clerk Dashboard 配置
 
 ### 1. 创建应用
+
 - [ ] 登录 https://dashboard.clerk.com
 - [ ] 创建新应用 "AIMake"
 - [ ] 选择 React 框架
 
 ### 2. 启用登录方式
+
 - [ ] Email/Password ✓
 - [ ] Google OAuth ✓
 - [ ] GitHub OAuth ✓
 
 ### 3. 配置 OAuth
+
 - [ ] Google: 添加 Client ID 和 Secret
 - [ ] GitHub: 添加 Client ID 和 Secret
 
 ### 4. 设置重定向
+
 - [ ] 开发环境: http://localhost:5173
 - [ ] 生产环境: https://aimake.cc
 
 ### 5. 配置 Webhook
+
 - [ ] URL: https://api.aimake.cc/webhook/clerk
 - [ ] Events: user.created, user.updated, user.deleted
 - [ ] 获取 Webhook Secret
 
 ### 6. 获取密钥
+
 - [ ] Publishable Key → 前端 .env
 - [ ] Secret Key → Workers Secrets
 - [ ] Webhook Secret → Workers Secrets
@@ -397,9 +402,7 @@ git push origin main  # 触发自动部署
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
 ```
 
@@ -422,15 +425,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
+
       - name: Install dependencies
         run: cd api && npm ci
-      
+
       - name: Deploy to Cloudflare
         run: cd api && npx wrangler deploy
         env:
@@ -453,7 +456,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Run migrations
         run: |
           npx wrangler d1 execute aimake-db \
@@ -591,34 +594,34 @@ claude "重构 src/services/api.ts，使用更好的错误处理"
 
 ### 6.1 MVP 开发计划
 
-| 阶段 | 任务 | AI 工具 | 预计时间 |
-|------|------|---------|----------|
-| **Day 1** | 项目初始化 | Claude Code | 2h |
-| | Clerk 集成 | Clerk + Claude | 1.5h |
-| | 登录页面 | v0.dev | 0.5h |
-| **Day 2** | TTS API 路由 | Claude Code | 2h |
-| | 创建页面 UI | v0.dev | 1h |
-| | 音频播放器 | v0.dev + Claude | 1h |
-| **Day 3** | 音频库页面 | v0.dev + Claude | 2h |
-| | 用量统计 | Claude Code | 1h |
-| | 测试用例 | Claude + Vitest | 1h |
-| **Day 4** | E2E 测试 | Playwright MCP | 2h |
-| | 部署配置 | Claude Code | 1h |
-| | 修复 Bug | Claude Code | 1h |
-| **Day 5** | 优化和测试 | 全部 | 4h |
+| 阶段      | 任务         | AI 工具         | 预计时间 |
+| --------- | ------------ | --------------- | -------- |
+| **Day 1** | 项目初始化   | Claude Code     | 2h       |
+|           | Clerk 集成   | Clerk + Claude  | 1.5h     |
+|           | 登录页面     | v0.dev          | 0.5h     |
+| **Day 2** | TTS API 路由 | Claude Code     | 2h       |
+|           | 创建页面 UI  | v0.dev          | 1h       |
+|           | 音频播放器   | v0.dev + Claude | 1h       |
+| **Day 3** | 音频库页面   | v0.dev + Claude | 2h       |
+|           | 用量统计     | Claude Code     | 1h       |
+|           | 测试用例     | Claude + Vitest | 1h       |
+| **Day 4** | E2E 测试     | Playwright MCP  | 2h       |
+|           | 部署配置     | Claude Code     | 1h       |
+|           | 修复 Bug     | Claude Code     | 1h       |
+| **Day 5** | 优化和测试   | 全部            | 4h       |
 
 **总计: 5 天 (约 20 小时)**
 
 ### 6.2 传统开发 vs AI 辅助开发
 
-| 任务 | 传统开发 | AI 辅助 | 节省 |
-|------|----------|---------|------|
-| 登录认证 | 2-3 天 | 2 小时 | 90% |
-| CRUD 页面 | 1 天 | 2 小时 | 80% |
-| 测试用例 | 1 天 | 1 小时 | 90% |
-| API 路由 | 4 小时 | 1 小时 | 75% |
-| E2E 测试 | 1 天 | 2 小时 | 80% |
-| **总计** | **2 周** | **3-4 天** | **75%** |
+| 任务      | 传统开发 | AI 辅助    | 节省    |
+| --------- | -------- | ---------- | ------- |
+| 登录认证  | 2-3 天   | 2 小时     | 90%     |
+| CRUD 页面 | 1 天     | 2 小时     | 80%     |
+| 测试用例  | 1 天     | 1 小时     | 90%     |
+| API 路由  | 4 小时   | 1 小时     | 75%     |
+| E2E 测试  | 1 天     | 2 小时     | 80%     |
+| **总计**  | **2 周** | **3-4 天** | **75%** |
 
 ---
 
@@ -626,12 +629,12 @@ claude "重构 src/services/api.ts，使用更好的错误处理"
 
 ### 7.1 自动化监控
 
-| 服务 | 用途 | 配置 |
-|------|------|------|
-| Sentry | 错误追踪 | 自动上报 JS/API 错误 |
-| Vercel Analytics | 性能监控 | Core Web Vitals |
-| UptimeRobot | 可用性监控 | 每 5 分钟检查 |
-| Cloudflare Analytics | 流量分析 | 自动统计 |
+| 服务                 | 用途       | 配置                 |
+| -------------------- | ---------- | -------------------- |
+| Sentry               | 错误追踪   | 自动上报 JS/API 错误 |
+| Vercel Analytics     | 性能监控   | Core Web Vitals      |
+| UptimeRobot          | 可用性监控 | 每 5 分钟检查        |
+| Cloudflare Analytics | 流量分析   | 自动统计             |
 
 ### 7.2 告警配置
 
@@ -642,7 +645,7 @@ monitors:
     url: https://aimake.cc
     interval: 5m
     alert: [email, slack]
-  
+
   - name: AIMake API
     url: https://api.aimake.cc/health
     interval: 5m
@@ -678,4 +681,4 @@ monitors:
 
 ---
 
-*用 AI 工具，让开发更轻松！*
+_用 AI 工具，让开发更轻松！_

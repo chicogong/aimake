@@ -1,7 +1,6 @@
 # AIMake SEO 与数据分析设计
 
-> 创建日期: 2026-01-09
-> 覆盖 SEO 优化和用户行为分析
+> 创建日期: 2026-01-09 覆盖 SEO 优化和用户行为分析
 
 ---
 
@@ -25,20 +24,14 @@ interface SEOProps {
 
 const DEFAULT_SEO = {
   title: 'AIMake - AI 语音内容生成平台',
-  description: '用 AI 快速生成播客、有声书、视频配音、教育内容。输入文字，获得专业音频。免费试用，无需信用卡。',
+  description:
+    '用 AI 快速生成播客、有声书、视频配音、教育内容。输入文字，获得专业音频。免费试用，无需信用卡。',
   keywords: ['AI语音', 'TTS', '文字转语音', '播客生成', '有声书', '配音'],
   image: 'https://aimake.cc/og-image.png',
   url: 'https://aimake.cc',
 };
 
-export function SEO({ 
-  title, 
-  description, 
-  keywords,
-  image,
-  url,
-  type = 'website'
-}: SEOProps) {
+export function SEO({ title, description, keywords, image, url, type = 'website' }: SEOProps) {
   const seo = {
     title: title ? `${title} | AIMake` : DEFAULT_SEO.title,
     description: description || DEFAULT_SEO.description,
@@ -54,7 +47,7 @@ export function SEO({
       <meta name="description" content={seo.description} />
       <meta name="keywords" content={seo.keywords.join(', ')} />
       <link rel="canonical" href={seo.url} />
-      
+
       {/* Open Graph */}
       <meta property="og:type" content={type} />
       <meta property="og:title" content={seo.title} />
@@ -62,13 +55,13 @@ export function SEO({
       <meta property="og:image" content={seo.image} />
       <meta property="og:url" content={seo.url} />
       <meta property="og:site_name" content="AIMake" />
-      
+
       {/* Twitter Card */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={seo.title} />
       <meta name="twitter:description" content={seo.description} />
       <meta name="twitter:image" content={seo.image} />
-      
+
       {/* 其他 */}
       <meta name="robots" content="index, follow" />
       <meta name="author" content="AIMake" />
@@ -79,13 +72,13 @@ export function SEO({
 
 ### 1.2 各页面 SEO 配置
 
-| 页面 | Title | Description |
-|------|-------|-------------|
-| 首页 | AIMake - AI 语音内容生成平台 | 用 AI 快速生成播客、有声书、视频配音。输入文字，获得专业音频。 |
-| 定价 | 定价 \| AIMake | AIMake 定价方案。免费版每月 10 分钟，Pro 版 $19/月享 300 分钟。 |
-| 登录 | 登录 \| AIMake | 登录 AIMake，开始创作 AI 语音内容。 |
-| 创建 | 创建音频 \| AIMake | 输入文字，选择音色，一键生成高质量语音。 |
-| 帮助 | 帮助中心 \| AIMake | AIMake 使用指南、常见问题解答。 |
+| 页面 | Title                        | Description                                                     |
+| ---- | ---------------------------- | --------------------------------------------------------------- |
+| 首页 | AIMake - AI 语音内容生成平台 | 用 AI 快速生成播客、有声书、视频配音。输入文字，获得专业音频。  |
+| 定价 | 定价 \| AIMake               | AIMake 定价方案。免费版每月 10 分钟，Pro 版 $19/月享 300 分钟。 |
+| 登录 | 登录 \| AIMake               | 登录 AIMake，开始创作 AI 语音内容。                             |
+| 创建 | 创建音频 \| AIMake           | 输入文字，选择音色，一键生成高质量语音。                        |
+| 帮助 | 帮助中心 \| AIMake           | AIMake 使用指南、常见问题解答。                                 |
 
 ### 1.3 结构化数据 (JSON-LD)
 
@@ -96,49 +89,41 @@ export function WebsiteStructuredData() {
   const data = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    'name': 'AIMake',
-    'description': 'AI 语音内容生成平台',
-    'url': 'https://aimake.cc',
-    'applicationCategory': 'MultimediaApplication',
-    'operatingSystem': 'Web',
-    'offers': {
+    name: 'AIMake',
+    description: 'AI 语音内容生成平台',
+    url: 'https://aimake.cc',
+    applicationCategory: 'MultimediaApplication',
+    operatingSystem: 'Web',
+    offers: {
       '@type': 'Offer',
-      'price': '0',
-      'priceCurrency': 'USD',
+      price: '0',
+      priceCurrency: 'USD',
     },
-    'aggregateRating': {
+    aggregateRating: {
       '@type': 'AggregateRating',
-      'ratingValue': '4.9',
-      'ratingCount': '128',
+      ratingValue: '4.9',
+      ratingCount: '128',
     },
   };
 
-  return (
-    <script type="application/ld+json">
-      {JSON.stringify(data)}
-    </script>
-  );
+  return <script type="application/ld+json">{JSON.stringify(data)}</script>;
 }
 
-export function FAQStructuredData({ faqs }: { faqs: Array<{q: string, a: string}> }) {
+export function FAQStructuredData({ faqs }: { faqs: Array<{ q: string; a: string }> }) {
   const data = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    'mainEntity': faqs.map(faq => ({
+    mainEntity: faqs.map((faq) => ({
       '@type': 'Question',
-      'name': faq.q,
-      'acceptedAnswer': {
+      name: faq.q,
+      acceptedAnswer: {
         '@type': 'Answer',
-        'text': faq.a,
+        text: faq.a,
       },
     })),
   };
 
-  return (
-    <script type="application/ld+json">
-      {JSON.stringify(data)}
-    </script>
-  );
+  return <script type="application/ld+json">{JSON.stringify(data)}</script>;
 }
 ```
 
@@ -194,19 +179,19 @@ Sitemap: https://aimake.cc/sitemap.xml
 
 ### 2.1 分析工具选型
 
-| 工具 | 用途 | 成本 |
-|------|------|------|
-| **Plausible** | 页面访问、转化率 | $9/月 (推荐，隐私友好) |
-| Google Analytics 4 | 全面分析 | 免费 |
-| Mixpanel | 事件分析、漏斗 | 免费层 |
-| PostHog | 产品分析、Session 回放 | 免费层 |
+| 工具               | 用途                   | 成本                   |
+| ------------------ | ---------------------- | ---------------------- |
+| **Plausible**      | 页面访问、转化率       | $9/月 (推荐，隐私友好) |
+| Google Analytics 4 | 全面分析               | 免费                   |
+| Mixpanel           | 事件分析、漏斗         | 免费层                 |
+| PostHog            | 产品分析、Session 回放 | 免费层                 |
 
 ### 2.2 事件追踪设计
 
 ```typescript
 // src/lib/analytics.ts
 
-type EventName = 
+type EventName =
   // 页面访问
   | 'page_view'
   // 认证
@@ -238,17 +223,17 @@ interface EventProperties {
   // 通用属性
   page?: string;
   source?: string;
-  
+
   // 创建相关
   voice_id?: string;
   text_length?: number;
   duration?: number;
-  
+
   // 付费相关
   plan?: 'pro' | 'team';
   billing_cycle?: 'monthly' | 'yearly';
   amount?: number;
-  
+
   // 错误相关
   error_code?: string;
   error_message?: string;
@@ -260,22 +245,22 @@ class Analytics {
     if (window.plausible) {
       window.plausible(event, { props: properties });
     }
-    
+
     // Google Analytics
     if (window.gtag) {
       window.gtag('event', event, properties);
     }
-    
+
     // 开发环境日志
     if (import.meta.env.DEV) {
       console.log('[Analytics]', event, properties);
     }
   }
-  
+
   identify(userId: string, traits?: Record<string, any>) {
     // 用于付费分析工具
   }
-  
+
   page(pageName: string) {
     this.track('page_view', { page: pageName });
   }
@@ -330,7 +315,7 @@ import { analytics } from '@/lib/analytics';
 
 export function usePageTracking() {
   const location = useLocation();
-  
+
   useEffect(() => {
     analytics.page(location.pathname);
   }, [location.pathname]);
@@ -392,24 +377,24 @@ analytics.track('signup_complete');
 
 ### 4.1 核心指标 (KPIs)
 
-| 指标 | 定义 | 目标 |
-|------|------|------|
-| **DAU** | 日活跃用户 | 增长 10%/月 |
-| **注册转化率** | 注册数 / 访客数 | > 5% |
-| **付费转化率** | 付费用户 / 注册用户 | > 3% |
-| **MRR** | 月经常性收入 | 增长 20%/月 |
-| **Churn Rate** | 月流失率 | < 5% |
-| **生成量** | 日均生成分钟数 | - |
+| 指标           | 定义                | 目标        |
+| -------------- | ------------------- | ----------- |
+| **DAU**        | 日活跃用户          | 增长 10%/月 |
+| **注册转化率** | 注册数 / 访客数     | > 5%        |
+| **付费转化率** | 付费用户 / 注册用户 | > 3%        |
+| **MRR**        | 月经常性收入        | 增长 20%/月 |
+| **Churn Rate** | 月流失率            | < 5%        |
+| **生成量**     | 日均生成分钟数      | -           |
 
 ### 4.2 产品指标
 
-| 指标 | 定义 |
-|------|------|
-| 首次生成时间 | 注册到首次生成的时间 |
-| 生成成功率 | 成功生成 / 总尝试 |
-| 平均生成时长 | 每次生成的音频时长 |
-| 功能使用率 | TTS vs 播客的使用比例 |
-| 留存率 | 7日/30日回访率 |
+| 指标         | 定义                  |
+| ------------ | --------------------- |
+| 首次生成时间 | 注册到首次生成的时间  |
+| 生成成功率   | 成功生成 / 总尝试     |
+| 平均生成时长 | 每次生成的音频时长    |
+| 功能使用率   | TTS vs 播客的使用比例 |
+| 留存率       | 7日/30日回访率        |
 
 ---
 
@@ -423,7 +408,7 @@ analytics.track('signup_complete');
 interface Experiment {
   id: string;
   variants: string[];
-  weights?: number[];  // 默认均分
+  weights?: number[]; // 默认均分
 }
 
 const experiments: Record<string, Experiment> = {
@@ -440,24 +425,22 @@ const experiments: Record<string, Experiment> = {
 export function getVariant(experimentId: string): string {
   const experiment = experiments[experimentId];
   if (!experiment) return '';
-  
+
   // 从 localStorage 读取已分配的变体
   const stored = localStorage.getItem(`exp_${experimentId}`);
   if (stored) return stored;
-  
+
   // 随机分配
-  const variant = experiment.variants[
-    Math.floor(Math.random() * experiment.variants.length)
-  ];
-  
+  const variant = experiment.variants[Math.floor(Math.random() * experiment.variants.length)];
+
   localStorage.setItem(`exp_${experimentId}`, variant);
-  
+
   // 追踪实验分组
   analytics.track('experiment_assigned', {
     experiment_id: experimentId,
     variant,
   });
-  
+
   return variant;
 }
 ```
@@ -467,14 +450,16 @@ export function getVariant(experimentId: string): string {
 ```tsx
 function HeroCTA() {
   const ctaText = getVariant('hero-cta-text');
-  
+
   return (
-    <button onClick={() => {
-      analytics.track('hero_cta_click', {
-        experiment_id: 'hero-cta-text',
-        variant: ctaText,
-      });
-    }}>
+    <button
+      onClick={() => {
+        analytics.track('hero_cta_click', {
+          experiment_id: 'hero-cta-text',
+          variant: ctaText,
+        });
+      }}
+    >
       {ctaText}
     </button>
   );
@@ -495,17 +480,17 @@ import * as Sentry from '@sentry/react';
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
   environment: import.meta.env.MODE,
-  
+
   integrations: [
     new Sentry.BrowserTracing({
       tracePropagationTargets: ['localhost', 'api.aimake.cc'],
     }),
     new Sentry.Replay(),
   ],
-  
-  tracesSampleRate: 0.1,  // 10% 性能追踪
-  replaysSessionSampleRate: 0.1,  // 10% Session 回放
-  replaysOnErrorSampleRate: 1.0,  // 错误时 100% 回放
+
+  tracesSampleRate: 0.1, // 10% 性能追踪
+  replaysSessionSampleRate: 0.1, // 10% Session 回放
+  replaysOnErrorSampleRate: 1.0, // 错误时 100% 回放
 });
 
 // 用户识别
@@ -539,10 +524,7 @@ export function ErrorBoundary({ children }: { children: React.ReactNode }) {
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">出错了</h1>
             <p className="text-gray-600 mb-6">抱歉，发生了意外错误</p>
-            <button 
-              onClick={resetError}
-              className="bg-primary-500 text-white px-6 py-2 rounded-lg"
-            >
+            <button onClick={resetError} className="bg-primary-500 text-white px-6 py-2 rounded-lg">
               重试
             </button>
           </div>
@@ -584,12 +566,12 @@ export function reportWebVitals() {
 
 ### 7.2 性能目标
 
-| 指标 | 目标 | 说明 |
-|------|------|------|
-| LCP | < 2.5s | 最大内容绘制 |
-| FID | < 100ms | 首次输入延迟 |
-| CLS | < 0.1 | 累积布局偏移 |
-| TTFB | < 600ms | 首字节时间 |
+| 指标 | 目标    | 说明         |
+| ---- | ------- | ------------ |
+| LCP  | < 2.5s  | 最大内容绘制 |
+| FID  | < 100ms | 首次输入延迟 |
+| CLS  | < 0.1   | 累积布局偏移 |
+| TTFB | < 600ms | 首字节时间   |
 
 ---
 
@@ -602,41 +584,40 @@ export function reportWebVitals() {
 
 export function CookieConsent() {
   const [shown, setShown] = useState(false);
-  
+
   useEffect(() => {
     const consent = localStorage.getItem('cookie_consent');
     if (!consent) setShown(true);
   }, []);
-  
+
   const handleAccept = () => {
     localStorage.setItem('cookie_consent', 'accepted');
     setShown(false);
     // 初始化分析工具
     initAnalytics();
   };
-  
+
   const handleDecline = () => {
     localStorage.setItem('cookie_consent', 'declined');
     setShown(false);
   };
-  
+
   if (!shown) return null;
-  
+
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         <p>
           我们使用 Cookie 来改善您的体验。
-          <a href="/privacy" className="underline ml-1">了解更多</a>
+          <a href="/privacy" className="underline ml-1">
+            了解更多
+          </a>
         </p>
         <div className="flex gap-4">
           <button onClick={handleDecline} className="text-gray-400">
             拒绝
           </button>
-          <button 
-            onClick={handleAccept}
-            className="bg-primary-500 px-4 py-2 rounded-lg"
-          >
+          <button onClick={handleAccept} className="bg-primary-500 px-4 py-2 rounded-lg">
             接受
           </button>
         </div>
@@ -649,6 +630,7 @@ export function CookieConsent() {
 ### 8.2 数据收集声明
 
 在隐私政策中说明：
+
 - 收集哪些数据
 - 如何使用数据
 - 第三方服务 (Sentry, Analytics)
@@ -656,4 +638,4 @@ export function CookieConsent() {
 
 ---
 
-*数据驱动产品增长！*
+_数据驱动产品增长！_

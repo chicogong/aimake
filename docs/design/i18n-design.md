@@ -1,7 +1,6 @@
 # AIMake 国际化 (i18n) 设计
 
-> 创建日期: 2026-01-09
-> 支持多语言的技术方案
+> 创建日期: 2026-01-09支持多语言的技术方案
 
 ---
 
@@ -9,18 +8,18 @@
 
 ### 1.1 阶段规划
 
-| 阶段 | 语言 | 优先级 | 时间 |
-|------|------|--------|------|
-| Phase 1 | 简体中文 (zh-CN)、英文 (en) | P0 | MVP |
-| Phase 2 | 繁体中文 (zh-TW)、日语 (ja) | P1 | +1 月 |
-| Phase 3 | 韩语 (ko)、西班牙语 (es) | P2 | +3 月 |
+| 阶段    | 语言                        | 优先级 | 时间  |
+| ------- | --------------------------- | ------ | ----- |
+| Phase 1 | 简体中文 (zh-CN)、英文 (en) | P0     | MVP   |
+| Phase 2 | 繁体中文 (zh-TW)、日语 (ja) | P1     | +1 月 |
+| Phase 3 | 韩语 (ko)、西班牙语 (es)    | P2     | +3 月 |
 
 ### 1.2 默认语言
 
 ```typescript
 const DEFAULT_LOCALE = 'zh-CN';
 const SUPPORTED_LOCALES = ['zh-CN', 'en', 'zh-TW', 'ja'] as const;
-type Locale = typeof SUPPORTED_LOCALES[number];
+type Locale = (typeof SUPPORTED_LOCALES)[number];
 ```
 
 ---
@@ -29,11 +28,11 @@ type Locale = typeof SUPPORTED_LOCALES[number];
 
 ### 2.1 库选型
 
-| 方案 | 优点 | 缺点 | 推荐 |
-|------|------|------|------|
-| **react-i18next** | 生态成熟，功能丰富 | 包较大 | ✅ 推荐 |
-| next-intl | Next.js 原生支持 | 仅限 Next.js | - |
-| FormatJS | 标准化好 | 配置复杂 | - |
+| 方案              | 优点               | 缺点         | 推荐    |
+| ----------------- | ------------------ | ------------ | ------- |
+| **react-i18next** | 生态成熟，功能丰富 | 包较大       | ✅ 推荐 |
+| next-intl         | Next.js 原生支持   | 仅限 Next.js | -       |
+| FormatJS          | 标准化好           | 配置复杂     | -       |
 
 ### 2.2 安装配置
 
@@ -85,7 +84,7 @@ import en from './locales/en';
 export const defaultNS = 'common';
 export const resources = {
   'zh-CN': zhCN,
-  'en': en,
+  en: en,
 } as const;
 
 i18n
@@ -96,11 +95,11 @@ i18n
     defaultNS,
     fallbackLng: 'zh-CN',
     supportedLngs: ['zh-CN', 'en', 'zh-TW', 'ja'],
-    
+
     interpolation: {
       escapeValue: false,
     },
-    
+
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
@@ -155,7 +154,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 {
   "appName": "AIMake",
   "tagline": "AI 语音内容生成平台",
-  
+
   "nav": {
     "features": "功能",
     "useCases": "场景",
@@ -165,7 +164,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     "signup": "免费试用",
     "logout": "退出登录"
   },
-  
+
   "actions": {
     "save": "保存",
     "cancel": "取消",
@@ -182,7 +181,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     "loading": "加载中...",
     "generating": "生成中..."
   },
-  
+
   "time": {
     "now": "刚刚",
     "minutesAgo": "{{count}}分钟前",
@@ -190,7 +189,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     "yesterday": "昨天",
     "daysAgo": "{{count}}天前"
   },
-  
+
   "units": {
     "minutes": "分钟",
     "seconds": "秒",
@@ -215,7 +214,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     "withGoogle": "使用 Google 登录",
     "withGithub": "使用 GitHub 登录"
   },
-  
+
   "signup": {
     "title": "创建你的账号",
     "username": "用户名",
@@ -230,7 +229,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     "hasAccount": "已有账号？",
     "loginLink": "立即登录"
   },
-  
+
   "forgotPassword": {
     "title": "重置密码",
     "description": "输入你的邮箱，我们会发送重置链接",
@@ -238,7 +237,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     "submit": "发送重置链接",
     "backToLogin": "返回登录"
   },
-  
+
   "verifyEmail": {
     "title": "验证你的邮箱",
     "description": "我们已发送验证邮件到",
@@ -253,7 +252,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 // src/i18n/locales/zh-CN/create.json
 {
   "title": "创建音频",
-  
+
   "mode": {
     "title": "选择创建模式",
     "tts": {
@@ -265,7 +264,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       "description": "输入主题，生成双人对话"
     }
   },
-  
+
   "tts": {
     "inputLabel": "输入文本",
     "inputPlaceholder": "在这里输入你想要转换的文字...",
@@ -276,7 +275,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     "generateBtn": "生成音频",
     "estimatedDuration": "预计时长: {{duration}}"
   },
-  
+
   "voice": {
     "preview": "试听",
     "stop": "停止",
@@ -285,7 +284,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     "female": "女声",
     "neutral": "中性"
   },
-  
+
   "emotion": {
     "neutral": "自然",
     "happy": "开心",
@@ -293,14 +292,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     "excited": "激动",
     "calm": "平静"
   },
-  
+
   "result": {
     "title": "生成结果",
     "downloadMp3": "下载 MP3",
     "downloadWav": "下载 WAV",
     "saveToLibrary": "保存到音频库"
   },
-  
+
   "quota": {
     "remaining": "本月额度: {{remaining}} 剩余",
     "used": "{{used}} / {{limit}}",
@@ -319,19 +318,19 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   "forbidden": "没有权限访问",
   "notFound": "资源不存在",
   "serverError": "服务器错误，请稍后重试",
-  
+
   "auth": {
     "invalidCredentials": "邮箱或密码错误",
     "emailExists": "该邮箱已被注册",
     "weakPassword": "密码强度不够",
     "emailNotVerified": "请先验证邮箱"
   },
-  
+
   "quota": {
     "exceeded": "额度已用完",
     "insufficient": "额度不足，需要 {{required}} 秒，剩余 {{remaining}} 秒"
   },
-  
+
   "tts": {
     "textTooLong": "文本过长，最多 {{max}} 字符",
     "textEmpty": "请输入文本",
@@ -348,7 +347,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 {
   "appName": "AIMake",
   "tagline": "AI Voice Content Generator",
-  
+
   "nav": {
     "features": "Features",
     "useCases": "Use Cases",
@@ -358,7 +357,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     "signup": "Get Started Free",
     "logout": "Log out"
   },
-  
+
   "actions": {
     "save": "Save",
     "cancel": "Cancel",
@@ -375,7 +374,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     "loading": "Loading...",
     "generating": "Generating..."
   },
-  
+
   "time": {
     "now": "Just now",
     "minutesAgo": "{{count}} minute ago",
@@ -386,7 +385,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     "daysAgo": "{{count}} day ago",
     "daysAgo_plural": "{{count}} days ago"
   },
-  
+
   "units": {
     "minutes": "min",
     "seconds": "sec",
@@ -399,7 +398,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 // src/i18n/locales/en/create.json
 {
   "title": "Create Audio",
-  
+
   "mode": {
     "title": "Choose Creation Mode",
     "tts": {
@@ -411,7 +410,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       "description": "Generate two-person conversation"
     }
   },
-  
+
   "tts": {
     "inputLabel": "Enter Text",
     "inputPlaceholder": "Enter the text you want to convert to speech...",
@@ -422,7 +421,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     "generateBtn": "Generate Audio",
     "estimatedDuration": "Estimated duration: {{duration}}"
   },
-  
+
   "voice": {
     "preview": "Preview",
     "stop": "Stop",
@@ -431,7 +430,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     "female": "Female",
     "neutral": "Neutral"
   },
-  
+
   "emotion": {
     "neutral": "Neutral",
     "happy": "Happy",
@@ -453,14 +452,14 @@ import { useTranslation } from 'react-i18next';
 
 export function CreatePage() {
   const { t } = useTranslation('create');
-  
+
   return (
     <div>
       <h1>{t('title')}</h1>
-      
+
       <label>{t('tts.inputLabel')}</label>
       <textarea placeholder={t('tts.inputPlaceholder')} />
-      
+
       <button>{t('tts.generateBtn')}</button>
     </div>
   );
@@ -471,11 +470,11 @@ export function CreatePage() {
 
 ```tsx
 // 简单插值
-t('tts.charCount', { current: 100, max: 5000 })
+t('tts.charCount', { current: 100, max: 5000 });
 // → "100 / 5000 字"
 
 // 带复数
-t('time.minutesAgo', { count: 5 })
+t('time.minutesAgo', { count: 5 });
 // → "5分钟前" (zh-CN)
 // → "5 minutes ago" (en)
 ```
@@ -487,7 +486,7 @@ import { useTranslation } from 'react-i18next';
 
 export function Component() {
   const { t } = useTranslation(['create', 'common']);
-  
+
   return (
     <div>
       <h1>{t('create:title')}</h1>
@@ -513,9 +512,9 @@ const languages = [
 
 export function LanguageSwitcher() {
   const { i18n } = useTranslation();
-  
-  const currentLanguage = languages.find(l => l.code === i18n.language);
-  
+
+  const currentLanguage = languages.find((l) => l.code === i18n.language);
+
   return (
     <select
       value={i18n.language}
@@ -547,15 +546,15 @@ import i18n from '@/i18n';
 
 const locales: Record<string, Locale> = {
   'zh-CN': zhCN,
-  'en': enUS,
+  en: enUS,
   'zh-TW': zhTW,
-  'ja': ja,
+  ja: ja,
 };
 
 export function formatDate(date: Date | string, formatStr = 'PPP') {
   const d = typeof date === 'string' ? new Date(date) : date;
-  return format(d, formatStr, { 
-    locale: locales[i18n.language] || zhCN 
+  return format(d, formatStr, {
+    locale: locales[i18n.language] || zhCN,
   });
 }
 
@@ -607,7 +606,7 @@ const rtlLanguages = ['ar', 'he'];
 function App() {
   const { i18n } = useTranslation();
   const isRTL = rtlLanguages.includes(i18n.language);
-  
+
   return (
     <div dir={isRTL ? 'rtl' : 'ltr'}>
       <Routes />
@@ -630,7 +629,7 @@ import { Helmet } from 'react-helmet-async';
 
 export function LanguageHead() {
   const { i18n } = useTranslation();
-  
+
   return (
     <Helmet>
       <html lang={i18n.language} />
@@ -679,7 +678,7 @@ import en from '../src/i18n/locales/en';
 
 function findMissingKeys(base: object, target: object, path = ''): string[] {
   const missing: string[] = [];
-  
+
   for (const key in base) {
     const newPath = path ? `${path}.${key}` : key;
     if (!(key in target)) {
@@ -688,14 +687,14 @@ function findMissingKeys(base: object, target: object, path = ''): string[] {
       missing.push(...findMissingKeys(base[key], target[key], newPath));
     }
   }
-  
+
   return missing;
 }
 
 const missingInEn = findMissingKeys(zhCN, en);
 if (missingInEn.length > 0) {
   console.log('Missing translations in en:');
-  missingInEn.forEach(key => console.log(`  - ${key}`));
+  missingInEn.forEach((key) => console.log(`  - ${key}`));
 }
 ```
 
@@ -731,12 +730,12 @@ if (missingInEn.length > 0) {
 
 ```tsx
 // ❌ 字符串拼接
-`剩余 ${remaining} 分钟`
+`剩余 ${remaining} 分钟`;
 
 // ✅ 使用插值
-t('quota.remaining', { remaining })
+t('quota.remaining', { remaining });
 ```
 
 ---
 
-*让产品走向国际！*
+_让产品走向国际！_

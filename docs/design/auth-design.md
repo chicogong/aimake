@@ -1,24 +1,22 @@
 # AIMake 登录鉴权设计
 
-> 创建日期: 2026-01-09
-> 策略: 使用现成认证服务，减少开发维护成本
+> 创建日期: 2026-01-09策略: 使用现成认证服务，减少开发维护成本
 
 ---
 
 ## 一、认证服务选型
 
-| 服务 | 优点 | 缺点 | 月费 | 推荐度 |
-|------|------|------|------|--------|
-| **Clerk** | UI 组件完善、开箱即用 | 免费额度较少 | 免费 5K MAU | ⭐⭐⭐⭐⭐ |
-| **Supabase Auth** | 与 Supabase DB 集成 | UI 需自己写 | 免费 50K MAU | ⭐⭐⭐⭐ |
-| **Auth0** | 企业级、功能全 | 配置复杂、贵 | 免费 7K MAU | ⭐⭐⭐ |
-| **Firebase Auth** | Google 生态 | 绑定 Firebase | 免费 | ⭐⭐⭐ |
-| **Lucia** | 开源自托管 | 需要自己维护 | 免费 | ⭐⭐ |
+| 服务              | 优点                  | 缺点          | 月费         | 推荐度     |
+| ----------------- | --------------------- | ------------- | ------------ | ---------- |
+| **Clerk**         | UI 组件完善、开箱即用 | 免费额度较少  | 免费 5K MAU  | ⭐⭐⭐⭐⭐ |
+| **Supabase Auth** | 与 Supabase DB 集成   | UI 需自己写   | 免费 50K MAU | ⭐⭐⭐⭐   |
+| **Auth0**         | 企业级、功能全        | 配置复杂、贵  | 免费 7K MAU  | ⭐⭐⭐     |
+| **Firebase Auth** | Google 生态           | 绑定 Firebase | 免费         | ⭐⭐⭐     |
+| **Lucia**         | 开源自托管            | 需要自己维护  | 免费         | ⭐⭐       |
 
 ### 推荐方案
 
-**首选: Clerk** - 最省事，自带 UI 组件
-**备选: Supabase Auth** - 如果已用 Supabase 做数据库
+**首选: Clerk** - 最省事，自带 UI 组件 **备选: Supabase Auth** - 如果已用 Supabase 做数据库
 
 ---
 
@@ -99,11 +97,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 ```tsx
 // src/App.tsx
 
-import {
-  SignedIn,
-  SignedOut,
-  RedirectToSignIn,
-} from '@clerk/clerk-react';
+import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 function App() {
@@ -115,7 +109,7 @@ function App() {
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/sign-in/*" element={<SignInPage />} />
         <Route path="/sign-up/*" element={<SignUpPage />} />
-        
+
         {/* 需要登录 */}
         <Route
           path="/app/*"
@@ -176,12 +170,7 @@ import { SignUp } from '@clerk/clerk-react';
 export function SignUpPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <SignUp
-        path="/sign-up"
-        routing="path"
-        signInUrl="/sign-in"
-        afterSignUpUrl="/app"
-      />
+      <SignUp path="/sign-up" routing="path" signInUrl="/sign-in" afterSignUpUrl="/app" />
     </div>
   );
 }
@@ -196,15 +185,15 @@ import { UserButton, useUser } from '@clerk/clerk-react';
 
 export function Header() {
   const { user } = useUser();
-  
+
   return (
     <header className="flex items-center justify-between p-4 border-b">
       <Logo />
-      
+
       <nav className="flex items-center gap-4">
         <Link to="/app/create">创建</Link>
         <Link to="/app/library">音频库</Link>
-        
+
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">
             {user?.firstName || user?.emailAddresses[0]?.emailAddress}
@@ -227,19 +216,21 @@ import { useUser, useAuth } from '@clerk/clerk-react';
 export function useCurrentUser() {
   const { user, isLoaded, isSignedIn } = useUser();
   const { getToken } = useAuth();
-  
+
   // 获取 JWT token 用于 API 请求
   const getAuthToken = async () => {
     return await getToken();
   };
-  
+
   return {
-    user: user ? {
-      id: user.id,
-      email: user.emailAddresses[0]?.emailAddress,
-      name: user.fullName || user.firstName,
-      avatar: user.imageUrl,
-    } : null,
+    user: user
+      ? {
+          id: user.id,
+          email: user.emailAddresses[0]?.emailAddress,
+          name: user.fullName || user.firstName,
+          avatar: user.imageUrl,
+        }
+      : null,
     isLoaded,
     isSignedIn,
     getAuthToken,
@@ -264,22 +255,22 @@ import { verifyToken } from '@clerk/backend';
 
 export async function authMiddleware(c: Context, next: Next) {
   const authHeader = c.req.header('Authorization');
-  
+
   if (!authHeader?.startsWith('Bearer ')) {
     return c.json({ error: '未授权' }, 401);
   }
-  
+
   const token = authHeader.slice(7);
-  
+
   try {
     const payload = await verifyToken(token, {
       secretKey: c.env.CLERK_SECRET_KEY,
     });
-    
+
     // 存储用户 ID
     c.set('userId', payload.sub);
     c.set('sessionId', payload.sid);
-    
+
     await next();
   } catch (error) {
     return c.json({ error: 'Token 无效' }, 401);
@@ -301,13 +292,15 @@ const tts = new Hono();
 tts.use('*', authMiddleware);
 
 tts.post('/generate', async (c) => {
-  const userId = c.get('userId');  // Clerk 用户 ID
-  
+  const userId = c.get('userId'); // Clerk 用户 ID
+
   // 查询用户额度 (从自己的数据库)
   const user = await c.env.DB.prepare(
     'SELECT quota_used, quota_limit FROM users WHERE clerk_id = ?'
-  ).bind(userId).first();
-  
+  )
+    .bind(userId)
+    .first();
+
   // ... 生成逻辑
 });
 ```
@@ -330,17 +323,17 @@ webhook.post('/clerk', async (c) => {
     'svix-timestamp': c.req.header('svix-timestamp'),
     'svix-signature': c.req.header('svix-signature'),
   };
-  
+
   // 验证签名
   const wh = new Webhook(c.env.CLERK_WEBHOOK_SECRET);
   let event;
-  
+
   try {
     event = wh.verify(payload, headers);
   } catch {
     return c.json({ error: 'Invalid signature' }, 400);
   }
-  
+
   // 处理事件
   switch (event.type) {
     case 'user.created':
@@ -353,26 +346,31 @@ webhook.post('/clerk', async (c) => {
       await handleUserDeleted(c.env.DB, event.data);
       break;
   }
-  
+
   return c.json({ received: true });
 });
 
 async function handleUserCreated(db: D1Database, data: any) {
   const now = new Date().toISOString();
   const resetAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-  
-  await db.prepare(`
+
+  await db
+    .prepare(
+      `
     INSERT INTO users (id, clerk_id, email, name, avatar_url, plan, quota_limit, quota_used, quota_reset_at, created_at)
     VALUES (?, ?, ?, ?, ?, 'free', 600, 0, ?, ?)
-  `).bind(
-    crypto.randomUUID(),
-    data.id,
-    data.email_addresses[0]?.email_address,
-    data.first_name || '',
-    data.image_url,
-    resetAt,
-    now
-  ).run();
+  `
+    )
+    .bind(
+      crypto.randomUUID(),
+      data.id,
+      data.email_addresses[0]?.email_address,
+      data.first_name || '',
+      data.image_url,
+      resetAt,
+      now
+    )
+    .run();
 }
 ```
 
@@ -386,16 +384,16 @@ CREATE TABLE users (
     email           TEXT NOT NULL,
     name            TEXT,
     avatar_url      TEXT,
-    
+
     -- 套餐和额度
     plan            TEXT DEFAULT 'free',
     quota_limit     INTEGER DEFAULT 600,
     quota_used      INTEGER DEFAULT 0,
     quota_reset_at  TEXT,
-    
+
     -- Stripe
     stripe_customer_id TEXT,
-    
+
     created_at      TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at      TEXT DEFAULT CURRENT_TIMESTAMP
 );
@@ -440,7 +438,7 @@ export function LoginPage() {
       },
     });
   };
-  
+
   const handleEmailLogin = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -448,12 +446,10 @@ export function LoginPage() {
     });
     if (error) throw error;
   };
-  
+
   return (
     <div>
-      <button onClick={handleGoogleLogin}>
-        使用 Google 登录
-      </button>
+      <button onClick={handleGoogleLogin}>使用 Google 登录</button>
       {/* 邮箱登录表单 */}
     </div>
   );
@@ -479,11 +475,11 @@ export function useAuth() {
     });
 
     // 监听状态变化
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
 
     return () => subscription.unsubscribe();
   }, []);
@@ -501,27 +497,27 @@ import { createClient } from '@supabase/supabase-js';
 
 export async function authMiddleware(c: Context, next: Next) {
   const authHeader = c.req.header('Authorization');
-  
+
   if (!authHeader?.startsWith('Bearer ')) {
     return c.json({ error: '未授权' }, 401);
   }
-  
+
   const token = authHeader.slice(7);
-  
-  const supabase = createClient(
-    c.env.SUPABASE_URL,
-    c.env.SUPABASE_SERVICE_KEY
-  );
-  
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  
+
+  const supabase = createClient(c.env.SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY);
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(token);
+
   if (error || !user) {
     return c.json({ error: 'Token 无效' }, 401);
   }
-  
+
   c.set('userId', user.id);
   c.set('userEmail', user.email);
-  
+
   await next();
 }
 ```
@@ -607,10 +603,10 @@ import { useAuth } from '@clerk/clerk-react';
 
 export function useApi() {
   const { getToken } = useAuth();
-  
+
   const request = async (endpoint: string, options: RequestInit = {}) => {
     const token = await getToken();
-    
+
     const response = await fetch(`${API_URL}${endpoint}`, {
       ...options,
       headers: {
@@ -619,17 +615,17 @@ export function useApi() {
         ...options.headers,
       },
     });
-    
+
     if (!response.ok) {
       throw new Error(await response.text());
     }
-    
+
     return response.json();
   };
-  
+
   return {
     get: (endpoint: string) => request(endpoint),
-    post: (endpoint: string, data: any) => 
+    post: (endpoint: string, data: any) =>
       request(endpoint, { method: 'POST', body: JSON.stringify(data) }),
   };
 }
@@ -637,7 +633,7 @@ export function useApi() {
 // 使用
 function TTSCreate() {
   const api = useApi();
-  
+
   const handleGenerate = async () => {
     const result = await api.post('/tts/generate', {
       text: 'Hello world',
@@ -681,17 +677,16 @@ CLERK_WEBHOOK_SECRET=whsec_xxx
 
 ## 七、成本对比
 
-| 方案 | 开发时间 | 维护成本 | 月费用 | 功能完整度 |
-|------|----------|----------|--------|------------|
-| **Clerk** | 1-2 天 | 极低 | $0-25 | 极高 |
-| **Supabase Auth** | 2-3 天 | 低 | $0 | 高 |
-| **自建 JWT** | 1-2 周 | 高 | $0 | 中 |
-| **Auth0** | 2-3 天 | 低 | $0-23 | 极高 |
+| 方案              | 开发时间 | 维护成本 | 月费用 | 功能完整度 |
+| ----------------- | -------- | -------- | ------ | ---------- |
+| **Clerk**         | 1-2 天   | 极低     | $0-25  | 极高       |
+| **Supabase Auth** | 2-3 天   | 低       | $0     | 高         |
+| **自建 JWT**      | 1-2 周   | 高       | $0     | 中         |
+| **Auth0**         | 2-3 天   | 低       | $0-23  | 极高       |
 
 ### 推荐
 
-**MVP 阶段**: 使用 Clerk 免费版 (5K MAU)
-**增长阶段**: 继续使用 Clerk 或迁移到 Supabase Auth
+**MVP 阶段**: 使用 Clerk 免费版 (5K MAU) **增长阶段**: 继续使用 Clerk 或迁移到 Supabase Auth
 
 ---
 
@@ -706,4 +701,4 @@ CLERK_WEBHOOK_SECRET=whsec_xxx
 
 ---
 
-*使用现成服务，专注核心业务！*
+_使用现成服务，专注核心业务！_

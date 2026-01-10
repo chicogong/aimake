@@ -1,7 +1,6 @@
 # AIMake 上线验证测试计划
 
-> 创建日期: 2026-01-09
-> 目的: 确保每次发布前系统稳定可用
+> 创建日期: 2026-01-09目的: 确保每次发布前系统稳定可用
 
 ---
 
@@ -39,23 +38,27 @@
 ## 冒烟测试检查项 (5 分钟)
 
 ### 前端可访问性
+
 - [ ] 首页加载成功 (< 3s)
 - [ ] 无 JS 控制台错误
 - [ ] 静态资源加载正常 (CSS/JS/图片)
 
 ### 认证流程
+
 - [ ] 登录页面可访问
 - [ ] Google OAuth 跳转正常
 - [ ] 登录后正确跳转到 /app
 - [ ] 登出功能正常
 
 ### 核心业务
+
 - [ ] TTS 创建页面可访问
 - [ ] 输入文本后可选择音色
 - [ ] 点击生成后 API 响应正常
 - [ ] 音频播放器可播放
 
 ### API 健康检查
+
 - [ ] GET /health 返回 200
 - [ ] GET /api/voices 返回音色列表
 - [ ] POST /api/tts/generate 可调用
@@ -71,7 +74,7 @@ test.describe('Smoke Tests', () => {
   test('homepage loads successfully', async ({ page }) => {
     const response = await page.goto('/');
     expect(response?.status()).toBe(200);
-    
+
     // 检查关键元素
     await expect(page.locator('h1')).toBeVisible();
     await expect(page.locator('[data-testid="login-btn"]')).toBeVisible();
@@ -80,7 +83,7 @@ test.describe('Smoke Tests', () => {
   test('API health check', async ({ request }) => {
     const response = await request.get('/api/health');
     expect(response.status()).toBe(200);
-    
+
     const data = await response.json();
     expect(data.status).toBe('ok');
     expect(data.database).toBe('connected');
@@ -98,10 +101,10 @@ test.describe('Smoke Tests', () => {
     await page.fill('input[name="email"]', process.env.TEST_USER_EMAIL!);
     await page.fill('input[name="password"]', process.env.TEST_USER_PASSWORD!);
     await page.click('button[type="submit"]');
-    
+
     // 验证跳转到应用
     await expect(page).toHaveURL('/app', { timeout: 10000 });
-    
+
     // 验证创建页面
     await page.click('text=创建');
     await expect(page.locator('textarea')).toBeVisible();
@@ -165,29 +168,29 @@ echo "🎉 冒烟测试通过！"
 ```markdown
 ## 回归测试矩阵
 
-| 模块 | 测试用例 | 优先级 |
-|------|----------|--------|
-| **认证** | | |
-| | 邮箱密码登录 | P0 |
-| | Google OAuth | P0 |
-| | GitHub OAuth | P1 |
-| | 登出 | P0 |
-| | Token 刷新 | P1 |
-| **TTS 生成** | | |
-| | 短文本生成 (< 100字) | P0 |
-| | 长文本生成 (1000字) | P0 |
-| | 不同音色切换 | P0 |
-| | 生成进度显示 | P1 |
-| | 生成失败重试 | P1 |
-| **音频管理** | | |
-| | 音频列表加载 | P0 |
-| | 音频播放 | P0 |
-| | 音频下载 | P0 |
-| | 音频删除 | P1 |
-| **用户中心** | | |
-| | 用量显示 | P0 |
-| | 额度提醒 | P1 |
-| | 订阅信息 | P1 |
+| 模块         | 测试用例             | 优先级 |
+| ------------ | -------------------- | ------ |
+| **认证**     |                      |        |
+|              | 邮箱密码登录         | P0     |
+|              | Google OAuth         | P0     |
+|              | GitHub OAuth         | P1     |
+|              | 登出                 | P0     |
+|              | Token 刷新           | P1     |
+| **TTS 生成** |                      |        |
+|              | 短文本生成 (< 100字) | P0     |
+|              | 长文本生成 (1000字)  | P0     |
+|              | 不同音色切换         | P0     |
+|              | 生成进度显示         | P1     |
+|              | 生成失败重试         | P1     |
+| **音频管理** |                      |        |
+|              | 音频列表加载         | P0     |
+|              | 音频播放             | P0     |
+|              | 音频下载             | P0     |
+|              | 音频删除             | P1     |
+| **用户中心** |                      |        |
+|              | 用量显示             | P0     |
+|              | 额度提醒             | P1     |
+|              | 订阅信息             | P1     |
 ```
 
 ### 3.2 自动化回归测试
@@ -199,11 +202,11 @@ import { test, expect } from '@playwright/test';
 test.describe('Auth Regression', () => {
   test('email login flow', async ({ page }) => {
     await page.goto('/sign-in');
-    
+
     await page.fill('input[name="email"]', 'test@example.com');
     await page.fill('input[name="password"]', 'TestPass123!');
     await page.click('button[type="submit"]');
-    
+
     await expect(page).toHaveURL('/app');
     await expect(page.locator('[data-testid="user-button"]')).toBeVisible();
   });
@@ -211,14 +214,14 @@ test.describe('Auth Regression', () => {
   test('logout clears session', async ({ page }) => {
     // 先登录
     await loginAsTestUser(page);
-    
+
     // 登出
     await page.click('[data-testid="user-button"]');
     await page.click('text=退出登录');
-    
+
     // 验证跳转到首页
     await expect(page).toHaveURL('/');
-    
+
     // 验证无法访问受保护页面
     await page.goto('/app');
     await expect(page).toHaveURL('/sign-in');
@@ -233,14 +236,14 @@ test.describe('TTS Regression', () => {
 
   test('generate short text audio', async ({ page }) => {
     await page.goto('/app/create');
-    
+
     await page.fill('textarea', '这是一段测试文本。');
     await page.click('[data-voice-id="openai-alloy"]');
     await page.click('button:has-text("生成")');
-    
+
     // 等待生成完成
     await expect(page.locator('.audio-player')).toBeVisible({ timeout: 30000 });
-    
+
     // 验证可以播放
     await page.click('[aria-label="播放"]');
     await expect(page.locator('[aria-label="暂停"]')).toBeVisible();
@@ -248,25 +251,25 @@ test.describe('TTS Regression', () => {
 
   test('generate long text audio', async ({ page }) => {
     await page.goto('/app/create');
-    
+
     const longText = '这是一段很长的测试文本。'.repeat(50);
     await page.fill('textarea', longText);
     await page.click('[data-voice-id="openai-nova"]');
     await page.click('button:has-text("生成")');
-    
+
     // 长文本需要更长时间
     await expect(page.locator('.audio-player')).toBeVisible({ timeout: 60000 });
   });
 
   test('switch voice before generate', async ({ page }) => {
     await page.goto('/app/create');
-    
+
     await page.fill('textarea', '测试音色切换。');
-    
+
     // 选择第一个音色
     await page.click('[data-voice-id="openai-alloy"]');
     await expect(page.locator('[data-voice-id="openai-alloy"]')).toHaveClass(/selected/);
-    
+
     // 切换到另一个音色
     await page.click('[data-voice-id="openai-echo"]');
     await expect(page.locator('[data-voice-id="openai-echo"]')).toHaveClass(/selected/);
@@ -290,25 +293,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Install Playwright
         run: npx playwright install --with-deps chromium
-      
+
       - name: Run regression tests
         run: npx playwright test tests/regression/
         env:
           BASE_URL: ${{ github.event.deployment_status.target_url }}
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
-      
+
       - name: Upload test report
         uses: actions/upload-artifact@v4
         if: failure()
@@ -326,19 +329,19 @@ jobs:
 ```markdown
 ## 性能 SLA
 
-| 指标 | 目标值 | 告警阈值 |
-|------|--------|----------|
-| **前端** | | |
-| 首页 LCP | < 2.5s | > 4s |
-| FID | < 100ms | > 300ms |
-| CLS | < 0.1 | > 0.25 |
-| **API** | | |
-| /health 响应 | < 50ms | > 200ms |
-| /api/voices | < 100ms | > 500ms |
-| /api/tts/generate | < 30s | > 60s |
-| **资源** | | |
-| JS Bundle | < 200KB | > 500KB |
-| 首页总大小 | < 1MB | > 2MB |
+| 指标              | 目标值  | 告警阈值 |
+| ----------------- | ------- | -------- |
+| **前端**          |         |          |
+| 首页 LCP          | < 2.5s  | > 4s     |
+| FID               | < 100ms | > 300ms  |
+| CLS               | < 0.1   | > 0.25   |
+| **API**           |         |          |
+| /health 响应      | < 50ms  | > 200ms  |
+| /api/voices       | < 100ms | > 500ms  |
+| /api/tts/generate | < 30s   | > 60s    |
+| **资源**          |         |          |
+| JS Bundle         | < 200KB | > 500KB  |
+| 首页总大小        | < 1MB   | > 2MB    |
 ```
 
 ### 4.2 性能测试脚本
@@ -350,12 +353,12 @@ import { test, expect } from '@playwright/test';
 test.describe('Performance Tests', () => {
   test('homepage Core Web Vitals', async ({ page }) => {
     await page.goto('/');
-    
+
     // 获取 Web Vitals
     const metrics = await page.evaluate(() => {
       return new Promise((resolve) => {
         const results: Record<string, number> = {};
-        
+
         new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
             if (entry.entryType === 'largest-contentful-paint') {
@@ -363,7 +366,7 @@ test.describe('Performance Tests', () => {
             }
           }
         }).observe({ type: 'largest-contentful-paint', buffered: true });
-        
+
         // CLS
         let cls = 0;
         new PerformanceObserver((list) => {
@@ -374,11 +377,11 @@ test.describe('Performance Tests', () => {
           }
           results.cls = cls;
         }).observe({ type: 'layout-shift', buffered: true });
-        
+
         setTimeout(() => resolve(results), 3000);
       });
     });
-    
+
     console.log('Web Vitals:', metrics);
     expect(metrics.lcp).toBeLessThan(2500);
     expect(metrics.cls).toBeLessThan(0.1);
@@ -390,7 +393,7 @@ test.describe('Performance Tests', () => {
     await request.get('/api/health');
     const healthTime = Date.now() - healthStart;
     expect(healthTime).toBeLessThan(200);
-    
+
     // Voices endpoint
     const voicesStart = Date.now();
     await request.get('/api/voices');
@@ -400,25 +403,25 @@ test.describe('Performance Tests', () => {
 
   test('bundle size check', async ({ page }) => {
     const resources: { name: string; size: number }[] = [];
-    
+
     page.on('response', async (response) => {
       const url = response.url();
       if (url.includes('.js') || url.includes('.css')) {
         const buffer = await response.body();
         resources.push({
           name: url.split('/').pop() || url,
-          size: buffer.length
+          size: buffer.length,
         });
       }
     });
-    
+
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    
+
     const totalJS = resources
-      .filter(r => r.name.endsWith('.js'))
+      .filter((r) => r.name.endsWith('.js'))
       .reduce((sum, r) => sum + r.size, 0);
-    
+
     console.log('Total JS size:', (totalJS / 1024).toFixed(2), 'KB');
     expect(totalJS).toBeLessThan(500 * 1024); // 500KB
   });
@@ -434,9 +437,9 @@ import { check, sleep } from 'k6';
 
 export const options = {
   stages: [
-    { duration: '1m', target: 10 },  // Ramp up
-    { duration: '3m', target: 10 },  // Stay
-    { duration: '1m', target: 0 },   // Ramp down
+    { duration: '1m', target: 10 }, // Ramp up
+    { duration: '3m', target: 10 }, // Stay
+    { duration: '1m', target: 0 }, // Ramp down
   ],
   thresholds: {
     http_req_duration: ['p(95)<500'],
@@ -473,23 +476,27 @@ export default function () {
 ## 安全验证项
 
 ### 认证安全
+
 - [ ] 无效 Token 返回 401
 - [ ] 过期 Token 返回 401
 - [ ] 无 Token 访问受保护路由返回 401
 - [ ] CORS 配置正确
 
 ### 输入验证
+
 - [ ] XSS 防护 (HTML 转义)
 - [ ] SQL 注入防护
 - [ ] 文本长度限制生效
 - [ ] 文件上传类型限制
 
 ### 速率限制
+
 - [ ] API 速率限制生效
 - [ ] 超限返回 429
 - [ ] 限制重置正常
 
 ### 敏感信息
+
 - [ ] 错误响应不泄露堆栈
 - [ ] 日志不记录敏感信息
 - [ ] API Key 不暴露在前端
@@ -510,8 +517,8 @@ test.describe('Security Tests', () => {
   test('invalid token rejected', async ({ request }) => {
     const response = await request.get('/api/user/profile', {
       headers: {
-        'Authorization': 'Bearer invalid-token-here'
-      }
+        Authorization: 'Bearer invalid-token-here',
+      },
     });
     expect(response.status()).toBe(401);
   });
@@ -519,12 +526,12 @@ test.describe('Security Tests', () => {
   test('XSS prevention', async ({ page }) => {
     await loginAsTestUser(page);
     await page.goto('/app/create');
-    
+
     // 尝试 XSS 攻击
     const xssPayload = '<script>alert("xss")</script>';
     await page.fill('textarea', xssPayload);
     await page.click('button:has-text("生成")');
-    
+
     // 验证脚本未执行
     const alertTriggered = await page.evaluate(() => {
       return (window as any).__xssTriggered || false;
@@ -534,13 +541,13 @@ test.describe('Security Tests', () => {
 
   test('rate limiting works', async ({ request }) => {
     // 快速发送多个请求
-    const requests = Array(20).fill(null).map(() => 
-      request.get('/api/voices')
-    );
-    
+    const requests = Array(20)
+      .fill(null)
+      .map(() => request.get('/api/voices'));
+
     const responses = await Promise.all(requests);
-    const tooManyRequests = responses.filter(r => r.status() === 429);
-    
+    const tooManyRequests = responses.filter((r) => r.status() === 429);
+
     // 应该有部分请求被限制
     expect(tooManyRequests.length).toBeGreaterThan(0);
   });
@@ -548,10 +555,10 @@ test.describe('Security Tests', () => {
   test('CORS headers correct', async ({ request }) => {
     const response = await request.get('/api/health', {
       headers: {
-        'Origin': 'https://malicious-site.com'
-      }
+        Origin: 'https://malicious-site.com',
+      },
     });
-    
+
     const corsHeader = response.headers()['access-control-allow-origin'];
     expect(corsHeader).not.toBe('*');
     expect(corsHeader).not.toBe('https://malicious-site.com');
@@ -568,14 +575,14 @@ test.describe('Security Tests', () => {
 ```markdown
 ## 支持的浏览器
 
-| 浏览器 | 版本 | 优先级 |
-|--------|------|--------|
-| Chrome | 最新 2 个版本 | P0 |
-| Safari | 最新 2 个版本 | P0 |
-| Firefox | 最新 2 个版本 | P1 |
-| Edge | 最新 2 个版本 | P1 |
-| Safari iOS | 最新 2 个版本 | P0 |
-| Chrome Android | 最新 2 个版本 | P1 |
+| 浏览器         | 版本          | 优先级 |
+| -------------- | ------------- | ------ |
+| Chrome         | 最新 2 个版本 | P0     |
+| Safari         | 最新 2 个版本 | P0     |
+| Firefox        | 最新 2 个版本 | P1     |
+| Edge           | 最新 2 个版本 | P1     |
+| Safari iOS     | 最新 2 个版本 | P0     |
+| Chrome Android | 最新 2 个版本 | P1     |
 ```
 
 ### 6.2 Playwright 多浏览器测试
@@ -624,16 +631,16 @@ const viewports = [
 
 for (const viewport of viewports) {
   test(`homepage renders correctly on ${viewport.name}`, async ({ page }) => {
-    await page.setViewportSize({ 
-      width: viewport.width, 
-      height: viewport.height 
+    await page.setViewportSize({
+      width: viewport.width,
+      height: viewport.height,
     });
-    
+
     await page.goto('/');
-    
+
     // 截图对比
     await expect(page).toHaveScreenshot(`homepage-${viewport.name}.png`);
-    
+
     // 验证关键元素可见
     await expect(page.locator('nav')).toBeVisible();
     await expect(page.locator('h1')).toBeVisible();
@@ -652,21 +659,25 @@ for (const viewport of viewports) {
 ## 上线后监控验证
 
 ### Sentry 错误监控
+
 - [ ] 测试错误能够上报
 - [ ] Source Map 正确解析
 - [ ] 告警通知正常
 
 ### Vercel Analytics
+
 - [ ] 页面访问记录正常
 - [ ] Core Web Vitals 采集正常
 - [ ] 实时数据更新
 
 ### Cloudflare Analytics
+
 - [ ] 请求统计正常
 - [ ] 错误率显示正常
 - [ ] 地理分布正常
 
 ### UptimeRobot
+
 - [ ] 监控器状态为 Up
 - [ ] 响应时间记录正常
 - [ ] 告警配置生效
@@ -723,24 +734,28 @@ echo "📊 监控验证完成"
 ## 发布前检查清单 (Release Checklist)
 
 ### 代码准备
+
 - [ ] 所有 PR 已合并到 main
 - [ ] 版本号已更新 (package.json)
 - [ ] CHANGELOG 已更新
 - [ ] 无未解决的 Critical/High Bug
 
 ### 测试通过
+
 - [ ] 单元测试通过 (> 80% 覆盖率)
 - [ ] E2E 测试通过
 - [ ] 冒烟测试通过
 - [ ] 性能测试达标
 
 ### 环境准备
+
 - [ ] 环境变量已配置
 - [ ] Secrets 已更新 (如有变化)
 - [ ] 数据库迁移已准备
 - [ ] CDN 缓存策略确认
 
 ### 团队确认
+
 - [ ] 产品确认发布范围
 - [ ] 开发确认代码就绪
 - [ ] 运维确认部署就绪
@@ -866,31 +881,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
+
       - name: Wait for deployment
         run: sleep 120
-      
+
       - name: Install Playwright
         run: npx playwright install --with-deps chromium
-      
+
       - name: Run smoke tests
         run: npx playwright test tests/smoke/
         env:
           BASE_URL: https://aimake.cc
           API_URL: https://api.aimake.cc
-      
+
       - name: Notify success
         if: success()
         run: |
           curl -X POST "${{ secrets.SLACK_WEBHOOK }}" \
             -H "Content-Type: application/json" \
             -d '{"text": "✅ Release ${{ github.ref_name }} smoke tests passed!"}'
-      
+
       - name: Notify failure
         if: failure()
         run: |
@@ -903,15 +918,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
+
       - name: Install Playwright
         run: npx playwright install --with-deps
-      
+
       - name: Run regression tests
         run: npx playwright test tests/regression/
         env:
@@ -924,7 +939,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Run Lighthouse
         uses: treosh/lighthouse-ci-action@v10
         with:
@@ -939,10 +954,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Playwright
         run: npx playwright install --with-deps chromium
-      
+
       - name: Run security tests
         run: npx playwright test tests/security/
         env:
@@ -987,4 +1002,4 @@ jobs:
 
 ---
 
-*确保每次发布都经过完整验证！*
+_确保每次发布都经过完整验证！_

@@ -1,7 +1,6 @@
 # AIMake 前端组件架构
 
-> 创建日期: 2026-01-09
-> 技术栈: React 18 + TypeScript + Vite + Tailwind CSS
+> 创建日期: 2026-01-09技术栈: React 18 + TypeScript + Vite + Tailwind CSS
 
 ---
 
@@ -167,7 +166,7 @@ export function AudioPlayer({
   duration,
   showWaveform = false,
   onTimeUpdate,
-  onEnded
+  onEnded,
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -209,11 +208,9 @@ export function AudioPlayer({
           onEnded?.();
         }}
       />
-      
-      {title && (
-        <div className="text-sm font-medium mb-2">{title}</div>
-      )}
-      
+
+      {title && <div className="text-sm font-medium mb-2">{title}</div>}
+
       <div className="flex items-center gap-3">
         {/* 播放按钮 */}
         <button
@@ -222,7 +219,7 @@ export function AudioPlayer({
         >
           {isPlaying ? <PauseIcon /> : <PlayIcon />}
         </button>
-        
+
         {/* 进度条 */}
         <div className="flex-1">
           {showWaveform ? (
@@ -233,14 +230,10 @@ export function AudioPlayer({
               onSeek={handleSeek}
             />
           ) : (
-            <Slider
-              value={currentTime}
-              max={totalDuration}
-              onChange={handleSeek}
-            />
+            <Slider value={currentTime} max={totalDuration} onChange={handleSeek} />
           )}
         </div>
-        
+
         {/* 时间显示 */}
         <div className="text-sm text-gray-500 w-24 text-right">
           {formatTime(currentTime)} / {formatTime(totalDuration)}
@@ -276,7 +269,7 @@ export function VoiceSelector({
   voices,
   selectedId,
   onSelect,
-  showPremiumLock = true
+  showPremiumLock = true,
 }: VoiceSelectorProps) {
   const [previewingId, setPreviewingId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -296,22 +289,19 @@ export function VoiceSelector({
 
   return (
     <div className="space-y-3">
-      <audio
-        ref={audioRef}
-        onEnded={() => setPreviewingId(null)}
-      />
-      
+      <audio ref={audioRef} onEnded={() => setPreviewingId(null)} />
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         {voices.map((voice) => (
           <div
             key={voice.id}
             onClick={() => !voice.isPremium && onSelect(voice.id)}
             className={cn(
-              "relative p-3 rounded-lg border-2 cursor-pointer transition-all",
+              'relative p-3 rounded-lg border-2 cursor-pointer transition-all',
               selectedId === voice.id
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300",
-              voice.isPremium && showPremiumLock && "opacity-60"
+                ? 'border-blue-500 bg-blue-50'
+                : 'border-gray-200 hover:border-gray-300',
+              voice.isPremium && showPremiumLock && 'opacity-60'
             )}
           >
             {/* Premium 标记 */}
@@ -322,7 +312,7 @@ export function VoiceSelector({
                 </span>
               </div>
             )}
-            
+
             {/* 音色信息 */}
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
@@ -333,7 +323,7 @@ export function VoiceSelector({
                 <div className="text-xs text-gray-500">{voice.name}</div>
               </div>
             </div>
-            
+
             {/* 试听按钮 */}
             <button
               onClick={(e) => {
@@ -354,7 +344,7 @@ export function VoiceSelector({
                 </>
               )}
             </button>
-            
+
             {/* 选中标记 */}
             {selectedId === voice.id && (
               <div className="absolute top-2 left-2">
@@ -379,36 +369,34 @@ export function TTSCreate() {
   const [voiceId, setVoiceId] = useState('openai-alloy');
   const [speed, setSpeed] = useState(1.0);
   const [emotion, setEmotion] = useState('neutral');
-  
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedAudio, setGeneratedAudio] = useState<GeneratedAudio | null>(null);
-  
+
   const { quota, refreshQuota } = useQuota();
   const { showToast } = useToast();
   const { data: voices } = useVoices();
 
   const estimatedDuration = useMemo(() => {
     // 估算：中文每分钟约 200 字
-    return Math.ceil(text.length / 200 * 60);
+    return Math.ceil((text.length / 200) * 60);
   }, [text]);
 
   const canGenerate = useMemo(() => {
-    return text.length > 0 && 
-           text.length <= 5000 && 
-           quota.remaining >= estimatedDuration;
+    return text.length > 0 && text.length <= 5000 && quota.remaining >= estimatedDuration;
   }, [text, quota, estimatedDuration]);
 
   const handleGenerate = async () => {
     if (!canGenerate) return;
-    
+
     setIsGenerating(true);
     try {
       const result = await ttsService.generate({
         text,
         voiceId,
-        params: { speed, emotion }
+        params: { speed, emotion },
       });
-      
+
       setGeneratedAudio(result);
       refreshQuota();
       showToast('音频生成成功！', 'success');
@@ -423,15 +411,13 @@ export function TTSCreate() {
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* 标题 */}
       <h1 className="text-2xl font-bold">创建音频</h1>
-      
+
       {/* 文本输入 */}
       <Card>
         <Card.Header>
           <div className="flex justify-between">
             <span>输入文本</span>
-            <span className="text-sm text-gray-500">
-              {text.length} / 5000 字
-            </span>
+            <span className="text-sm text-gray-500">{text.length} / 5000 字</span>
           </div>
         </Card.Header>
         <Card.Body>
@@ -452,40 +438,26 @@ export function TTSCreate() {
           </div>
         </Card.Body>
       </Card>
-      
+
       {/* 音色选择 */}
       <Card>
         <Card.Header>选择音色</Card.Header>
         <Card.Body>
-          <VoiceSelector
-            voices={voices || []}
-            selectedId={voiceId}
-            onSelect={setVoiceId}
-          />
+          <VoiceSelector voices={voices || []} selectedId={voiceId} onSelect={setVoiceId} />
         </Card.Body>
       </Card>
-      
+
       {/* 参数设置 */}
       <Card>
         <Card.Header>音频设置</Card.Header>
         <Card.Body className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">
-              语速: {speed}x
-            </label>
-            <Slider
-              min={0.5}
-              max={2.0}
-              step={0.1}
-              value={speed}
-              onChange={setSpeed}
-            />
+            <label className="block text-sm font-medium mb-2">语速: {speed}x</label>
+            <Slider min={0.5} max={2.0} step={0.1} value={speed} onChange={setSpeed} />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium mb-2">
-              情感
-            </label>
+            <label className="block text-sm font-medium mb-2">情感</label>
             <Select
               value={emotion}
               onChange={setEmotion}
@@ -499,12 +471,10 @@ export function TTSCreate() {
           </div>
         </Card.Body>
       </Card>
-      
+
       {/* 生成按钮 */}
       <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-500">
-          预计时长: {formatDuration(estimatedDuration)}
-        </div>
+        <div className="text-sm text-gray-500">预计时长: {formatDuration(estimatedDuration)}</div>
         <Button
           onClick={handleGenerate}
           disabled={!canGenerate || isGenerating}
@@ -514,7 +484,7 @@ export function TTSCreate() {
           {isGenerating ? '生成中...' : '生成音频'}
         </Button>
       </div>
-      
+
       {/* 预览 */}
       {generatedAudio && (
         <Card>
@@ -532,20 +502,14 @@ export function TTSCreate() {
               >
                 下载 MP3
               </Button>
-              <Button variant="secondary">
-                保存到音频库
-              </Button>
+              <Button variant="secondary">保存到音频库</Button>
             </div>
           </Card.Body>
         </Card>
       )}
-      
+
       {/* 额度显示 */}
-      <QuotaBar
-        used={quota.used}
-        limit={quota.limit}
-        resetAt={quota.resetAt}
-      />
+      <QuotaBar used={quota.used} limit={quota.limit} resetAt={quota.resetAt} />
     </div>
   );
 }
@@ -557,15 +521,15 @@ export function TTSCreate() {
 // components/shared/QuotaBar.tsx
 
 interface QuotaBarProps {
-  used: number;      // 已用秒数
-  limit: number;     // 总额度秒数
-  resetAt: string;   // 重置时间
+  used: number; // 已用秒数
+  limit: number; // 总额度秒数
+  resetAt: string; // 重置时间
 }
 
 export function QuotaBar({ used, limit, resetAt }: QuotaBarProps) {
   const percentage = Math.min((used / limit) * 100, 100);
   const remaining = Math.max(limit - used, 0);
-  
+
   const getColor = () => {
     if (percentage >= 90) return 'bg-red-500';
     if (percentage >= 70) return 'bg-yellow-500';
@@ -577,24 +541,20 @@ export function QuotaBar({ used, limit, resetAt }: QuotaBarProps) {
       <div className="max-w-4xl mx-auto flex items-center justify-between">
         <div className="flex-1 mr-4">
           <div className="flex justify-between text-sm mb-1">
-            <span className="text-gray-600">
-              本月额度: {formatDuration(remaining)} 剩余
-            </span>
+            <span className="text-gray-600">本月额度: {formatDuration(remaining)} 剩余</span>
             <span className="text-gray-400">
               {formatDuration(used)} / {formatDuration(limit)}
             </span>
           </div>
           <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
             <div
-              className={cn("h-full transition-all", getColor())}
+              className={cn('h-full transition-all', getColor())}
               style={{ width: `${percentage}%` }}
             />
           </div>
-          <div className="text-xs text-gray-400 mt-1">
-            {formatDate(resetAt)} 重置
-          </div>
+          <div className="text-xs text-gray-400 mt-1">{formatDate(resetAt)} 重置</div>
         </div>
-        
+
         {percentage >= 80 && (
           <Button variant="primary" size="sm">
             升级 Pro
@@ -631,7 +591,7 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  
+
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   register: (email: string, password: string, name: string) => Promise<void>;
@@ -645,7 +605,7 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isAuthenticated: false,
       isLoading: false,
-      
+
       login: async (email, password) => {
         set({ isLoading: true });
         try {
@@ -655,11 +615,11 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: false });
         }
       },
-      
+
       logout: () => {
         set({ user: null, token: null, isAuthenticated: false });
       },
-      
+
       register: async (email, password, name) => {
         set({ isLoading: true });
         try {
@@ -669,7 +629,7 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: false });
         }
       },
-      
+
       updateUser: (data) => {
         const user = get().user;
         if (user) {
@@ -707,7 +667,7 @@ interface AudioState {
   isLoading: boolean;
   currentPage: number;
   totalPages: number;
-  
+
   fetchLibrary: (page?: number) => Promise<void>;
   addItem: (item: AudioItem) => void;
   removeItem: (id: string) => Promise<void>;
@@ -718,7 +678,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   isLoading: false,
   currentPage: 1,
   totalPages: 1,
-  
+
   fetchLibrary: async (page = 1) => {
     set({ isLoading: true });
     try {
@@ -728,15 +688,15 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  
+
   addItem: (item) => {
     set((state) => ({ items: [item, ...state.items] }));
   },
-  
+
   removeItem: async (id) => {
     await audioService.delete(id);
     set((state) => ({
-      items: state.items.filter((item) => item.id !== id)
+      items: state.items.filter((item) => item.id !== id),
     }));
   },
 }));
@@ -771,31 +731,34 @@ export function useTTS(options: UseTTSOptions = {}): UseTTSReturn {
   const [audio, setAudio] = useState<GeneratedAudio | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
-  const generate = useCallback(async (params: TTSParams) => {
-    setIsGenerating(true);
-    setProgress(0);
-    setError(null);
-    
-    try {
-      // 模拟进度
-      const progressInterval = setInterval(() => {
-        setProgress((p) => Math.min(p + 10, 90));
-      }, 200);
-      
-      const result = await ttsService.generate(params);
-      
-      clearInterval(progressInterval);
-      setProgress(100);
-      setAudio(result);
-      options.onSuccess?.(result);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Unknown error');
-      setError(error);
-      options.onError?.(error);
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [options]);
+  const generate = useCallback(
+    async (params: TTSParams) => {
+      setIsGenerating(true);
+      setProgress(0);
+      setError(null);
+
+      try {
+        // 模拟进度
+        const progressInterval = setInterval(() => {
+          setProgress((p) => Math.min(p + 10, 90));
+        }, 200);
+
+        const result = await ttsService.generate(params);
+
+        clearInterval(progressInterval);
+        setProgress(100);
+        setAudio(result);
+        options.onSuccess?.(result);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Unknown error');
+        setError(error);
+        options.onError?.(error);
+      } finally {
+        setIsGenerating(false);
+      }
+    },
+    [options]
+  );
 
   const reset = useCallback(() => {
     setAudio(null);
@@ -826,7 +789,7 @@ export function useQuota() {
     limit: 600,
     remaining: 600,
     resetAt: '',
-    plan: 'free'
+    plan: 'free',
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -835,7 +798,7 @@ export function useQuota() {
       const data = await userService.getUsage();
       setQuota({
         ...data,
-        remaining: data.limit - data.used
+        remaining: data.limit - data.used,
       });
     } finally {
       setIsLoading(false);
@@ -846,9 +809,12 @@ export function useQuota() {
     fetchQuota();
   }, [fetchQuota]);
 
-  const checkQuota = useCallback((duration: number) => {
-    return quota.remaining >= duration;
-  }, [quota.remaining]);
+  const checkQuota = useCallback(
+    (duration: number) => {
+      return quota.remaining >= duration;
+    },
+    [quota.remaining]
+  );
 
   return {
     quota,
@@ -905,7 +871,7 @@ export const ttsService = {
   generate: async (params: TTSParams): Promise<GeneratedAudio> => {
     return api.post('/tts/generate', params);
   },
-  
+
   getVoices: async (): Promise<Voice[]> => {
     return api.get('/tts/voices');
   },
@@ -917,22 +883,22 @@ export const podcastService = {
   create: async (params: PodcastParams): Promise<{ jobId: string }> => {
     return api.post('/podcast/generate', params);
   },
-  
+
   getStatus: async (jobId: string): Promise<PodcastJob> => {
     return api.get(`/podcast/${jobId}`);
   },
-  
+
   // 轮询状态
   pollStatus: (jobId: string, onProgress: (job: PodcastJob) => void) => {
     const interval = setInterval(async () => {
       const job = await podcastService.getStatus(jobId);
       onProgress(job);
-      
+
       if (job.status === 'completed' || job.status === 'failed') {
         clearInterval(interval);
       }
     }, 2000);
-    
+
     return () => clearInterval(interval);
   },
 };
@@ -956,7 +922,7 @@ function App() {
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        
+
         {/* 需要登录的页面 */}
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
@@ -966,11 +932,11 @@ function App() {
             <Route path="/app/settings" element={<SettingsPage />} />
           </Route>
         </Route>
-        
+
         {/* 404 */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-      
+
       <ToastContainer />
     </BrowserRouter>
   );
@@ -979,19 +945,19 @@ function App() {
 // ProtectedRoute 组件
 function ProtectedRoute() {
   const { isAuthenticated, isLoading } = useAuthStore();
-  
+
   if (isLoading) {
     return <LoadingScreen />;
   }
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return <Outlet />;
 }
 ```
 
 ---
 
-*文档持续更新中...*
+_文档持续更新中..._

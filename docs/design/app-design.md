@@ -7,12 +7,14 @@
 ## 📱 产品定位
 
 ### 核心价值
+
 - **移动优先**：随时随地创作语音内容
 - **离线能力**：本地处理 + 云端增强
 - **原生体验**：流畅的移动端交互
 - **跨平台**：iOS + Android 统一体验
 
 ### 目标用户
+
 - 移动端内容创作者（播客主播、自媒体）
 - 碎片时间创作者（通勤、旅行）
 - 需要快速配音的视频创作者
@@ -24,16 +26,17 @@
 
 ### 方案对比
 
-| 方案 | 优势 | 劣势 | 推荐度 |
-|------|------|------|--------|
-| **React Native** | ✅ 代码复用（与 Web 共享）<br>✅ 热更新<br>✅ 社区强大 | ⚠️ 性能不如原生<br>⚠️ 包体积较大 | ⭐⭐⭐⭐ |
-| **Flutter** | ✅ 高性能渲染<br>✅ 优秀的 UI 组件<br>✅ 单一代码库 | ⚠️ 学习成本<br>⚠️ 与 Web 不共享代码 | ⭐⭐⭐⭐⭐ |
-| **原生开发** | ✅ 最佳性能<br>✅ 完整平台特性 | ❌ 开发成本高<br>❌ 两套代码库 | ⭐⭐⭐ |
-| **PWA** | ✅ 无需安装<br>✅ 开发简单 | ❌ 功能受限<br>❌ iOS 支持差 | ⭐⭐ |
+| 方案             | 优势                                                   | 劣势                                | 推荐度     |
+| ---------------- | ------------------------------------------------------ | ----------------------------------- | ---------- |
+| **React Native** | ✅ 代码复用（与 Web 共享）<br>✅ 热更新<br>✅ 社区强大 | ⚠️ 性能不如原生<br>⚠️ 包体积较大    | ⭐⭐⭐⭐   |
+| **Flutter**      | ✅ 高性能渲染<br>✅ 优秀的 UI 组件<br>✅ 单一代码库    | ⚠️ 学习成本<br>⚠️ 与 Web 不共享代码 | ⭐⭐⭐⭐⭐ |
+| **原生开发**     | ✅ 最佳性能<br>✅ 完整平台特性                         | ❌ 开发成本高<br>❌ 两套代码库      | ⭐⭐⭐     |
+| **PWA**          | ✅ 无需安装<br>✅ 开发简单                             | ❌ 功能受限<br>❌ iOS 支持差        | ⭐⭐       |
 
 ### 推荐方案：**Flutter**
 
 **选择理由**：
+
 1. **性能优先**：语音处理需要流畅的 UI 和快速响应
 2. **原生体验**：Material Design + Cupertino 双主题
 3. **独立演进**：移动端可独立于 Web 端优化
@@ -160,6 +163,7 @@ ThemeData lightTheme = ThemeData(
 ### 核心页面结构
 
 #### 1. 首页（生成页）
+
 ```
 ┌──────────────────────────────────┐
 │  [Logo]  [消息] [设置]           │ ← AppBar
@@ -188,6 +192,7 @@ ThemeData lightTheme = ThemeData(
 ```
 
 #### 2. 内容库页
+
 ```
 ┌──────────────────────────────────┐
 │  我的内容库                       │
@@ -208,6 +213,7 @@ ThemeData lightTheme = ThemeData(
 ```
 
 #### 3. 播放器页
+
 ```
 ┌──────────────────────────────────┐
 │  [← ]  AI 趋势讨论  [⋮]          │
@@ -228,6 +234,7 @@ ThemeData lightTheme = ThemeData(
 ```
 
 #### 4. 设置页
+
 ```
 ┌──────────────────────────────────┐
 │  设置                             │
@@ -259,11 +266,13 @@ ThemeData lightTheme = ThemeData(
 ### 1. 语音生成模块
 
 **流程**：
+
 ```
 输入文字 → 参数配置 → 调用 API → 流式返回 → 本地缓存 → 播放
 ```
 
 **关键代码**：
+
 ```dart
 class GenerateAudioUseCase {
   final AudioRepository repository;
@@ -294,12 +303,14 @@ class GenerateAudioUseCase {
 ### 2. 音频播放器模块
 
 **功能**：
+
 - 播放、暂停、快进、快退
 - 后台播放 + 锁屏控制
 - 播放列表管理
 - 睡眠定时器
 
 **技术实现**：
+
 ```dart
 // 使用 audio_service + just_audio
 class AudioPlayerService {
@@ -326,11 +337,13 @@ class AudioPlayerService {
 ### 3. 离线缓存模块
 
 **策略**：
+
 - 自动缓存最近 30 天的内容
 - 支持手动下载
 - 智能清理（LRU）
 
 **存储结构**：
+
 ```
 app_documents/
 ├── audio/                    # 音频文件
@@ -344,12 +357,14 @@ app_documents/
 ### 4. 同步模块
 
 **同步内容**：
+
 - 生成历史
 - 收藏列表
 - 播放进度
 - 用户设置
 
 **同步时机**：
+
 - 应用启动
 - 切换账号
 - 手动触发
@@ -362,24 +377,28 @@ app_documents/
 ### Phase 1：MVP 核心功能（2 个月）
 
 **Week 1-2：项目搭建**
+
 - Flutter 项目初始化
 - CI/CD 配置（GitHub Actions）
 - 基础架构搭建
 - UI 组件库
 
 **Week 3-4：认证模块**
+
 - 集成 Clerk SDK
 - 登录/注册页面
 - Token 管理
 - 状态同步
 
 **Week 5-6：生成功能**
+
 - 文本输入页面
 - 参数配置
 - API 调用封装
 - 进度显示
 
 **Week 7-8：播放器**
+
 - 音频播放器
 - 播放控制
 - 后台播放
@@ -388,18 +407,21 @@ app_documents/
 ### Phase 2：完善体验（1.5 个月）
 
 **Week 9-10：内容管理**
+
 - 内容库页面
 - 分类管理
 - 搜索功能
 - 批量操作
 
 **Week 11-12：离线功能**
+
 - 下载管理
 - 缓存策略
 - 离线播放
 - 存储管理
 
 **Week 13-14：设置与优化**
+
 - 设置页面
 - 主题切换
 - 性能优化
@@ -408,12 +430,14 @@ app_documents/
 ### Phase 3：高级功能（1 个月）
 
 **Week 15-16：高级特性**
+
 - 播客脚本生成
 - 多角色对话
 - 语音克隆（Pro）
 - 批量生成
 
 **Week 17-18：发布准备**
+
 - 测试覆盖
 - 应用签名
 - Store 提交
@@ -426,6 +450,7 @@ app_documents/
 ### App Store（iOS）
 
 **准备工作**：
+
 1. Apple Developer 账号（$99/年）
 2. 应用图标（1024x1024）
 3. 应用截图（6.7"、6.5"、5.5" iPhone）
@@ -433,6 +458,7 @@ app_documents/
 5. 应用描述（多语言）
 
 **审核要点**：
+
 - ✅ 不违反 App Store 审核指南
 - ✅ 提供测试账号
 - ✅ 功能完整可用
@@ -441,6 +467,7 @@ app_documents/
 ### Google Play（Android）
 
 **准备工作**：
+
 1. Google Play 开发者账号（$25 一次性）
 2. 应用图标（512x512）
 3. 应用截图（手机 + 平板）
@@ -448,6 +475,7 @@ app_documents/
 5. 应用描述
 
 **发布渠道**：
+
 - **内部测试**：开发团队
 - **封闭测试**：早期用户（100 人）
 - **开放测试**：公开 Beta（无限制）
@@ -459,15 +487,16 @@ app_documents/
 
 ### 定价策略
 
-| 版本 | 月费 | 年费 | 功能 |
-|------|------|------|------|
-| **免费版** | $0 | $0 | 10 分钟/月、5 种音色、MP3 导出 |
-| **Pro** | $19 | $190 (省 $38) | 300 分钟/月、所有音色、播客生成、WAV 导出 |
-| **Team** | $99 | $990 (省 $198) | 无限分钟、5 成员、API 接入、优先支持 |
+| 版本       | 月费 | 年费           | 功能                                      |
+| ---------- | ---- | -------------- | ----------------------------------------- |
+| **免费版** | $0   | $0             | 10 分钟/月、5 种音色、MP3 导出            |
+| **Pro**    | $19  | $190 (省 $38)  | 300 分钟/月、所有音色、播客生成、WAV 导出 |
+| **Team**   | $99  | $990 (省 $198) | 无限分钟、5 成员、API 接入、优先支持      |
 
 ### 应用内购买（IAP）
 
 **iOS（StoreKit 2）**：
+
 ```dart
 // 订阅配置
 final products = [
@@ -485,6 +514,7 @@ final products = [
 ```
 
 **Android（Google Play Billing）**：
+
 ```dart
 // 使用 in_app_purchase 插件
 final ProductDetailsResponse response =
@@ -495,6 +525,7 @@ final ProductDetailsResponse response =
 ```
 
 ### 收入分成
+
 - App Store：30%（首年）→ 15%（次年及以后）
 - Google Play：15%（首个 $1M）→ 30%（超过部分）
 
@@ -505,10 +536,12 @@ final ProductDetailsResponse response =
 ### 数据加密
 
 **传输层**：
+
 - HTTPS/TLS 1.3
 - Certificate Pinning
 
 **存储层**：
+
 ```dart
 // 敏感数据加密存储
 final storage = FlutterSecureStorage();
@@ -518,12 +551,14 @@ await storage.write(key: 'auth_token', value: token);
 ### 隐私合规
 
 **GDPR / CCPA**：
+
 - ✅ 数据最小化
 - ✅ 用户同意
 - ✅ 数据删除
 - ✅ 隐私政策
 
 **iOS 隐私清单**（Privacy Nutrition Label）：
+
 ```yaml
 数据收集:
   - 联系信息: 邮箱（用于账户管理）
@@ -541,23 +576,25 @@ await storage.write(key: 'auth_token', value: token);
 
 ### 关键指标（KPIs）
 
-| 指标 | 目标 | 测量方法 |
-|------|------|---------|
-| **启动时间** | < 1.5s | Firebase Performance |
-| **生成延迟** | < 3s | 自定义埋点 |
-| **播放卡顿率** | < 0.5% | 音频事件监听 |
-| **崩溃率** | < 0.1% | Sentry / Crashlytics |
-| **日活跃率** | > 20% | Firebase Analytics |
+| 指标           | 目标   | 测量方法             |
+| -------------- | ------ | -------------------- |
+| **启动时间**   | < 1.5s | Firebase Performance |
+| **生成延迟**   | < 3s   | 自定义埋点           |
+| **播放卡顿率** | < 0.5% | 音频事件监听         |
+| **崩溃率**     | < 0.1% | Sentry / Crashlytics |
+| **日活跃率**   | > 20%  | Firebase Analytics   |
 
 ### 性能优化
 
 **包体积优化**：
+
 - 使用 `--split-per-abi` 生成多架构包
 - 移除未使用的资源
 - 图片压缩（WebP）
 - 代码混淆
 
 **网络优化**：
+
 - 请求合并
 - 数据压缩（Gzip）
 - CDN 加速
@@ -568,6 +605,7 @@ await storage.write(key: 'auth_token', value: token);
 ## 🧪 测试策略
 
 ### 单元测试
+
 ```dart
 // 使用 flutter_test
 test('GenerateAudioUseCase should return stream', () async {
@@ -582,6 +620,7 @@ test('GenerateAudioUseCase should return stream', () async {
 ```
 
 ### 集成测试
+
 ```dart
 // 使用 integration_test
 testWidgets('Generate audio flow', (tester) async {
@@ -600,6 +639,7 @@ testWidgets('Generate audio flow', (tester) async {
 ```
 
 ### 覆盖率目标
+
 - 单元测试：> 80%
 - 集成测试：核心流程 100%
 - UI 测试：关键页面 100%
@@ -610,20 +650,20 @@ testWidgets('Generate audio flow', (tester) async {
 
 ### 必需服务
 
-| 服务 | 用途 | 成本 |
-|------|------|------|
+| 服务         | 用途             | 成本               |
+| ------------ | ---------------- | ------------------ |
 | **Firebase** | 分析、崩溃、推送 | 免费（Spark 计划） |
-| **Sentry** | 错误监控 | $26/月（Team） |
-| **Clerk** | 用户认证 | 已集成（Web 同步） |
-| **Stripe** | 支付订阅 | 2.9% + $0.30/笔 |
+| **Sentry**   | 错误监控         | $26/月（Team）     |
+| **Clerk**    | 用户认证         | 已集成（Web 同步） |
+| **Stripe**   | 支付订阅         | 2.9% + $0.30/笔    |
 
 ### 可选服务
 
-| 服务 | 用途 | 优先级 |
-|------|------|--------|
-| **OneSignal** | 推送通知（替代 FCM） | 低 |
-| **Mixpanel** | 高级分析 | 中 |
-| **Intercom** | 客服支持 | 中 |
+| 服务          | 用途                 | 优先级 |
+| ------------- | -------------------- | ------ |
+| **OneSignal** | 推送通知（替代 FCM） | 低     |
+| **Mixpanel**  | 高级分析             | 中     |
+| **Intercom**  | 客服支持             | 中     |
 
 ---
 
@@ -686,9 +726,9 @@ jobs:
 
 ### 版本发布流程
 
-1. **开发分支**：feature/* → develop
-2. **测试版本**：develop → release/*
-3. **正式发布**：release/* → main
+1. **开发分支**：feature/\* → develop
+2. **测试版本**：develop → release/\*
+3. **正式发布**：release/\* → main
 4. **标签创建**：git tag v1.0.0
 5. **商店提交**：自动上传 TestFlight / Internal Testing
 
@@ -706,6 +746,7 @@ jobs:
 ## ✅ 待办事项
 
 ### MVP 前置
+
 - [ ] 注册 Apple Developer 账号
 - [ ] 注册 Google Play 开发者账号
 - [ ] 设计应用图标（1024x1024）
@@ -714,6 +755,7 @@ jobs:
 - [ ] 编写服务条款
 
 ### 开发阶段
+
 - [ ] 搭建 Flutter 项目
 - [ ] 集成 Clerk SDK
 - [ ] 集成 Stripe SDK
@@ -722,12 +764,14 @@ jobs:
 - [ ] 完成 UI/UX 设计
 
 ### 测试阶段
+
 - [ ] 单元测试覆盖
 - [ ] 集成测试
 - [ ] 内部 Beta 测试
 - [ ] 公开 Beta 测试
 
 ### 发布阶段
+
 - [ ] App Store 提交
 - [ ] Google Play 提交
 - [ ] 营销素材准备
@@ -735,9 +779,6 @@ jobs:
 
 ---
 
-**最后更新**: 2026-01-10
-**版本**: 1.0
-**状态**: 规划中
+**最后更新**: 2026-01-10 **版本**: 1.0 **状态**: 规划中
 
-**预计开发周期**: 4.5 个月（MVP）
-**预计成本**: $20K - $30K（人力 + 账号 + 服务）
+**预计开发周期**: 4.5 个月（MVP） **预计成本**: $20K - $30K（人力 + 账号 + 服务）

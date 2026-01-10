@@ -1,7 +1,6 @@
 # AIMake 错误处理规范
 
-> 创建日期: 2026-01-09
-> 目标: 统一错误格式、友好用户提示、便于调试
+> 创建日期: 2026-01-09目标: 统一错误格式、友好用户提示、便于调试
 
 ---
 
@@ -38,42 +37,42 @@
 
 type ErrorCode =
   // ========== 认证错误 (401) ==========
-  | 'AUTH_REQUIRED'           // 需要登录
-  | 'AUTH_TOKEN_INVALID'      // Token 无效
-  | 'AUTH_TOKEN_EXPIRED'      // Token 过期
-  | 'AUTH_USER_NOT_FOUND'     // 用户不存在
-  
+  | 'AUTH_REQUIRED' // 需要登录
+  | 'AUTH_TOKEN_INVALID' // Token 无效
+  | 'AUTH_TOKEN_EXPIRED' // Token 过期
+  | 'AUTH_USER_NOT_FOUND' // 用户不存在
+
   // ========== 权限错误 (403) ==========
-  | 'FORBIDDEN'               // 无权限
-  | 'QUOTA_EXCEEDED'          // 额度超限
-  | 'FEATURE_NOT_AVAILABLE'   // 功能不可用（需升级）
-  | 'RATE_LIMITED'            // 请求频率限制
-  
+  | 'FORBIDDEN' // 无权限
+  | 'QUOTA_EXCEEDED' // 额度超限
+  | 'FEATURE_NOT_AVAILABLE' // 功能不可用（需升级）
+  | 'RATE_LIMITED' // 请求频率限制
+
   // ========== 资源错误 (404) ==========
-  | 'NOT_FOUND'               // 资源不存在
-  | 'AUDIO_NOT_FOUND'         // 音频不存在
-  | 'VOICE_NOT_FOUND'         // 音色不存在
-  | 'JOB_NOT_FOUND'           // 任务不存在
-  
+  | 'NOT_FOUND' // 资源不存在
+  | 'AUDIO_NOT_FOUND' // 音频不存在
+  | 'VOICE_NOT_FOUND' // 音色不存在
+  | 'JOB_NOT_FOUND' // 任务不存在
+
   // ========== 请求错误 (400) ==========
-  | 'VALIDATION_ERROR'        // 参数验证失败
-  | 'INVALID_INPUT'           // 输入无效
-  | 'TEXT_TOO_LONG'           // 文本过长
-  | 'TEXT_TOO_SHORT'          // 文本过短
-  | 'INVALID_VOICE'           // 无效音色
-  | 'INVALID_FORMAT'          // 无效格式
-  
+  | 'VALIDATION_ERROR' // 参数验证失败
+  | 'INVALID_INPUT' // 输入无效
+  | 'TEXT_TOO_LONG' // 文本过长
+  | 'TEXT_TOO_SHORT' // 文本过短
+  | 'INVALID_VOICE' // 无效音色
+  | 'INVALID_FORMAT' // 无效格式
+
   // ========== 业务错误 (422) ==========
-  | 'TTS_GENERATION_FAILED'   // TTS 生成失败
+  | 'TTS_GENERATION_FAILED' // TTS 生成失败
   | 'PODCAST_GENERATION_FAILED' // 播客生成失败
   | 'CONTENT_MODERATION_FAILED' // 内容审核失败
-  | 'PAYMENT_FAILED'          // 支付失败
-  
+  | 'PAYMENT_FAILED' // 支付失败
+
   // ========== 服务器错误 (500) ==========
-  | 'INTERNAL_ERROR'          // 内部错误
-  | 'DATABASE_ERROR'          // 数据库错误
-  | 'EXTERNAL_API_ERROR'      // 外部 API 错误
-  | 'TTS_PROVIDER_ERROR';     // TTS 供应商错误
+  | 'INTERNAL_ERROR' // 内部错误
+  | 'DATABASE_ERROR' // 数据库错误
+  | 'EXTERNAL_API_ERROR' // 外部 API 错误
+  | 'TTS_PROVIDER_ERROR'; // TTS 供应商错误
 ```
 
 ### 2.2 错误码与 HTTP 状态码映射
@@ -87,19 +86,19 @@ const ERROR_STATUS_MAP: Record<ErrorCode, number> = {
   AUTH_TOKEN_INVALID: 401,
   AUTH_TOKEN_EXPIRED: 401,
   AUTH_USER_NOT_FOUND: 401,
-  
+
   // 403
   FORBIDDEN: 403,
   QUOTA_EXCEEDED: 403,
   FEATURE_NOT_AVAILABLE: 403,
   RATE_LIMITED: 429,
-  
+
   // 404
   NOT_FOUND: 404,
   AUDIO_NOT_FOUND: 404,
   VOICE_NOT_FOUND: 404,
   JOB_NOT_FOUND: 404,
-  
+
   // 400
   VALIDATION_ERROR: 400,
   INVALID_INPUT: 400,
@@ -107,13 +106,13 @@ const ERROR_STATUS_MAP: Record<ErrorCode, number> = {
   TEXT_TOO_SHORT: 400,
   INVALID_VOICE: 400,
   INVALID_FORMAT: 400,
-  
+
   // 422
   TTS_GENERATION_FAILED: 422,
   PODCAST_GENERATION_FAILED: 422,
   CONTENT_MODERATION_FAILED: 422,
   PAYMENT_FAILED: 422,
-  
+
   // 500
   INTERNAL_ERROR: 500,
   DATABASE_ERROR: 500,
@@ -134,19 +133,19 @@ const ERROR_MESSAGES_ZH: Record<ErrorCode, string> = {
   AUTH_TOKEN_INVALID: '登录已失效，请重新登录',
   AUTH_TOKEN_EXPIRED: '登录已过期，请重新登录',
   AUTH_USER_NOT_FOUND: '用户不存在',
-  
+
   // 权限
   FORBIDDEN: '您没有权限执行此操作',
   QUOTA_EXCEEDED: '本月额度已用完，请升级套餐',
   FEATURE_NOT_AVAILABLE: '此功能需要升级到 Pro 套餐',
   RATE_LIMITED: '操作过于频繁，请稍后再试',
-  
+
   // 资源
   NOT_FOUND: '资源不存在',
   AUDIO_NOT_FOUND: '音频不存在或已删除',
   VOICE_NOT_FOUND: '音色不存在',
   JOB_NOT_FOUND: '任务不存在',
-  
+
   // 请求
   VALIDATION_ERROR: '输入参数有误',
   INVALID_INPUT: '输入内容无效',
@@ -154,13 +153,13 @@ const ERROR_MESSAGES_ZH: Record<ErrorCode, string> = {
   TEXT_TOO_SHORT: '文本过短，请输入至少 10 个字符',
   INVALID_VOICE: '所选音色无效',
   INVALID_FORMAT: '不支持的格式',
-  
+
   // 业务
   TTS_GENERATION_FAILED: '音频生成失败，请重试',
   PODCAST_GENERATION_FAILED: '播客生成失败，请重试',
   CONTENT_MODERATION_FAILED: '内容包含敏感信息，请修改后重试',
   PAYMENT_FAILED: '支付失败，请检查支付信息',
-  
+
   // 服务器
   INTERNAL_ERROR: '服务器开小差了，请稍后重试',
   DATABASE_ERROR: '数据服务异常，请稍后重试',
@@ -210,24 +209,20 @@ export const Errors = {
   tokenInvalid: () => new AppError('AUTH_TOKEN_INVALID'),
   tokenExpired: () => new AppError('AUTH_TOKEN_EXPIRED'),
   userNotFound: () => new AppError('AUTH_USER_NOT_FOUND'),
-  
+
   // 权限
   forbidden: () => new AppError('FORBIDDEN'),
   quotaExceeded: (quota: { limit: number; used: number }) =>
     new AppError('QUOTA_EXCEEDED', undefined, { quota }),
   featureNotAvailable: (feature: string) =>
     new AppError('FEATURE_NOT_AVAILABLE', undefined, { feature }),
-  rateLimited: (retryAfter: number) =>
-    new AppError('RATE_LIMITED', undefined, { retryAfter }),
-  
+  rateLimited: (retryAfter: number) => new AppError('RATE_LIMITED', undefined, { retryAfter }),
+
   // 资源
-  notFound: (resource: string) =>
-    new AppError('NOT_FOUND', `${resource} 不存在`),
-  audioNotFound: (id: string) =>
-    new AppError('AUDIO_NOT_FOUND', undefined, { id }),
-  voiceNotFound: (id: string) =>
-    new AppError('VOICE_NOT_FOUND', undefined, { id }),
-  
+  notFound: (resource: string) => new AppError('NOT_FOUND', `${resource} 不存在`),
+  audioNotFound: (id: string) => new AppError('AUDIO_NOT_FOUND', undefined, { id }),
+  voiceNotFound: (id: string) => new AppError('VOICE_NOT_FOUND', undefined, { id }),
+
   // 请求
   validation: (errors: Record<string, string>) =>
     new AppError('VALIDATION_ERROR', undefined, { errors }),
@@ -235,13 +230,13 @@ export const Errors = {
     new AppError('TEXT_TOO_LONG', undefined, { length, max }),
   textTooShort: (length: number, min: number) =>
     new AppError('TEXT_TOO_SHORT', undefined, { length, min }),
-  
+
   // 业务
   ttsGenerationFailed: (reason: string) =>
     new AppError('TTS_GENERATION_FAILED', undefined, { reason }),
   contentModeration: (reason: string) =>
     new AppError('CONTENT_MODERATION_FAILED', undefined, { reason }),
-  
+
   // 服务器
   internal: (error?: Error) =>
     new AppError('INTERNAL_ERROR', undefined, {
@@ -286,7 +281,7 @@ export function errorHandler() {
           error.statusCode
         );
       }
-      
+
       // 处理 Zod 验证错误
       if (error.name === 'ZodError') {
         return c.json(
@@ -304,10 +299,10 @@ export function errorHandler() {
           400
         );
       }
-      
+
       // 未知错误
       console.error('Unhandled error:', error);
-      
+
       // 上报 Sentry
       if (c.env.SENTRY_DSN) {
         Sentry.captureException(error, {
@@ -318,7 +313,7 @@ export function errorHandler() {
           },
         });
       }
-      
+
       return c.json(
         {
           success: false,
@@ -348,7 +343,7 @@ import { Errors } from '@/utils/errors';
 tts.post('/generate', async (c) => {
   const user = c.get('user');
   const body = c.req.valid('json');
-  
+
   // 检查额度
   const quota = await getQuota(c.env.DB, user.id);
   if (quota.remaining <= 0) {
@@ -357,27 +352,27 @@ tts.post('/generate', async (c) => {
       used: quota.used,
     });
   }
-  
+
   // 检查文本长度
   if (body.text.length > 5000) {
     throw Errors.textTooLong(body.text.length, 5000);
   }
-  
+
   if (body.text.length < 10) {
     throw Errors.textTooShort(body.text.length, 10);
   }
-  
+
   // 检查音色
   const voice = await getVoice(c.env.DB, body.voiceId);
   if (!voice) {
     throw Errors.voiceNotFound(body.voiceId);
   }
-  
+
   // 检查高级音色权限
   if (voice.isPremium && user.plan === 'free') {
     throw Errors.featureNotAvailable('高级音色');
   }
-  
+
   // 调用 TTS
   try {
     const result = await ttsService.generate(body);
@@ -428,7 +423,7 @@ api.interceptors.response.use(
   (response) => response.data,
   (error: AxiosError<{ error: ApiError }>) => {
     const apiError = error.response?.data?.error;
-    
+
     if (!apiError) {
       // 网络错误
       return Promise.reject({
@@ -436,7 +431,7 @@ api.interceptors.response.use(
         message: '网络连接失败，请检查网络',
       });
     }
-    
+
     // 处理特定错误
     switch (apiError.code) {
       case 'AUTH_TOKEN_EXPIRED':
@@ -445,23 +440,23 @@ api.interceptors.response.use(
         useAuthStore.getState().logout();
         window.location.href = '/sign-in';
         break;
-        
+
       case 'QUOTA_EXCEEDED':
         // 显示升级提示（由业务代码处理）
         break;
-        
+
       case 'RATE_LIMITED':
         const retryAfter = apiError.details?.retryAfter || 60;
         toast.error(`操作过于频繁，请 ${retryAfter} 秒后重试`);
         break;
-        
+
       case 'INTERNAL_ERROR':
       case 'DATABASE_ERROR':
       case 'EXTERNAL_API_ERROR':
         toast.error('服务暂时不可用，请稍后重试');
         break;
     }
-    
+
     return Promise.reject(apiError);
   }
 );
@@ -480,10 +475,10 @@ import { useUpgradeModal } from '@/hooks/useUpgradeModal';
 export function useTTS() {
   const { toast } = useToast();
   const { openUpgrade } = useUpgradeModal();
-  
+
   return useMutation({
     mutationFn: ttsService.generate,
-    
+
     onError: (error: ApiError) => {
       switch (error.code) {
         case 'QUOTA_EXCEEDED':
@@ -492,31 +487,31 @@ export function useTTS() {
             message: error.message,
           });
           break;
-          
+
         case 'FEATURE_NOT_AVAILABLE':
           openUpgrade({
             reason: 'feature',
             feature: error.details?.feature,
           });
           break;
-          
+
         case 'TEXT_TOO_LONG':
           toast.error(`文本过长: ${error.details?.length}/${error.details?.max} 字符`);
           break;
-          
+
         case 'CONTENT_MODERATION_FAILED':
           toast.error('内容包含敏感信息，请修改后重试');
           break;
-          
+
         case 'TTS_GENERATION_FAILED':
           toast.error('生成失败，请重试');
           break;
-          
+
         default:
           toast.error(error.message);
       }
     },
-    
+
     onSuccess: () => {
       toast.success('音频生成成功！');
     },
@@ -551,9 +546,9 @@ export function TTSForm() {
   } = useForm({
     resolver: zodResolver(schema),
   });
-  
+
   const { mutate, isPending } = useTTS();
-  
+
   const onSubmit = async (data) => {
     try {
       await mutate(data);
@@ -566,14 +561,14 @@ export function TTSForm() {
       }
     }
   };
-  
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <textarea {...register('text')} />
       {errors.text && (
         <span className="text-red-500 text-sm">{errors.text.message}</span>
       )}
-      
+
       {/* ... */}
     </form>
   );
@@ -600,14 +595,14 @@ interface State {
 
 export class ErrorBoundary extends Component<Props, State> {
   state: State = { hasError: false };
-  
+
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
-  
+
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('React Error Boundary caught:', error, errorInfo);
-    
+
     // 上报 Sentry
     Sentry.captureException(error, {
       extra: {
@@ -615,7 +610,7 @@ export class ErrorBoundary extends Component<Props, State> {
       },
     });
   }
-  
+
   render() {
     if (this.state.hasError) {
       return (
@@ -635,7 +630,7 @@ export class ErrorBoundary extends Component<Props, State> {
         )
       );
     }
-    
+
     return this.props.children;
   }
 }
@@ -660,10 +655,7 @@ import * as Sentry from '@sentry/react';
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
   environment: import.meta.env.VITE_ENV,
-  integrations: [
-    Sentry.browserTracingIntegration(),
-    Sentry.replayIntegration(),
-  ],
+  integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],
   tracesSampleRate: 0.1,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
@@ -736,26 +728,26 @@ export interface LogEntry {
 
 export function createLogger(env: Env) {
   const level = env.LOG_LEVEL || 'info';
-  
+
   return {
     debug: (message: string, context?: object) => {
       if (level === 'debug') {
         console.debug(formatLog('debug', message, context));
       }
     },
-    
+
     info: (message: string, context?: object) => {
       if (['debug', 'info'].includes(level)) {
         console.info(formatLog('info', message, context));
       }
     },
-    
+
     warn: (message: string, context?: object) => {
       if (['debug', 'info', 'warn'].includes(level)) {
         console.warn(formatLog('warn', message, context));
       }
     },
-    
+
     error: (message: string, error?: Error, context?: object) => {
       console.error(
         formatLog('error', message, {
@@ -775,7 +767,7 @@ function formatLog(level: string, message: string, context?: object): string {
     message,
     context,
   };
-  
+
   return JSON.stringify(entry);
 }
 ```
@@ -789,14 +781,14 @@ export function requestLogger() {
   return async (c: Context, next: Next) => {
     const requestId = crypto.randomUUID();
     c.set('requestId', requestId);
-    
+
     const start = Date.now();
-    
+
     await next();
-    
+
     const duration = Date.now() - start;
     const user = c.get('user');
-    
+
     console.log(
       JSON.stringify({
         timestamp: new Date().toISOString(),
@@ -828,12 +820,12 @@ import { Errors, AppError } from '@/utils/errors';
 describe('AppError', () => {
   it('creates error with correct code and message', () => {
     const error = Errors.quotaExceeded({ limit: 600, used: 600 });
-    
+
     expect(error.code).toBe('QUOTA_EXCEEDED');
     expect(error.statusCode).toBe(403);
     expect(error.details).toEqual({ quota: { limit: 600, used: 600 } });
   });
-  
+
   it('maps error code to correct HTTP status', () => {
     expect(Errors.authRequired().statusCode).toBe(401);
     expect(Errors.notFound('Audio').statusCode).toBe(404);
@@ -856,34 +848,34 @@ describe('Error Handling', () => {
       method: 'POST',
       body: JSON.stringify({ text: 'test' }),
     });
-    
+
     expect(res.status).toBe(401);
     const data = await res.json();
     expect(data.error.code).toBe('AUTH_REQUIRED');
   });
-  
+
   it('returns 400 for validation error', async () => {
     const res = await app.request('/api/tts/generate', {
       method: 'POST',
       headers: { Authorization: `Bearer ${testToken}` },
-      body: JSON.stringify({ text: '' }),  // Empty text
+      body: JSON.stringify({ text: '' }), // Empty text
     });
-    
+
     expect(res.status).toBe(400);
     const data = await res.json();
     expect(data.error.code).toBe('VALIDATION_ERROR');
   });
-  
+
   it('returns 403 for quota exceeded', async () => {
     // 设置用户额度为 0
     await setUserQuota(testUserId, 0);
-    
+
     const res = await app.request('/api/tts/generate', {
       method: 'POST',
       headers: { Authorization: `Bearer ${testToken}` },
       body: JSON.stringify({ text: 'test', voiceId: 'openai-alloy' }),
     });
-    
+
     expect(res.status).toBe(403);
     const data = await res.json();
     expect(data.error.code).toBe('QUOTA_EXCEEDED');
@@ -941,15 +933,15 @@ if (error.code === 'AUTH_TOKEN_EXPIRED') {
 
 ### 8.3 错误码速查
 
-| 错误码 | HTTP | 说明 | 前端处理 |
-|--------|------|------|----------|
-| AUTH_REQUIRED | 401 | 未登录 | 跳转登录 |
-| QUOTA_EXCEEDED | 403 | 额度用完 | 升级弹窗 |
-| RATE_LIMITED | 429 | 频率限制 | Toast + 等待 |
-| VALIDATION_ERROR | 400 | 参数错误 | 表单提示 |
-| TTS_GENERATION_FAILED | 422 | 生成失败 | Toast + 重试 |
-| INTERNAL_ERROR | 500 | 服务器错误 | Toast + 上报 |
+| 错误码                | HTTP | 说明       | 前端处理     |
+| --------------------- | ---- | ---------- | ------------ |
+| AUTH_REQUIRED         | 401  | 未登录     | 跳转登录     |
+| QUOTA_EXCEEDED        | 403  | 额度用完   | 升级弹窗     |
+| RATE_LIMITED          | 429  | 频率限制   | Toast + 等待 |
+| VALIDATION_ERROR      | 400  | 参数错误   | 表单提示     |
+| TTS_GENERATION_FAILED | 422  | 生成失败   | Toast + 重试 |
+| INTERNAL_ERROR        | 500  | 服务器错误 | Toast + 上报 |
 
 ---
 
-*统一的错误处理规范，提升用户体验和调试效率！*
+_统一的错误处理规范，提升用户体验和调试效率！_

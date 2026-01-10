@@ -5,16 +5,19 @@
 ### 源文件（SVG 矢量）
 
 ✅ **logo.svg** - 完整 Logo（图标 + 文字）
+
 - 尺寸：200x60px
 - 用途：网站导航、营销材料
 - 背景：深色
 
 ✅ **favicon.svg** - 图标 Logo（仅图标）
+
 - 尺寸：64x64px
 - 用途：Favicon、应用图标
 - 背景：蓝色渐变
 
 ✅ **og-image-template.svg** - OG Image 模板
+
 - 尺寸：1200x630px
 - 用途：社交分享图片
 - 需要转换为 PNG
@@ -33,6 +36,7 @@
 ```
 
 **需要安装**：
+
 ```bash
 # macOS
 brew install inkscape imagemagick
@@ -42,6 +46,7 @@ sudo apt-get install inkscape imagemagick
 ```
 
 **生成的文件**：
+
 - `favicon-16x16.png` - 16x16 favicon
 - `favicon-32x32.png` - 32x32 favicon
 - `favicon-192x192.png` - Android icon
@@ -56,6 +61,7 @@ sudo apt-get install inkscape imagemagick
 ### 方法 2：在线工具
 
 #### RealFaviconGenerator（推荐）
+
 1. 访问：https://realfavicongenerator.net/
 2. 上传 `favicon.svg`
 3. 自定义设置（使用默认即可）
@@ -63,12 +69,14 @@ sudo apt-get install inkscape imagemagick
 5. 解压到当前目录
 
 #### Cloudconvert
+
 1. 访问：https://cloudconvert.com/svg-to-png
 2. 上传 SVG 文件
 3. 设置输出尺寸
 4. 下载 PNG
 
 #### Favicon.io
+
 1. 访问：https://favicon.io/
 2. 选择 "SVG to Favicon"
 3. 上传 `favicon.svg`
@@ -111,13 +119,13 @@ inkscape og-image-template.svg \
 
 ```html
 <!-- Favicon -->
-<link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
-<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png" />
 
 <!-- OG Image -->
-<meta property="og:image" content="/assets/images/og-image.png">
+<meta property="og:image" content="/assets/images/og-image.png" />
 ```
 
 ---
@@ -127,10 +135,12 @@ inkscape og-image-template.svg \
 详见 `docs/design/brand-identity.md`
 
 **最小尺寸**：
+
 - 完整 Logo：120px 宽
 - 图标：24px
 
 **禁止**：
+
 - ❌ 改变颜色
 - ❌ 拉伸变形
 - ❌ 旋转（除 90° 倍数）
@@ -140,12 +150,12 @@ inkscape og-image-template.svg \
 
 ## 🎨 配色参考
 
-| 颜色 | Hex | 用途 |
-|------|-----|------|
+| 颜色       | Hex       | 用途 |
+| ---------- | --------- | ---- |
 | Trust Blue | `#2563EB` | 主色 |
 | Light Blue | `#3B82F6` | 渐变 |
-| Orange | `#F97316` | CTA |
-| Dark Navy | `#0A0E27` | 背景 |
+| Orange     | `#F97316` | CTA  |
+| Dark Navy  | `#0A0E27` | 背景 |
 
 ---
 

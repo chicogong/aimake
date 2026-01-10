@@ -1,7 +1,6 @@
 # LLM 和 ASR 免费供应商快速接入指南
 
-> 创建日期: 2026-01-09
-> 目标: 快速上线，优先使用免费 API
+> 创建日期: 2026-01-09目标: 快速上线，优先使用免费 API
 
 ---
 
@@ -12,6 +11,7 @@
 **免费额度**: 新用户送 2000万 tokens（约可生成 1000 次播客对话脚本）
 
 **优势**:
+
 - 完全兼容 OpenAI API，一行代码切换
 - 支持 Qwen、DeepSeek、GLM 等国产模型
 - 价格超低：¥0.70/百万 tokens（GPT-4 的 1/50）
@@ -44,6 +44,7 @@ print(response.choices[0].message.content)
 ```
 
 **推荐模型**:
+
 - **Qwen/Qwen2.5-7B-Instruct**: 中文能力强，速度快
 - **deepseek-ai/DeepSeek-V2.5**: 推理能力强，适合复杂任务
 - **THUDM/glm-4-9b-chat**: GLM-4，对话自然
@@ -57,6 +58,7 @@ print(response.choices[0].message.content)
 **免费额度**: 新用户送 500万 tokens
 
 **优势**:
+
 - DeepSeek-V3 推理能力接近 GPT-4
 - 价格：¥1/百万 tokens（输入），¥2/百万 tokens（输出）
 - OpenAI 兼容
@@ -89,6 +91,7 @@ response = client.chat.completions.create(
 **免费额度**: 新用户送 100万 tokens
 
 **优势**:
+
 - 通义千问 Qwen2.5 系列
 - 阿里云生态，稳定性高
 - 支持 OpenAI SDK
@@ -118,6 +121,7 @@ response = client.chat.completions.create(
 **免费额度**: 新用户送 15元代金券
 
 **优势**:
+
 - 长文本处理能力强（200K context）
 - 适合有声书、长文章转播客
 - OpenAI 兼容
@@ -147,6 +151,7 @@ response = client.chat.completions.create(
 **免费额度**: 新用户送 1000万 tokens
 
 **优势**:
+
 - GLM-4 系列，清华团队出品
 - 免费额度最大
 - OpenAI 兼容
@@ -291,10 +296,12 @@ result = await llm.chat(
 ### 3.1 腾讯云 ASR
 
 **免费额度**:
+
 - 新用户：10小时免费（6个月有效）
 - 持续免费：50,000次/月（每次60秒以内）
 
 **优势**:
+
 - 中文识别准确率高
 - 支持实时和录音文件识别
 - 价格低：录音文件 ¥1.5/小时
@@ -372,10 +379,12 @@ print(text)
 ### 3.2 阿里云 ASR
 
 **免费额度**:
+
 - 新用户：3个月免费（每月 2小时）
 - 持续免费：500次/月
 
 **优势**:
+
 - 识别准确率高
 - 支持方言识别
 - 价格：¥2.5/小时
@@ -429,6 +438,7 @@ class AliyunASR:
 **免费额度**: 新用户送 100小时
 
 **优势**:
+
 - 字节跳动技术
 - 免费额度最大
 - 适合短视频场景
@@ -464,6 +474,7 @@ class VolcanoASR:
 **免费额度**: 500万字符/年（约 200小时）
 
 **优势**:
+
 - 国内 ASR 老牌厂商
 - 准确率高
 - 免费额度大且持续
@@ -711,16 +722,16 @@ XUNFEI_API_KEY=your-api-key
 
 ## 七、注册链接汇总
 
-| 服务 | 注册链接 | 免费额度 |
-|------|---------|---------|
-| **硅基流动** | https://siliconflow.cn | 2000万 tokens |
-| **DeepSeek** | https://platform.deepseek.com | 500万 tokens |
-| **智谱 AI** | https://open.bigmodel.cn | 1000万 tokens |
-| **Moonshot** | https://platform.moonshot.cn | 15元代金券 |
-| **阿里云百炼** | https://bailian.console.aliyun.com | 100万 tokens |
-| **腾讯云 ASR** | https://cloud.tencent.com/product/asr | 10小时 + 50K次/月 |
-| **讯飞 ASR** | https://www.xfyun.cn | 500万字符/年 |
-| **火山引擎 ASR** | https://www.volcengine.com | 100小时 |
+| 服务             | 注册链接                              | 免费额度          |
+| ---------------- | ------------------------------------- | ----------------- |
+| **硅基流动**     | https://siliconflow.cn                | 2000万 tokens     |
+| **DeepSeek**     | https://platform.deepseek.com         | 500万 tokens      |
+| **智谱 AI**      | https://open.bigmodel.cn              | 1000万 tokens     |
+| **Moonshot**     | https://platform.moonshot.cn          | 15元代金券        |
+| **阿里云百炼**   | https://bailian.console.aliyun.com    | 100万 tokens      |
+| **腾讯云 ASR**   | https://cloud.tencent.com/product/asr | 10小时 + 50K次/月 |
+| **讯飞 ASR**     | https://www.xfyun.cn                  | 500万字符/年      |
+| **火山引擎 ASR** | https://www.volcengine.com            | 100小时           |
 
 ---
 
@@ -742,5 +753,4 @@ XUNFEI_API_KEY=your-api-key
 
 ---
 
-**最后更新**: 2026-01-09
-**维护者**: AIMake 技术团队
+**最后更新**: 2026-01-09 **维护者**: AIMake 技术团队

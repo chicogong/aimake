@@ -1,7 +1,6 @@
 # AIMake 主页 (Landing Page) 设计规范
 
-> 创建日期: 2026-01-09
-> 适用于营销首页的设计规范
+> 创建日期: 2026-01-09适用于营销首页的设计规范
 
 ---
 
@@ -86,7 +85,7 @@ export function Navigation() {
           <a href="/" className="text-2xl font-bold text-primary-500">
             AIMake
           </a>
-          
+
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-gray-600 hover:text-primary-500">
@@ -102,40 +101,47 @@ export function Navigation() {
               帮助
             </a>
           </div>
-          
+
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
             <a href="/login" className="text-gray-600 hover:text-primary-500">
               登录
             </a>
-            <a 
+            <a
               href="/signup"
               className="bg-primary-500 text-white px-5 py-2 rounded-lg font-medium hover:bg-primary-600"
             >
               免费试用
             </a>
           </div>
-          
+
           {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden p-2"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
+          <button className="md:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <XIcon /> : <MenuIcon />}
           </button>
         </div>
-        
+
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden pt-4 pb-6 border-t mt-4">
             <div className="flex flex-col gap-4">
-              <a href="#features" className="py-2">功能</a>
-              <a href="#use-cases" className="py-2">场景</a>
-              <a href="#pricing" className="py-2">价格</a>
-              <a href="/help" className="py-2">帮助</a>
+              <a href="#features" className="py-2">
+                功能
+              </a>
+              <a href="#use-cases" className="py-2">
+                场景
+              </a>
+              <a href="#pricing" className="py-2">
+                价格
+              </a>
+              <a href="/help" className="py-2">
+                帮助
+              </a>
               <hr className="my-2" />
-              <a href="/login" className="py-2">登录</a>
-              <a 
+              <a href="/login" className="py-2">
+                登录
+              </a>
+              <a
                 href="/signup"
                 className="bg-primary-500 text-white py-3 rounded-lg text-center font-medium"
               >
@@ -156,13 +162,13 @@ export function Navigation() {
 
 ### 3.1 设计要点
 
-| 元素 | 说明 |
-|------|------|
-| 标题 | 一句话说明价值，不超过 10 个字 |
-| 副标题 | 2-3 行解释产品功能 |
-| CTA 按钮 | 主按钮 (立即体验) + 次按钮 (查看演示) |
-| Demo 卡片 | 交互式演示，让用户立即体验 |
-| 信任标识 | "免费使用，无需信用卡" |
+| 元素      | 说明                                  |
+| --------- | ------------------------------------- |
+| 标题      | 一句话说明价值，不超过 10 个字        |
+| 副标题    | 2-3 行解释产品功能                    |
+| CTA 按钮  | 主按钮 (立即体验) + 次按钮 (查看演示) |
+| Demo 卡片 | 交互式演示，让用户立即体验            |
+| 信任标识  | "免费使用，无需信用卡"                |
 
 ### 3.2 布局
 
@@ -371,28 +377,30 @@ export function Navigation() {
 const faqs = [
   {
     question: '免费版有什么限制？',
-    answer: '免费版每月可生成 10 分钟音频，支持 5 种基础音色，可导出 MP3 格式。升级 Pro 可获得 300 分钟额度、全部音色、播客对话生成等高级功能。'
+    answer:
+      '免费版每月可生成 10 分钟音频，支持 5 种基础音色，可导出 MP3 格式。升级 Pro 可获得 300 分钟额度、全部音色、播客对话生成等高级功能。',
   },
   {
     question: '生成的音频质量怎么样？',
-    answer: '我们使用业界领先的 AI 语音引擎，音质自然流畅，接近真人水平。Pro 用户可使用更高质量的音色。'
+    answer:
+      '我们使用业界领先的 AI 语音引擎，音质自然流畅，接近真人水平。Pro 用户可使用更高质量的音色。',
   },
   {
     question: '支持哪些语言？',
-    answer: '目前支持中文和英文，更多语言正在开发中。'
+    answer: '目前支持中文和英文，更多语言正在开发中。',
   },
   {
     question: '可以商用吗？',
-    answer: '可以。所有套餐生成的音频都可以商用，包括用于 YouTube、播客、产品宣传等。'
+    answer: '可以。所有套餐生成的音频都可以商用，包括用于 YouTube、播客、产品宣传等。',
   },
   {
     question: '如何取消订阅？',
-    answer: '在设置页面的"订阅管理"中可以随时取消订阅，取消后当月额度仍可使用至周期结束。'
+    answer: '在设置页面的"订阅管理"中可以随时取消订阅，取消后当月额度仍可使用至周期结束。',
   },
   {
     question: '数据安全如何保障？',
-    answer: '我们使用银行级加密传输，数据存储在安全的云服务器中。我们不会将您的文本用于 AI 训练。'
-  }
+    answer: '我们使用银行级加密传输，数据存储在安全的云服务器中。我们不会将您的文本用于 AI 训练。',
+  },
 ];
 
 export function FAQ() {
@@ -402,31 +410,24 @@ export function FAQ() {
     <section id="faq" className="py-24 bg-gray-50">
       <div className="max-w-3xl mx-auto px-6">
         <h2 className="text-4xl font-bold text-center mb-12">常见问题</h2>
-        
+
         <div className="space-y-4">
           {faqs.map((faq, index) => (
-            <div 
-              key={index}
-              className="bg-white rounded-xl border border-gray-200"
-            >
+            <div key={index} className="bg-white rounded-xl border border-gray-200">
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
                 className="w-full flex items-center justify-between p-6 text-left"
               >
                 <span className="font-medium">{faq.question}</span>
-                <ChevronDownIcon 
+                <ChevronDownIcon
                   className={cn(
-                    "w-5 h-5 transition-transform",
-                    openIndex === index && "rotate-180"
+                    'w-5 h-5 transition-transform',
+                    openIndex === index && 'rotate-180'
                   )}
                 />
               </button>
-              
-              {openIndex === index && (
-                <div className="px-6 pb-6 text-gray-600">
-                  {faq.answer}
-                </div>
-              )}
+
+              {openIndex === index && <div className="px-6 pb-6 text-gray-600">{faq.answer}</div>}
             </div>
           ))}
         </div>
@@ -484,12 +485,12 @@ export function FAQ() {
 
 ## 十、响应式断点
 
-| 断点 | 宽度 | 布局调整 |
-|------|------|----------|
-| `sm` | 640px | 单列布局 |
-| `md` | 768px | 显示桌面导航 |
+| 断点 | 宽度   | 布局调整      |
+| ---- | ------ | ------------- |
+| `sm` | 640px  | 单列布局      |
+| `md` | 768px  | 显示桌面导航  |
 | `lg` | 1024px | Hero 双列布局 |
-| `xl` | 1280px | 最大内容宽度 |
+| `xl` | 1280px | 最大内容宽度  |
 
 ---
 
@@ -499,14 +500,14 @@ export function FAQ() {
 
 ```css
 /* 主色调 */
---primary-500: #3B82F6;  /* 主按钮、链接 */
---primary-600: #2563EB;  /* 悬停状态 */
+--primary-500: #3b82f6; /* 主按钮、链接 */
+--primary-600: #2563eb; /* 悬停状态 */
 
 /* Hero 渐变背景 */
-background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 50%, #60A5FA 100%);
+background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
 
 /* 强调色 - 用于 CTA */
---accent: #F97316;  /* 橙色，吸引注意 */
+--accent: #f97316; /* 橙色，吸引注意 */
 ```
 
 ---
@@ -522,7 +523,7 @@ background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 50%, #60A5FA 100%);
   alt="AIMake Demo"
   width={600}
   height={400}
-  priority  // Hero 图片优先加载
+  priority // Hero 图片优先加载
   placeholder="blur"
 />
 ```
@@ -542,41 +543,35 @@ background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 50%, #60A5FA 100%);
 
 ```html
 <!-- 预加载关键字体 -->
-<link 
-  rel="preload" 
-  href="/fonts/Inter-var.woff2" 
-  as="font" 
-  type="font/woff2" 
-  crossorigin
-/>
+<link rel="preload" href="/fonts/Inter-var.woff2" as="font" type="font/woff2" crossorigin />
 ```
 
 ---
 
 ## 十三、A/B 测试建议
 
-| 元素 | 测试变体 |
-|------|----------|
-| Hero 标题 | "文字变声音" vs "AI 语音生成" |
+| 元素         | 测试变体                               |
+| ------------ | -------------------------------------- |
+| Hero 标题    | "文字变声音" vs "AI 语音生成"          |
 | CTA 按钮文案 | "立即体验" vs "免费开始" vs "开始创作" |
-| CTA 按钮颜色 | 蓝色 vs 橙色 |
-| 定价展示 | 三列 vs 两列 (隐藏免费版) |
-| Demo 位置 | Hero 内嵌 vs 独立 section |
+| CTA 按钮颜色 | 蓝色 vs 橙色                           |
+| 定价展示     | 三列 vs 两列 (隐藏免费版)              |
+| Demo 位置    | Hero 内嵌 vs 独立 section              |
 
 ---
 
 ## 十四、转化追踪点
 
-| 事件 | 触发位置 | 事件名 |
-|------|----------|--------|
-| 页面访问 | 加载时 | `landing_page_view` |
-| Hero CTA 点击 | "立即体验"按钮 | `hero_cta_click` |
-| Demo 交互 | 点击生成按钮 | `demo_generate_click` |
-| 音频播放 | 点击 Demo 播放 | `demo_audio_play` |
-| 定价查看 | 滚动到定价区 | `pricing_section_view` |
-| 升级按钮点击 | 定价区按钮 | `pricing_cta_click` |
-| 注册开始 | 点击注册按钮 | `signup_start` |
+| 事件          | 触发位置       | 事件名                 |
+| ------------- | -------------- | ---------------------- |
+| 页面访问      | 加载时         | `landing_page_view`    |
+| Hero CTA 点击 | "立即体验"按钮 | `hero_cta_click`       |
+| Demo 交互     | 点击生成按钮   | `demo_generate_click`  |
+| 音频播放      | 点击 Demo 播放 | `demo_audio_play`      |
+| 定价查看      | 滚动到定价区   | `pricing_section_view` |
+| 升级按钮点击  | 定价区按钮     | `pricing_cta_click`    |
+| 注册开始      | 点击注册按钮   | `signup_start`         |
 
 ---
 
-*让主页既美观又高转化！*
+_让主页既美观又高转化！_

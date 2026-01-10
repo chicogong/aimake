@@ -1,7 +1,6 @@
 # AIMake 部署架构设计
 
-> 创建日期: 2026-01-09
-> 目标: 从开发到生产的完整部署方案
+> 创建日期: 2026-01-09目标: 从开发到生产的完整部署方案
 
 ---
 
@@ -38,16 +37,16 @@
 
 ### 1.2 服务选型
 
-| 服务 | 推荐方案 | 备选方案 | 月成本估算 |
-|------|----------|----------|------------|
-| **前端托管** | Cloudflare Pages | Vercel | 免费 |
-| **后端托管** | Cloudflare Workers | Railway / Fly.io | 免费-$5 |
-| **数据库** | Cloudflare D1 | Supabase / Neon | 免费 |
-| **Redis** | Upstash | Cloudflare KV | 免费-$10 |
-| **对象存储** | Cloudflare R2 | AWS S3 | 免费-$5 |
-| **CDN** | Cloudflare | - | 免费 |
-| **域名** | Cloudflare | Namecheap | $10-15/年 |
-| **监控** | Sentry + Axiom | Datadog | 免费-$30 |
+| 服务         | 推荐方案           | 备选方案         | 月成本估算 |
+| ------------ | ------------------ | ---------------- | ---------- |
+| **前端托管** | Cloudflare Pages   | Vercel           | 免费       |
+| **后端托管** | Cloudflare Workers | Railway / Fly.io | 免费-$5    |
+| **数据库**   | Cloudflare D1      | Supabase / Neon  | 免费       |
+| **Redis**    | Upstash            | Cloudflare KV    | 免费-$10   |
+| **对象存储** | Cloudflare R2      | AWS S3           | 免费-$5    |
+| **CDN**      | Cloudflare         | -                | 免费       |
+| **域名**     | Cloudflare         | Namecheap        | $10-15/年  |
+| **监控**     | Sentry + Axiom     | Datadog          | 免费-$30   |
 
 ---
 
@@ -67,7 +66,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.dev
     ports:
-      - "5173:5173"
+      - '5173:5173'
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -82,7 +81,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile.dev
     ports:
-      - "8000:8000"
+      - '8000:8000'
     volumes:
       - ./backend:/app
     environment:
@@ -103,7 +102,7 @@ services:
   db:
     image: postgres:15-alpine
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -116,7 +115,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
 
@@ -124,8 +123,8 @@ services:
   minio:
     image: minio/minio
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - '9000:9000'
+      - '9001:9001'
     environment:
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=minioadmin
@@ -267,15 +266,11 @@ wrangler pages secret put VITE_STRIPE_PUBLISHABLE_KEY --project-name=aimake-fron
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ],
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "headers": [
     {
       "source": "/assets/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     }
   ]
 }
@@ -443,7 +438,7 @@ ALTER TABLE podcasts ENABLE ROW LEVEL SECURITY;
 -- 3. 创建策略 (API 通过 service_role 访问，不受限制)
 
 -- 4. 创建索引
-CREATE INDEX CONCURRENTLY idx_audios_user_created 
+CREATE INDEX CONCURRENTLY idx_audios_user_created
 ON audios(user_id, created_at DESC);
 ```
 
@@ -466,7 +461,7 @@ class StorageService:
             region_name='auto'
         )
         self.bucket = settings.S3_BUCKET
-    
+
     def upload_audio(self, file_data: bytes, key: str) -> str:
         """上传音频文件，返回 URL"""
         self.s3.put_object(
@@ -475,10 +470,10 @@ class StorageService:
             Body=file_data,
             ContentType='audio/mpeg'
         )
-        
+
         # 返回公开 URL
         return f"{settings.CDN_URL}/{key}"
-    
+
     def get_presigned_url(self, key: str, expires: int = 3600) -> str:
         """获取预签名 URL (用于私有文件)"""
         return self.s3.generate_presigned_url(
@@ -486,7 +481,7 @@ class StorageService:
             Params={'Bucket': self.bucket, 'Key': key},
             ExpiresIn=expires
         )
-    
+
     def delete_audio(self, key: str):
         """删除音频文件"""
         self.s3.delete_object(Bucket=self.bucket, Key=key)
@@ -648,14 +643,11 @@ sentry_sdk.init(
 ```tsx
 // frontend/src/main.tsx
 
-import * as Sentry from "@sentry/react";
+import * as Sentry from '@sentry/react';
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
-  integrations: [
-    Sentry.browserTracingIntegration(),
-    Sentry.replayIntegration(),
-  ],
+  integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],
   tracesSampleRate: 0.1,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
@@ -675,7 +667,7 @@ class AxiomHandler(logging.Handler):
         super().__init__()
         self.client = axiom.Client()
         self.dataset = dataset
-    
+
     def emit(self, record):
         log_entry = {
             "level": record.levelname,
@@ -717,26 +709,26 @@ async def readiness_check(response: Response):
         "database": False,
         "redis": False,
     }
-    
+
     # 检查数据库
     try:
         await database.execute("SELECT 1")
         checks["database"] = True
     except Exception:
         pass
-    
+
     # 检查 Redis
     try:
         await redis.ping()
         checks["redis"] = True
     except Exception:
         pass
-    
+
     all_healthy = all(checks.values())
-    
+
     if not all_healthy:
         response.status_code = 503
-    
+
     return {
         "status": "ok" if all_healthy else "degraded",
         "checks": checks
@@ -756,14 +748,14 @@ alerts:
     notify:
       - slack: #alerts
       - email: team@aimake.cc
-  
+
   - name: High Latency
     condition: p99_latency > 3s
     duration: 5m
     severity: warning
     notify:
       - slack: #alerts
-  
+
   - name: Database Connection Errors
     condition: db_connection_errors > 0
     duration: 1m
@@ -771,7 +763,7 @@ alerts:
     notify:
       - slack: #alerts
       - pagerduty: on-call
-  
+
   - name: TTS API Errors
     condition: tts_api_error_rate > 10%
     duration: 3m
@@ -910,20 +902,20 @@ app.add_middleware(
 class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         client_ip = request.client.host
-        
+
         # 使用 Redis 实现限流
         key = f"rate_limit:{client_ip}"
         count = await redis.incr(key)
-        
+
         if count == 1:
             await redis.expire(key, 60)  # 每分钟窗口
-        
+
         if count > 100:  # 每分钟 100 次
             return JSONResponse(
                 status_code=429,
                 content={"error": "Too many requests"}
             )
-        
+
         return await call_next(request)
 
 app.add_middleware(RateLimitMiddleware)
@@ -990,13 +982,13 @@ echo "Restore completed!"
 
 ### 9.1 按阶段的推荐配置
 
-| 阶段 | 用户数 | 配置 | 月成本 |
-|------|--------|------|--------|
-| **开发** | 0 | 本地 Docker | $0 |
-| **Beta** | 0-100 | 免费层 | $0-20 |
-| **上线** | 100-1000 | 基础付费 | $50-100 |
-| **增长** | 1000-5000 | 扩展配置 | $200-500 |
-| **规模** | 5000+ | 专业配置 | $500+ |
+| 阶段     | 用户数    | 配置        | 月成本   |
+| -------- | --------- | ----------- | -------- |
+| **开发** | 0         | 本地 Docker | $0       |
+| **Beta** | 0-100     | 免费层      | $0-20    |
+| **上线** | 100-1000  | 基础付费    | $50-100  |
+| **增长** | 1000-5000 | 扩展配置    | $200-500 |
+| **规模** | 5000+     | 专业配置    | $500+    |
 
 ### 9.2 免费层最大化
 
@@ -1010,6 +1002,7 @@ Upstash Redis:     10K 命令/天免费
 ```
 
 **Cloudflare 全家桶优势:**
+
 - 统一账单和管理
 - 零延迟边缘网络
 - 无跨平台费用
@@ -1023,14 +1016,14 @@ Upstash Redis:     10K 命令/天免费
 
 class CostTracker:
     """追踪 API 调用成本"""
-    
+
     PRICES = {
         "openai_tts": 0.000015,      # $0.015/1K chars
         "elevenlabs_tts": 0.00030,   # $0.30/1K chars
         "gpt4_input": 0.00001,       # $0.01/1K tokens
         "gpt4_output": 0.00003,      # $0.03/1K tokens
     }
-    
+
     async def log_usage(
         self,
         user_id: str,
@@ -1038,7 +1031,7 @@ class CostTracker:
         units: int
     ):
         cost = units * self.PRICES.get(service, 0)
-        
+
         await usage_logs.insert({
             "user_id": user_id,
             "service": service,
@@ -1046,9 +1039,9 @@ class CostTracker:
             "cost": cost,
             "created_at": datetime.utcnow()
         })
-        
+
         return cost
-    
+
     async def get_daily_cost(self) -> float:
         """获取今日总成本"""
         result = await usage_logs.aggregate([
@@ -1087,4 +1080,4 @@ class CostTracker:
 
 ---
 
-*文档持续更新中...*
+_文档持续更新中..._

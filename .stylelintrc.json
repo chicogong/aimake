@@ -1,0 +1,16 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "color-named": "never",
+    "selector-max-id": 0,
+    "function-url-quotes": "always",
+    "selector-pseudo-element-colon-notation": "double",
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": ["tailwind", "apply", "variants", "responsive", "screen"]
+      }
+    ],
+    "keyframes-name-pattern": null
+  }
+}

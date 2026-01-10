@@ -1,7 +1,6 @@
 # AIMake 页面设计规范
 
-> 创建日期: 2026-01-09
-> 覆盖所有应用页面的设计规范
+> 创建日期: 2026-01-09覆盖所有应用页面的设计规范
 
 ---
 
@@ -95,15 +94,15 @@ export function LoginPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary-500">AIMake</h1>
         </div>
-        
-        <SignIn 
+
+        <SignIn
           appearance={{
             elements: {
               rootBox: 'mx-auto',
               card: 'shadow-lg rounded-2xl',
               headerTitle: 'text-2xl font-bold',
               formButtonPrimary: 'bg-primary-500 hover:bg-primary-600',
-            }
+            },
           }}
           redirectUrl="/app"
           signUpUrl="/signup"
@@ -290,7 +289,7 @@ export function LoginPage() {
 export function LibraryPage() {
   const [filter, setFilter] = useState<'all' | 'tts' | 'podcast'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const { data: audios, isLoading } = useAudios({ filter, search: searchQuery });
 
   return (
@@ -299,56 +298,39 @@ export function LibraryPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">我的音频</h1>
         <div className="flex items-center gap-3">
-          <SearchInput 
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="搜索音频..."
-          />
+          <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder="搜索音频..." />
           <Button onClick={() => navigate('/app/create')}>
             <PlusIcon className="w-4 h-4 mr-1" />
             新建
           </Button>
         </div>
       </div>
-      
+
       {/* 筛选器 */}
       <div className="flex gap-2 mb-6">
-        <FilterButton 
-          active={filter === 'all'} 
-          onClick={() => setFilter('all')}
-        >
+        <FilterButton active={filter === 'all'} onClick={() => setFilter('all')}>
           全部 {counts.all}
         </FilterButton>
-        <FilterButton 
-          active={filter === 'tts'} 
-          onClick={() => setFilter('tts')}
-        >
+        <FilterButton active={filter === 'tts'} onClick={() => setFilter('tts')}>
           TTS {counts.tts}
         </FilterButton>
-        <FilterButton 
-          active={filter === 'podcast'} 
-          onClick={() => setFilter('podcast')}
-        >
+        <FilterButton active={filter === 'podcast'} onClick={() => setFilter('podcast')}>
           播客 {counts.podcast}
         </FilterButton>
       </div>
-      
+
       {/* 音频列表 */}
       {isLoading ? (
         <AudioListSkeleton />
       ) : audios.length === 0 ? (
-        <EmptyState 
+        <EmptyState
           icon={<MusicIcon />}
           title="还没有音频"
           description="创建你的第一个音频吧"
-          action={
-            <Button onClick={() => navigate('/app/create')}>
-              开始创建
-            </Button>
-          }
+          action={<Button onClick={() => navigate('/app/create')}>开始创建</Button>}
         />
       ) : (
-        <AudioList 
+        <AudioList
           audios={audios}
           groupByDate
           onPlay={handlePlay}
@@ -356,7 +338,7 @@ export function LibraryPage() {
           onDelete={handleDelete}
         />
       )}
-      
+
       {/* 额度条 */}
       <QuotaBar />
     </div>
@@ -863,34 +845,30 @@ export function SettingItem({
   description,
   onClick,
   rightContent,
-  danger
+  danger,
 }: SettingItemProps) {
   return (
     <div
       onClick={onClick}
       className={cn(
-        "flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition",
-        danger 
-          ? "border-red-200 hover:bg-red-50" 
-          : "border-gray-200 hover:bg-gray-50"
+        'flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition',
+        danger ? 'border-red-200 hover:bg-red-50' : 'border-gray-200 hover:bg-gray-50'
       )}
     >
-      <div className={cn(
-        "w-10 h-10 rounded-lg flex items-center justify-center",
-        danger ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-600"
-      )}>
+      <div
+        className={cn(
+          'w-10 h-10 rounded-lg flex items-center justify-center',
+          danger ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'
+        )}
+      >
         {icon}
       </div>
-      
+
       <div className="flex-1">
-        <div className={cn("font-medium", danger && "text-red-600")}>
-          {title}
-        </div>
-        {description && (
-          <div className="text-sm text-gray-500">{description}</div>
-        )}
+        <div className={cn('font-medium', danger && 'text-red-600')}>{title}</div>
+        {description && <div className="text-sm text-gray-500">{description}</div>}
       </div>
-      
+
       {rightContent || (onClick && <ChevronRightIcon className="w-5 h-5 text-gray-400" />)}
     </div>
   );
@@ -923,34 +901,32 @@ export function ConfirmDialog({
   confirmText = '确认',
   cancelText = '取消',
   danger = false,
-  loading = false
+  loading = false,
 }: ConfirmDialogProps) {
   return (
     <Dialog open={open} onClose={onClose}>
       <div className="p-6 text-center">
-        <div className={cn(
-          "w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center",
-          danger ? "bg-red-100" : "bg-blue-100"
-        )}>
+        <div
+          className={cn(
+            'w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center',
+            danger ? 'bg-red-100' : 'bg-blue-100'
+          )}
+        >
           {danger ? (
             <TrashIcon className="w-6 h-6 text-red-600" />
           ) : (
             <QuestionIcon className="w-6 h-6 text-blue-600" />
           )}
         </div>
-        
+
         <h3 className="text-lg font-semibold mb-2">{title}</h3>
         <p className="text-gray-600 mb-6">{description}</p>
-        
+
         <div className="flex gap-3 justify-center">
           <Button variant="secondary" onClick={onClose} disabled={loading}>
             {cancelText}
           </Button>
-          <Button 
-            variant={danger ? 'danger' : 'primary'} 
-            onClick={onConfirm}
-            loading={loading}
-          >
+          <Button variant={danger ? 'danger' : 'primary'} onClick={onConfirm} loading={loading}>
             {confirmText}
           </Button>
         </div>
@@ -962,4 +938,4 @@ export function ConfirmDialog({
 
 ---
 
-*覆盖所有页面，AI Coding 友好！*
+_覆盖所有页面，AI Coding 友好！_

@@ -1,0 +1,30 @@
+{
+  "name": "aimake",
+  "version": "0.1.0",
+  "description": "AI语音内容生成平台 - 播客、有声书、配音",
+  "scripts": {
+    "lint": "npm run lint:js && npm run lint:css && npm run lint:md",
+    "lint:js": "eslint 'landing/**/*.js' --fix",
+    "lint:css": "stylelint 'landing/**/*.css' --fix",
+    "lint:md": "markdownlint '**/*.md' --ignore node_modules --ignore .venv",
+    "format": "prettier --write '**/*.{js,css,html,json,md}' --ignore-path .prettierignore",
+    "format:check": "prettier --check '**/*.{js,css,html,json,md}' --ignore-path .prettierignore",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chicogong/aimake.git"
+  },
+  "author": "chicogong",
+  "license": "MIT",
+  "devDependencies": {
+    "@commitlint/cli": "^18.6.0",
+    "@commitlint/config-conventional": "^18.6.0",
+    "eslint": "^8.56.0",
+    "lint-staged": "^15.2.0",
+    "markdownlint-cli": "^0.39.0",
+    "prettier": "^3.2.4",
+    "stylelint": "^16.1.0",
+    "stylelint-config-standard": "^36.0.0"
+  }
+}

@@ -1,7 +1,6 @@
 # AIMake 环境变量与配置管理
 
-> 创建日期: 2026-01-09
-> 策略: 分环境配置 + 密钥安全管理
+> 创建日期: 2026-01-09 策略: 分环境配置 + 密钥安全管理
 >
 > **快速开始**: 复制根目录的 `.env.example` 文件并按照注释填写
 
@@ -16,6 +15,7 @@
 📄 **[.env.example](../../.env.example)**
 
 包含以下完整配置：
+
 - ✅ 前端环境变量（Vite）
 - ✅ 后端环境变量（Cloudflare Workers）
 - ✅ TTS 供应商配置（腾讯云、Google、Azure、OpenAI、MiniMax、ElevenLabs）
@@ -146,23 +146,23 @@ export const config = {
   env: import.meta.env.VITE_ENV,
   isDev: import.meta.env.VITE_ENV === 'development',
   isProd: import.meta.env.VITE_ENV === 'production',
-  
+
   api: {
     baseUrl: import.meta.env.VITE_API_URL,
   },
-  
+
   clerk: {
     publishableKey: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
   },
-  
+
   stripe: {
     publishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
   },
-  
+
   sentry: {
     dsn: import.meta.env.VITE_SENTRY_DSN,
   },
-  
+
   features: {
     podcast: import.meta.env.VITE_FEATURE_PODCAST === 'true',
     voiceClone: import.meta.env.VITE_FEATURE_VOICE_CLONE === 'true',
@@ -170,10 +170,7 @@ export const config = {
 } as const;
 
 // 验证必需变量
-const requiredEnvVars = [
-  'VITE_API_URL',
-  'VITE_CLERK_PUBLISHABLE_KEY',
-];
+const requiredEnvVars = ['VITE_API_URL', 'VITE_CLERK_PUBLISHABLE_KEY'];
 
 for (const key of requiredEnvVars) {
   if (!import.meta.env[key]) {
@@ -286,12 +283,12 @@ export interface Env {
   ENV: 'development' | 'staging' | 'production';
   CORS_ORIGIN: string;
   LOG_LEVEL: 'debug' | 'info' | 'warn' | 'error';
-  
+
   // ========== Bindings ==========
   DB: D1Database;
   KV: KVNamespace;
   R2: R2Bucket;
-  
+
   // ========== Secrets ==========
   CLERK_SECRET_KEY: string;
   CLERK_WEBHOOK_SECRET: string;
@@ -317,34 +314,38 @@ export function createConfig(env: Env) {
     env: env.ENV,
     isDev: env.ENV === 'development',
     isProd: env.ENV === 'production',
-    
+
     cors: {
       origin: env.CORS_ORIGIN.split(','),
     },
-    
+
     clerk: {
       secretKey: env.CLERK_SECRET_KEY,
       webhookSecret: env.CLERK_WEBHOOK_SECRET,
     },
-    
+
     stripe: {
       secretKey: env.STRIPE_SECRET_KEY,
       webhookSecret: env.STRIPE_WEBHOOK_SECRET,
     },
-    
+
     tts: {
       openai: {
         apiKey: env.OPENAI_API_KEY,
       },
-      elevenlabs: env.ELEVENLABS_API_KEY ? {
-        apiKey: env.ELEVENLABS_API_KEY,
-      } : null,
-      tencent: env.TENCENT_SECRET_ID ? {
-        secretId: env.TENCENT_SECRET_ID,
-        secretKey: env.TENCENT_SECRET_KEY,
-      } : null,
+      elevenlabs: env.ELEVENLABS_API_KEY
+        ? {
+            apiKey: env.ELEVENLABS_API_KEY,
+          }
+        : null,
+      tencent: env.TENCENT_SECRET_ID
+        ? {
+            secretId: env.TENCENT_SECRET_ID,
+            secretKey: env.TENCENT_SECRET_KEY,
+          }
+        : null,
     },
-    
+
     logging: {
       level: env.LOG_LEVEL,
     },
@@ -501,7 +502,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Deploy to Cloudflare
         run: |
           cd api
@@ -513,7 +514,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Deploy to Vercel
         run: |
           cd frontend
@@ -539,14 +540,17 @@ jobs:
 3. 左侧菜单 → API Keys
 
 ### Publishable Key (前端)
+
 - 格式: pk_test_xxx 或 pk_live_xxx
 - 用途: 前端 ClerkProvider
 
 ### Secret Key (后端)
+
 - 格式: sk_test_xxx 或 sk_live_xxx
 - 用途: 后端 JWT 验证
 
 ### Webhook Secret
+
 - 左侧菜单 → Webhooks
 - 创建 Endpoint 后获取
 - 格式: whsec_xxx
@@ -561,19 +565,23 @@ jobs:
 2. 右上角切换 Test/Live 模式
 
 ### Publishable Key (前端)
+
 - Developers → API keys → Publishable key
 - 格式: pk_test_xxx 或 pk_live_xxx
 
 ### Secret Key (后端)
+
 - Developers → API keys → Secret key
 - 格式: sk_test_xxx 或 sk_live_xxx
 
 ### Webhook Secret
+
 - Developers → Webhooks → 添加 Endpoint
 - 创建后点击 Reveal → Signing secret
 - 格式: whsec_xxx
 
 ### Price IDs
+
 - Products → 选择产品 → 价格 → API ID
 - 格式: price_xxx
 ```
@@ -589,6 +597,7 @@ jobs:
 4. 格式: sk-xxx
 
 ### 注意事项
+
 - 创建后只显示一次，请妥善保存
 - 建议为不同环境创建不同的 key
 - 设置 Usage limits 防止超额
@@ -604,14 +613,17 @@ jobs:
 3. 新建密钥
 
 ### SecretId
+
 - 格式: AKIDxxx
 - 用途: 身份标识
 
 ### SecretKey
+
 - 格式: xxx
 - 用途: 签名计算
 
 ### 注意事项
+
 - 建议使用子账号密钥
 - 开启 TTS 服务: 语音合成控制台
 ```
@@ -626,23 +638,27 @@ jobs:
 ## 环境变量安全清单
 
 ### 代码层面
+
 - [ ] .env.local 已加入 .gitignore
 - [ ] .dev.vars 已加入 .gitignore
 - [ ] 无硬编码的 API Key
 - [ ] 敏感变量使用 Secrets 管理
 
 ### 密钥管理
+
 - [ ] 开发/生产使用不同密钥
 - [ ] 定期轮换密钥
 - [ ] 限制 API Key 权限
 - [ ] 启用 API 使用限制
 
 ### 访问控制
+
 - [ ] Cloudflare Secrets 仅管理员可访问
 - [ ] Vercel 环境变量设置访问权限
 - [ ] GitHub Secrets 限制仓库访问
 
 ### 监控
+
 - [ ] 启用 API 使用告警
 - [ ] 监控异常调用
 - [ ] 日志脱敏处理
@@ -719,29 +735,25 @@ interface ValidationResult {
 export function validateEnv(env: Env): ValidationResult {
   const missing: string[] = [];
   const warnings: string[] = [];
-  
+
   // 必需变量
-  const required = [
-    'CLERK_SECRET_KEY',
-    'STRIPE_SECRET_KEY',
-    'OPENAI_API_KEY',
-  ];
-  
+  const required = ['CLERK_SECRET_KEY', 'STRIPE_SECRET_KEY', 'OPENAI_API_KEY'];
+
   for (const key of required) {
     if (!env[key]) {
       missing.push(key);
     }
   }
-  
+
   // 可选但推荐
   if (!env.SENTRY_DSN) {
     warnings.push('SENTRY_DSN not set - error tracking disabled');
   }
-  
+
   if (!env.ELEVENLABS_API_KEY) {
     warnings.push('ELEVENLABS_API_KEY not set - premium voices disabled');
   }
-  
+
   return {
     valid: missing.length === 0,
     missing,
@@ -754,7 +766,7 @@ const result = validateEnv(env);
 if (!result.valid) {
   throw new Error(`Missing env vars: ${result.missing.join(', ')}`);
 }
-result.warnings.forEach(w => console.warn(w));
+result.warnings.forEach((w) => console.warn(w));
 ```
 
 ### 8.2 健康检查包含配置状态
@@ -781,14 +793,14 @@ result.warnings.forEach(w => console.warn(w));
 
 ### 9.1 环境变量速查表
 
-| 变量 | 位置 | 类型 | 说明 |
-|------|------|------|------|
-| `VITE_API_URL` | 前端 | 公开 | API 地址 |
-| `VITE_CLERK_PUBLISHABLE_KEY` | 前端 | 公开 | Clerk 公钥 |
-| `VITE_STRIPE_PUBLISHABLE_KEY` | 前端 | 公开 | Stripe 公钥 |
-| `CLERK_SECRET_KEY` | 后端 | Secret | Clerk 私钥 |
-| `STRIPE_SECRET_KEY` | 后端 | Secret | Stripe 私钥 |
-| `OPENAI_API_KEY` | 后端 | Secret | OpenAI 密钥 |
+| 变量                          | 位置 | 类型   | 说明        |
+| ----------------------------- | ---- | ------ | ----------- |
+| `VITE_API_URL`                | 前端 | 公开   | API 地址    |
+| `VITE_CLERK_PUBLISHABLE_KEY`  | 前端 | 公开   | Clerk 公钥  |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | 前端 | 公开   | Stripe 公钥 |
+| `CLERK_SECRET_KEY`            | 后端 | Secret | Clerk 私钥  |
+| `STRIPE_SECRET_KEY`           | 后端 | Secret | Stripe 私钥 |
+| `OPENAI_API_KEY`              | 后端 | Secret | OpenAI 密钥 |
 
 ### 9.2 常用命令
 
@@ -814,4 +826,4 @@ vercel env pull .env.local
 
 ---
 
-*完整的环境配置管理方案！*
+_完整的环境配置管理方案！_

@@ -1,7 +1,6 @@
 # TTS 免费供应商快速接入指南
 
-> 创建日期: 2026-01-09
-> 目标: 快速上线，优先使用免费 API
+> 创建日期: 2026-01-09目标: 快速上线，优先使用免费 API
 
 ---
 
@@ -12,6 +11,7 @@
 **免费额度**: 新用户送 800万字符（基础/精品音色，3个月有效）
 
 **优势**:
+
 - 免费额度最大（800万字符 = 4万分钟音频）
 - 中文音质优秀，情感控制好
 - 150+ 音色，支持多语言
@@ -70,6 +70,7 @@ with open("output.mp3", "wb") as f:
 ```
 
 **推荐音色**:
+
 - **101001 (智瑜)**: 女声，温柔自然
 - **101002 (智聆)**: 女声，亲切温暖
 - **101003 (智美)**: 女声，甜美可爱
@@ -83,10 +84,12 @@ with open("output.mp3", "wb") as f:
 ### 1.2 Google Cloud TTS
 
 **免费额度**:
+
 - 标准音色：400万字符/月（持续免费）
 - WaveNet：100万字符/月（持续免费）
 
 **优势**:
+
 - 持续免费，无需担心过期
 - 220+ 音色，支持 40+ 语言
 - WaveNet 音质优秀
@@ -149,6 +152,7 @@ with open("output.mp3", "wb") as f:
 ```
 
 **推荐音色**:
+
 - **zh-CN-Wavenet-A**: 中文女声（WaveNet）
 - **zh-CN-Wavenet-B**: 中文男声（WaveNet）
 - **en-US-Neural2-A**: 英文女声（Neural）
@@ -161,10 +165,12 @@ with open("output.mp3", "wb") as f:
 ### 1.3 Amazon Polly
 
 **免费额度**:
+
 - 标准音色：500万字符/月（持续免费）
 - Neural 音色：100万字符/月（12个月）
 
 **优势**:
+
 - 免费额度大且持续
 - Neural 音色自然流畅
 - 60+ 音色，支持 30+ 语言
@@ -222,6 +228,7 @@ with open("output.mp3", "wb") as f:
 ```
 
 **推荐音色**:
+
 - **Zhiyu**: 中文女声（Neural）
 - **Joanna**: 英文女声（Neural）
 - **Matthew**: 英文男声（Neural）
@@ -236,6 +243,7 @@ with open("output.mp3", "wb") as f:
 **免费额度**: 500万字符/月（12个月）
 
 **优势**:
+
 - 400+ 音色，支持 110+ 语言
 - Neural 音色质量高
 - 价格最低：$0.001/1K chars（标准音色）
@@ -304,6 +312,7 @@ with open("output.mp3", "wb") as f:
 ```
 
 **推荐音色**:
+
 - **zh-CN-XiaoxiaoNeural**: 中文女声，温柔
 - **zh-CN-YunyangNeural**: 中文男声，专业
 - **en-US-JennyNeural**: 英文女声，友好
@@ -533,12 +542,12 @@ TTS:
 
 ## 五、注册链接汇总
 
-| 服务 | 注册链接 | 免费额度 |
-|------|---------|---------|
-| **腾讯云 TTS** | https://cloud.tencent.com/product/tts | 800万字符（3个月） |
-| **Google Cloud TTS** | https://cloud.google.com/text-to-speech | 400万字符/月 |
-| **Amazon Polly** | https://aws.amazon.com/polly/ | 500万字符/月 |
-| **Azure TTS** | https://azure.microsoft.com/products/ai-services/text-to-speech | 500万字符/月（12个月） |
+| 服务                 | 注册链接                                                        | 免费额度               |
+| -------------------- | --------------------------------------------------------------- | ---------------------- |
+| **腾讯云 TTS**       | https://cloud.tencent.com/product/tts                           | 800万字符（3个月）     |
+| **Google Cloud TTS** | https://cloud.google.com/text-to-speech                         | 400万字符/月           |
+| **Amazon Polly**     | https://aws.amazon.com/polly/                                   | 500万字符/月           |
+| **Azure TTS**        | https://azure.microsoft.com/products/ai-services/text-to-speech | 500万字符/月（12个月） |
 
 ---
 
@@ -573,5 +582,4 @@ voice = "nova"  # OpenAI TTS
 
 ---
 
-**最后更新**: 2026-01-09
-**维护者**: AIMake 技术团队
+**最后更新**: 2026-01-09 **维护者**: AIMake 技术团队

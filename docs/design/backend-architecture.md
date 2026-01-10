@@ -1,7 +1,6 @@
 # AIMake 后端架构设计
 
-> 创建日期: 2026-01-09
-> 技术栈: Cloudflare Workers + Hono + D1 + R2
+> 创建日期: 2026-01-09技术栈: Cloudflare Workers + Hono + D1 + R2
 
 ---
 
@@ -120,10 +119,13 @@ const app = new Hono<{ Bindings: Env }>();
 
 // 全局中间件
 app.use('*', logger());
-app.use('*', cors({
-  origin: ['https://aimake.cc', 'http://localhost:5173'],
-  credentials: true,
-}));
+app.use(
+  '*',
+  cors({
+    origin: ['https://aimake.cc', 'http://localhost:5173'],
+    credentials: true,
+  })
+);
 app.use('*', errorHandler());
 
 // 公开路由
@@ -159,12 +161,12 @@ export interface Env {
   KV: KVNamespace;
   // 存储
   R2: R2Bucket;
-  
+
   // Secrets
   CLERK_SECRET_KEY: string;
   STRIPE_SECRET_KEY: string;
   OPENAI_API_KEY: string;
-  
+
   // 环境变量
   ENV: 'development' | 'production';
   CORS_ORIGIN: string;
@@ -204,26 +206,25 @@ import { Errors } from '../lib/errors';
 export const authMiddleware = () => {
   return createMiddleware(async (c, next) => {
     const token = c.req.header('Authorization')?.replace('Bearer ', '');
-    
+
     if (!token) {
       throw Errors.authRequired();
     }
-    
+
     try {
       const payload = await verifyToken(token, {
         secretKey: c.env.CLERK_SECRET_KEY,
       });
-      
+
       // 从 D1 获取用户
-      const user = await c.env.DB
-        .prepare('SELECT * FROM users WHERE clerk_id = ?')
+      const user = await c.env.DB.prepare('SELECT * FROM users WHERE clerk_id = ?')
         .bind(payload.sub)
         .first();
-      
+
       if (!user) {
         throw Errors.userNotFound();
       }
-      
+
       c.set('user', user as User);
       await next();
     } catch {
@@ -244,14 +245,14 @@ export const rateLimiter = (limit = 60) => {
   return createMiddleware(async (c, next) => {
     const user = c.get('user');
     const key = `rate:${user.id}`;
-    
+
     const count = await c.env.KV.get(key);
     const current = count ? parseInt(count) : 0;
-    
+
     if (current >= limit) {
       throw Errors.rateLimited(60);
     }
-    
+
     await c.env.KV.put(key, String(current + 1), { expirationTtl: 60 });
     await next();
   });
@@ -273,26 +274,21 @@ import { Errors } from '../lib/errors';
 export class TTSService {
   private openai: OpenAI;
   private env: Env;
-  
+
   constructor(env: Env) {
     this.env = env;
     this.openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
   }
-  
-  async generate(params: {
-    text: string;
-    voiceId: string;
-    speed?: number;
-    user: User;
-  }) {
+
+  async generate(params: { text: string; voiceId: string; speed?: number; user: User }) {
     const { text, voiceId, speed = 1, user } = params;
-    
+
     // 检查额度
     const cost = Math.ceil(text.length / 200); // 预估秒数
     if (user.quotaUsed + cost > user.quotaLimit) {
       throw Errors.quotaExceeded({ limit: user.quotaLimit, used: user.quotaUsed });
     }
-    
+
     // 调用 OpenAI TTS
     const voice = voiceId.replace('openai-', '') as 'alloy' | 'echo' | 'nova';
     const response = await this.openai.audio.speech.create({
@@ -301,29 +297,29 @@ export class TTSService {
       input: text,
       speed,
     });
-    
+
     // 上传到 R2
     const audioId = crypto.randomUUID();
     const audioBuffer = await response.arrayBuffer();
     await this.env.R2.put(`audios/${audioId}.mp3`, audioBuffer, {
       httpMetadata: { contentType: 'audio/mpeg' },
     });
-    
+
     // 保存记录
-    await this.env.DB
-      .prepare(`
+    await this.env.DB.prepare(
+      `
         INSERT INTO audios (id, user_id, text, voice_id, duration, url)
         VALUES (?, ?, ?, ?, ?, ?)
-      `)
+      `
+    )
       .bind(audioId, user.id, text, voiceId, cost, `audios/${audioId}.mp3`)
       .run();
-    
+
     // 扣减额度
-    await this.env.DB
-      .prepare('UPDATE users SET quota_used = quota_used + ? WHERE id = ?')
+    await this.env.DB.prepare('UPDATE users SET quota_used = quota_used + ? WHERE id = ?')
       .bind(cost, user.id)
       .run();
-    
+
     return {
       id: audioId,
       url: `https://audio.aimake.cc/${audioId}.mp3`,
@@ -341,18 +337,18 @@ import { Env } from '../types';
 
 export class StorageService {
   constructor(private env: Env) {}
-  
+
   async upload(key: string, data: ArrayBuffer, contentType: string) {
     await this.env.R2.put(key, data, {
       httpMetadata: { contentType },
     });
     return `https://audio.aimake.cc/${key}`;
   }
-  
+
   async delete(key: string) {
     await this.env.R2.delete(key);
   }
-  
+
   async getSignedUrl(key: string) {
     // R2 presigned URL (需要配置)
     return `https://audio.aimake.cc/${key}`;
@@ -383,10 +379,10 @@ const generateSchema = z.object({
 tts.post('/generate', zValidator('json', generateSchema), async (c) => {
   const user = c.get('user');
   const body = c.req.valid('json');
-  
+
   const service = new TTSService(c.env);
   const result = await service.generate({ ...body, user });
-  
+
   return c.json({ success: true, data: result });
 });
 
@@ -402,10 +398,7 @@ export default tts;
 import { Env, User } from '../types';
 
 export async function getUserByClerkId(db: D1Database, clerkId: string) {
-  return db
-    .prepare('SELECT * FROM users WHERE clerk_id = ?')
-    .bind(clerkId)
-    .first<User>();
+  return db.prepare('SELECT * FROM users WHERE clerk_id = ?').bind(clerkId).first<User>();
 }
 
 export async function getAudiosByUser(db: D1Database, userId: string, limit = 20) {
@@ -423,9 +416,7 @@ export async function updateUserQuota(db: D1Database, userId: string, amount: nu
 }
 
 export async function resetMonthlyQuota(db: D1Database) {
-  return db
-    .prepare('UPDATE users SET quota_used = 0 WHERE quota_reset_at < datetime("now")')
-    .run();
+  return db.prepare('UPDATE users SET quota_used = 0 WHERE quota_reset_at < datetime("now")').run();
 }
 ```
 
@@ -483,14 +474,14 @@ wrangler deploy
 
 ## 十一、相关文档
 
-| 文档 | 说明 |
-|------|------|
-| [api-design.md](./api-design.md) | 详细接口定义 |
-| [database-schema.md](./database-schema.md) | 数据库表结构 |
-| [auth-design.md](./auth-design.md) | Clerk 认证详情 |
+| 文档                                               | 说明            |
+| -------------------------------------------------- | --------------- |
+| [api-design.md](./api-design.md)                   | 详细接口定义    |
+| [database-schema.md](./database-schema.md)         | 数据库表结构    |
+| [auth-design.md](./auth-design.md)                 | Clerk 认证详情  |
 | [payment-integration.md](./payment-integration.md) | Stripe 支付详情 |
-| [error-handling.md](./error-handling.md) | 错误处理规范 |
+| [error-handling.md](./error-handling.md)           | 错误处理规范    |
 
 ---
 
-*简洁的后端架构，专注核心功能！*
+_简洁的后端架构，专注核心功能！_

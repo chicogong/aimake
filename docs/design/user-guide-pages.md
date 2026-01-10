@@ -1,7 +1,6 @@
 # 用户导向页面设计
 
-> 创建日期: 2026-01-10
-> 状态: 设计中
+> 创建日期: 2026-01-10状态: 设计中
 
 ---
 
@@ -11,14 +10,14 @@
 
 ## 页面清单
 
-| 页面 | 路径 | 用途 | 优先级 |
-|------|------|------|--------|
-| 功能介绍 | `/features` | 展示所有功能详情 | P0 |
-| 使用教程 | `/tutorials` | 分步骤教程 | P1 |
-| 帮助中心 | `/help` | FAQ + 文档 | P0 |
-| 定价详情 | `/pricing` | 完整定价对比 | P0 |
-| 用例展示 | `/use-cases` | 场景化案例 | P1 |
-| 更新日志 | `/changelog` | 产品更新记录 | P2 |
+| 页面     | 路径         | 用途             | 优先级 |
+| -------- | ------------ | ---------------- | ------ |
+| 功能介绍 | `/features`  | 展示所有功能详情 | P0     |
+| 使用教程 | `/tutorials` | 分步骤教程       | P1     |
+| 帮助中心 | `/help`      | FAQ + 文档       | P0     |
+| 定价详情 | `/pricing`   | 完整定价对比     | P0     |
+| 用例展示 | `/use-cases` | 场景化案例       | P1     |
+| 更新日志 | `/changelog` | 产品更新记录     | P2     |
 
 ---
 
@@ -148,12 +147,7 @@ const features: FeatureSection[] = [
     title: 'AI 播客生成',
     badge: 'featured',
     description: '输入话题，AI 自动生成双人对话播客',
-    benefits: [
-      '智能生成对话脚本',
-      '自动分配主持人角色',
-      '自然的对话节奏',
-      '可自定义对话风格',
-    ],
+    benefits: ['智能生成对话脚本', '自动分配主持人角色', '自然的对话节奏', '可自定义对话风格'],
     mediaType: 'video',
     mediaUrl: '/videos/podcast-demo.mp4',
     ctaText: '生成我的播客',
@@ -165,12 +159,7 @@ const features: FeatureSection[] = [
     title: '多音色选择',
     badge: undefined,
     description: '50+ 种专业音色，覆盖不同场景需求',
-    benefits: [
-      '男声、女声、童声',
-      '不同口音和风格',
-      '实时试听预览',
-      '收藏常用音色',
-    ],
+    benefits: ['男声、女声、童声', '不同口音和风格', '实时试听预览', '收藏常用音色'],
     mediaType: 'interactive',
     mediaUrl: '/components/voice-preview',
     ctaText: '浏览音色库',
@@ -182,12 +171,7 @@ const features: FeatureSection[] = [
     title: '情感与语速控制',
     badge: 'new',
     description: '精细调节语音的情感、语速、音调',
-    benefits: [
-      '7 种情感模式',
-      '0.5x - 2x 语速调节',
-      '音调高低控制',
-      '停顿时长设置',
-    ],
+    benefits: ['7 种情感模式', '0.5x - 2x 语速调节', '音调高低控制', '停顿时长设置'],
     mediaType: 'animation',
     mediaUrl: '/animations/emotion-demo.json',
     ctaText: '试试看',
@@ -199,12 +183,7 @@ const features: FeatureSection[] = [
     title: '批量处理',
     badge: undefined,
     description: '上传文档，批量转换为音频文件',
-    benefits: [
-      '支持 TXT/DOCX/PDF',
-      '自动分章节处理',
-      '批量下载打包',
-      '进度实时追踪',
-    ],
+    benefits: ['支持 TXT/DOCX/PDF', '自动分章节处理', '批量下载打包', '进度实时追踪'],
     mediaType: 'image',
     mediaUrl: '/images/batch-demo.png',
     ctaText: '批量转换',
@@ -216,12 +195,7 @@ const features: FeatureSection[] = [
     title: 'API 接入',
     badge: undefined,
     description: '开发者友好的 RESTful API，轻松集成到你的应用',
-    benefits: [
-      'RESTful API 设计',
-      '完整的 SDK 支持',
-      'Webhook 回调',
-      '详细的文档示例',
-    ],
+    benefits: ['RESTful API 设计', '完整的 SDK 支持', 'Webhook 回调', '详细的文档示例'],
     mediaType: 'image',
     mediaUrl: '/images/api-demo.png',
     ctaText: '查看 API 文档',
@@ -242,15 +216,17 @@ interface FeatureCardProps {
 export function FeatureCard({ feature, layout }: FeatureCardProps) {
   return (
     <section id={feature.id} className="py-16 border-b border-gray-100">
-      <div className={cn(
-        "max-w-6xl mx-auto px-4 flex gap-12 items-center",
-        layout === 'right' && "flex-row-reverse"
-      )}>
+      <div
+        className={cn(
+          'max-w-6xl mx-auto px-4 flex gap-12 items-center',
+          layout === 'right' && 'flex-row-reverse'
+        )}
+      >
         {/* 媒体区域 */}
         <div className="flex-1">
           <FeatureMedia type={feature.mediaType} url={feature.mediaUrl} />
         </div>
-        
+
         {/* 内容区域 */}
         <div className="flex-1 space-y-6">
           <div className="flex items-center gap-3">
@@ -258,9 +234,9 @@ export function FeatureCard({ feature, layout }: FeatureCardProps) {
             <h2 className="text-3xl font-bold">{feature.title}</h2>
             {feature.badge && <FeatureBadge type={feature.badge} />}
           </div>
-          
+
           <p className="text-xl text-gray-600">{feature.description}</p>
-          
+
           <ul className="space-y-3">
             {feature.benefits.map((benefit, i) => (
               <li key={i} className="flex items-center gap-2">
@@ -269,7 +245,7 @@ export function FeatureCard({ feature, layout }: FeatureCardProps) {
               </li>
             ))}
           </ul>
-          
+
           <Button asChild size="lg">
             <Link href={feature.ctaLink}>
               {feature.ctaText} <ArrowRight className="ml-2" />
@@ -626,23 +602,24 @@ AIMake 是一个 AI 语音内容生成平台，可以帮助你：
 export function SearchHelp() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<FAQArticle[]>([]);
-  
+
   const handleSearch = useDebouncedCallback((value: string) => {
     if (value.length < 2) {
       setResults([]);
       return;
     }
-    
+
     // 搜索逻辑
-    const filtered = allArticles.filter(article => 
-      article.question.toLowerCase().includes(value.toLowerCase()) ||
-      article.answer.toLowerCase().includes(value.toLowerCase()) ||
-      article.tags.some(tag => tag.includes(value))
+    const filtered = allArticles.filter(
+      (article) =>
+        article.question.toLowerCase().includes(value.toLowerCase()) ||
+        article.answer.toLowerCase().includes(value.toLowerCase()) ||
+        article.tags.some((tag) => tag.includes(value))
     );
-    
+
     setResults(filtered.slice(0, 5));
   }, 300);
-  
+
   return (
     <div className="relative">
       <Input
@@ -654,19 +631,17 @@ export function SearchHelp() {
         }}
         className="w-full max-w-xl"
       />
-      
+
       {results.length > 0 && (
         <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-lg border">
-          {results.map(article => (
+          {results.map((article) => (
             <Link
               key={article.id}
               href={`/help/${article.slug}`}
               className="block p-4 hover:bg-gray-50"
             >
               <p className="font-medium">{article.question}</p>
-              <p className="text-sm text-gray-500 truncate">
-                {article.answer.slice(0, 100)}...
-              </p>
+              <p className="text-sm text-gray-500 truncate">{article.answer.slice(0, 100)}...</p>
             </Link>
           ))}
         </div>
@@ -1183,16 +1158,16 @@ const seoConfig = {
 
 ### 9.1 共享组件
 
-| 组件 | 用途 | 使用页面 |
-|------|------|----------|
-| `MarketingNav` | 营销页导航 | 全部 |
-| `MarketingFooter` | 营销页页脚 | 全部 |
-| `CTASection` | 行动号召区块 | Features, Use Cases |
-| `FeatureCard` | 功能卡片 | Features, Landing |
-| `PricingCard` | 定价卡片 | Pricing, Landing |
-| `TestimonialCard` | 用户评价卡片 | Use Cases, Landing |
-| `SearchBox` | 搜索框 | Help, Tutorials |
-| `Breadcrumb` | 面包屑导航 | Tutorials, Help |
+| 组件              | 用途         | 使用页面            |
+| ----------------- | ------------ | ------------------- |
+| `MarketingNav`    | 营销页导航   | 全部                |
+| `MarketingFooter` | 营销页页脚   | 全部                |
+| `CTASection`      | 行动号召区块 | Features, Use Cases |
+| `FeatureCard`     | 功能卡片     | Features, Landing   |
+| `PricingCard`     | 定价卡片     | Pricing, Landing    |
+| `TestimonialCard` | 用户评价卡片 | Use Cases, Landing  |
+| `SearchBox`       | 搜索框       | Help, Tutorials     |
+| `Breadcrumb`      | 面包屑导航   | Tutorials, Help     |
 
 ### 9.2 布局模板
 
@@ -1213,14 +1188,14 @@ export function MarketingLayout({ children }: { children: React.ReactNode }) {
 
 ## 10. 实现优先级
 
-| 页面 | 优先级 | 预计工时 | 说明 |
-|------|--------|----------|------|
-| 定价页 `/pricing` | P0 | 2h | 转化关键页 |
-| 帮助中心 `/help` | P0 | 3h | 减少客服压力 |
-| 功能介绍 `/features` | P0 | 3h | 产品展示核心 |
-| 使用教程 `/tutorials` | P1 | 4h | 提升用户体验 |
-| 用例展示 `/use-cases` | P1 | 2h | 社会证明 |
-| 更新日志 `/changelog` | P2 | 1h | 产品透明度 |
+| 页面                  | 优先级 | 预计工时 | 说明         |
+| --------------------- | ------ | -------- | ------------ |
+| 定价页 `/pricing`     | P0     | 2h       | 转化关键页   |
+| 帮助中心 `/help`      | P0     | 3h       | 减少客服压力 |
+| 功能介绍 `/features`  | P0     | 3h       | 产品展示核心 |
+| 使用教程 `/tutorials` | P1     | 4h       | 提升用户体验 |
+| 用例展示 `/use-cases` | P1     | 2h       | 社会证明     |
+| 更新日志 `/changelog` | P2     | 1h       | 产品透明度   |
 
 ---
 
@@ -1235,6 +1210,6 @@ export function MarketingLayout({ children }: { children: React.ReactNode }) {
 
 ## 更新日志
 
-| 日期 | 版本 | 更新内容 |
-|------|------|----------|
+| 日期       | 版本  | 更新内容                            |
+| ---------- | ----- | ----------------------------------- |
 | 2026-01-10 | 1.0.0 | 初始版本，包含 6 个用户导向页面设计 |

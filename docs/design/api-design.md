@@ -1,8 +1,6 @@
 # AIMake API 接口设计
 
-> 创建日期: 2026-01-09
-> 后端: Cloudflare Workers + Hono
-> 风格: RESTful + JSON
+> 创建日期: 2026-01-09后端: Cloudflare Workers + Hono风格: RESTful + JSON
 
 ---
 
@@ -21,36 +19,36 @@ Base URL:
 
 ### 1.2 接口清单
 
-| 模块 | 方法 | 路径 | 说明 |
-|------|------|------|------|
-| **健康检查** | | | |
-| | GET | /health | 服务健康检查 |
-| **认证** | | | |
-| | GET | /auth/me | 获取当前用户 |
-| | POST | /webhook/clerk | Clerk Webhook |
-| **音色** | | | |
-| | GET | /voices | 获取音色列表 |
-| | GET | /voices/:id/preview | 获取音色预览 |
-| **TTS** | | | |
-| | POST | /tts/generate | 生成音频 |
-| | GET | /tts/status/:jobId | 查询生成状态 |
-| **音频** | | | |
-| | GET | /audios | 获取音频列表 |
-| | GET | /audios/:id | 获取音频详情 |
-| | DELETE | /audios/:id | 删除音频 |
-| | GET | /audios/:id/download | 下载音频 |
-| **播客** | | | |
-| | POST | /podcasts/generate | 生成播客 |
-| | GET | /podcasts | 获取播客列表 |
-| | GET | /podcasts/:id | 获取播客详情 |
-| | DELETE | /podcasts/:id | 删除播客 |
-| **用户** | | | |
-| | GET | /user/quota | 获取用量额度 |
-| | GET | /user/usage | 获取使用记录 |
-| **订阅** | | | |
-| | GET | /subscription | 获取订阅状态 |
-| | POST | /subscription/checkout | 创建支付会话 |
-| | POST | /webhook/stripe | Stripe Webhook |
+| 模块         | 方法   | 路径                   | 说明           |
+| ------------ | ------ | ---------------------- | -------------- |
+| **健康检查** |        |                        |                |
+|              | GET    | /health                | 服务健康检查   |
+| **认证**     |        |                        |                |
+|              | GET    | /auth/me               | 获取当前用户   |
+|              | POST   | /webhook/clerk         | Clerk Webhook  |
+| **音色**     |        |                        |                |
+|              | GET    | /voices                | 获取音色列表   |
+|              | GET    | /voices/:id/preview    | 获取音色预览   |
+| **TTS**      |        |                        |                |
+|              | POST   | /tts/generate          | 生成音频       |
+|              | GET    | /tts/status/:jobId     | 查询生成状态   |
+| **音频**     |        |                        |                |
+|              | GET    | /audios                | 获取音频列表   |
+|              | GET    | /audios/:id            | 获取音频详情   |
+|              | DELETE | /audios/:id            | 删除音频       |
+|              | GET    | /audios/:id/download   | 下载音频       |
+| **播客**     |        |                        |                |
+|              | POST   | /podcasts/generate     | 生成播客       |
+|              | GET    | /podcasts              | 获取播客列表   |
+|              | GET    | /podcasts/:id          | 获取播客详情   |
+|              | DELETE | /podcasts/:id          | 删除播客       |
+| **用户**     |        |                        |                |
+|              | GET    | /user/quota            | 获取用量额度   |
+|              | GET    | /user/usage            | 获取使用记录   |
+| **订阅**     |        |                        |                |
+|              | GET    | /subscription          | 获取订阅状态   |
+|              | POST   | /subscription/checkout | 创建支付会话   |
+|              | POST   | /webhook/stripe        | Stripe Webhook |
 
 ---
 
@@ -62,7 +60,7 @@ Base URL:
 // 所有请求必须包含
 interface RequestHeaders {
   'Content-Type': 'application/json';
-  'Authorization'?: `Bearer ${string}`;  // Clerk JWT，需登录的接口必须
+  Authorization?: `Bearer ${string}`; // Clerk JWT，需登录的接口必须
 }
 ```
 
@@ -84,9 +82,9 @@ interface SuccessResponse<T> {
 interface ErrorResponse {
   success: false;
   error: {
-    code: string;        // 错误码，如 'QUOTA_EXCEEDED'
-    message: string;     // 用户可读消息
-    details?: unknown;   // 详细错误信息（仅开发环境）
+    code: string; // 错误码，如 'QUOTA_EXCEEDED'
+    message: string; // 用户可读消息
+    details?: unknown; // 详细错误信息（仅开发环境）
   };
 }
 ```
@@ -96,10 +94,10 @@ interface ErrorResponse {
 ```typescript
 // Query 参数
 interface PaginationParams {
-  page?: number;      // 页码，默认 1
-  pageSize?: number;  // 每页数量，默认 20，最大 100
-  sortBy?: string;    // 排序字段
-  sortOrder?: 'asc' | 'desc';  // 排序方向
+  page?: number; // 页码，默认 1
+  pageSize?: number; // 每页数量，默认 20，最大 100
+  sortBy?: string; // 排序字段
+  sortOrder?: 'asc' | 'desc'; // 排序方向
 }
 ```
 
@@ -159,20 +157,20 @@ curl https://api.aimake.cc/api/health
 
 ```typescript
 // 请求头
-Authorization: Bearer <clerk_jwt>
+Authorization: Bearer<clerk_jwt>;
 
 // 响应
 interface UserResponse {
-  id: string;           // 用户 ID (UUID)
-  clerkId: string;      // Clerk 用户 ID
+  id: string; // 用户 ID (UUID)
+  clerkId: string; // Clerk 用户 ID
   email: string;
   name: string | null;
   avatarUrl: string | null;
   plan: 'free' | 'pro' | 'team';
   quota: {
-    limit: number;      // 额度上限（秒）
-    used: number;       // 已用额度（秒）
-    resetAt: string;    // 重置时间 (ISO 8601)
+    limit: number; // 额度上限（秒）
+    used: number; // 已用额度（秒）
+    resetAt: string; // 重置时间 (ISO 8601)
   };
   createdAt: string;
 }
@@ -218,21 +216,21 @@ interface VoicesQuery {
   provider?: 'openai' | 'elevenlabs' | 'azure' | 'tencent';
   gender?: 'male' | 'female';
   language?: 'zh' | 'en' | 'ja';
-  premium?: boolean;  // 是否仅显示高级音色
+  premium?: boolean; // 是否仅显示高级音色
 }
 
 // 响应
 interface Voice {
-  id: string;           // 如 'openai-alloy'
-  name: string;         // 显示名称
-  nameZh: string;       // 中文名称
-  provider: string;     // 供应商
+  id: string; // 如 'openai-alloy'
+  name: string; // 显示名称
+  nameZh: string; // 中文名称
+  provider: string; // 供应商
   gender: 'male' | 'female' | 'neutral';
-  language: string[];   // 支持的语言
-  style: string;        // 风格描述
-  previewUrl: string;   // 预览音频 URL
-  isPremium: boolean;   // 是否高级音色
-  tags: string[];       // 标签
+  language: string[]; // 支持的语言
+  style: string; // 风格描述
+  previewUrl: string; // 预览音频 URL
+  isPremium: boolean; // 是否高级音色
+  tags: string[]; // 标签
 }
 
 type VoicesResponse = Voice[];
@@ -275,18 +273,18 @@ curl https://api.aimake.cc/api/voices?language=zh
 ```typescript
 // 请求体
 interface TTSGenerateRequest {
-  text: string;         // 待转换文本，最大 5000 字符
-  voiceId: string;      // 音色 ID
-  speed?: number;       // 语速 0.5-2.0，默认 1.0
-  pitch?: number;       // 音调 -10 到 10，默认 0
-  format?: 'mp3' | 'wav';  // 输出格式，默认 mp3
+  text: string; // 待转换文本，最大 5000 字符
+  voiceId: string; // 音色 ID
+  speed?: number; // 语速 0.5-2.0，默认 1.0
+  pitch?: number; // 音调 -10 到 10，默认 0
+  format?: 'mp3' | 'wav'; // 输出格式，默认 mp3
 }
 
 // 响应
 interface TTSGenerateResponse {
-  jobId: string;        // 任务 ID
+  jobId: string; // 任务 ID
   status: 'pending' | 'processing' | 'completed' | 'failed';
-  estimatedTime?: number;  // 预计完成时间（秒）
+  estimatedTime?: number; // 预计完成时间（秒）
 }
 ```
 
@@ -323,12 +321,12 @@ curl -X POST https://api.aimake.cc/api/tts/generate \
 interface TTSStatusResponse {
   jobId: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
-  progress?: number;    // 0-100
+  progress?: number; // 0-100
   audio?: {
     id: string;
     url: string;
-    duration: number;   // 秒
-    size: number;       // 字节
+    duration: number; // 秒
+    size: number; // 字节
   };
   error?: {
     code: string;
@@ -357,12 +355,12 @@ interface Audio {
   id: string;
   title: string;
   type: 'tts' | 'podcast';
-  text: string;         // 原始文本（截断）
+  text: string; // 原始文本（截断）
   voiceId: string;
   voiceName: string;
-  duration: number;     // 秒
-  size: number;         // 字节
-  url: string;          // 音频 URL
+  duration: number; // 秒
+  size: number; // 字节
+  url: string; // 音频 URL
   createdAt: string;
 }
 
@@ -380,7 +378,7 @@ interface AudiosResponse {
 
 ```typescript
 interface AudioDetailResponse extends Audio {
-  text: string;         // 完整文本
+  text: string; // 完整文本
   settings: {
     speed: number;
     pitch: number;
@@ -388,7 +386,7 @@ interface AudioDetailResponse extends Audio {
   };
   usage: {
     characters: number;
-    cost: number;       // 消耗额度（秒）
+    cost: number; // 消耗额度（秒）
   };
 }
 ```
@@ -399,7 +397,9 @@ interface AudioDetailResponse extends Audio {
 
 ```typescript
 // 响应
-{ success: true }
+{
+  success: true;
+}
 ```
 
 #### GET /audios/:id/download
@@ -427,16 +427,16 @@ Content-Disposition: attachment; filename="audio.mp3"
 interface PodcastGenerateRequest {
   source: {
     type: 'text' | 'url';
-    content: string;    // 文本内容或 URL
+    content: string; // 文本内容或 URL
   };
   settings: {
-    duration: 5 | 10 | 15 | 20;  // 目标时长（分钟）
+    duration: 5 | 10 | 15 | 20; // 目标时长（分钟）
     style: 'casual' | 'professional' | 'debate';
     hostVoiceId: string;
     guestVoiceId: string;
     language?: 'zh' | 'en';
   };
-  title?: string;       // 可选标题
+  title?: string; // 可选标题
 }
 
 // 响应
@@ -501,14 +501,14 @@ interface PodcastDetailResponse {
 interface QuotaResponse {
   plan: 'free' | 'pro' | 'team';
   quota: {
-    limit: number;      // 总额度（秒）
-    used: number;       // 已用（秒）
-    remaining: number;  // 剩余（秒）
-    resetAt: string;    // 重置时间
+    limit: number; // 总额度（秒）
+    used: number; // 已用（秒）
+    remaining: number; // 剩余（秒）
+    resetAt: string; // 重置时间
   };
   usage: {
-    today: number;      // 今日使用（秒）
-    thisMonth: number;  // 本月使用（秒）
+    today: number; // 今日使用（秒）
+    thisMonth: number; // 本月使用（秒）
   };
 }
 ```
@@ -520,7 +520,7 @@ interface QuotaResponse {
 ```typescript
 // Query 参数
 interface UsageQuery extends PaginationParams {
-  startDate?: string;   // ISO 8601
+  startDate?: string; // ISO 8601
   endDate?: string;
   type?: 'tts' | 'podcast';
 }
@@ -590,7 +590,7 @@ interface CheckoutRequest {
 
 // 响应
 interface CheckoutResponse {
-  checkoutUrl: string;  // Stripe Checkout URL
+  checkoutUrl: string; // Stripe Checkout URL
   sessionId: string;
 }
 ```
@@ -680,10 +680,13 @@ const app = new Hono<{ Bindings: Bindings }>();
 
 // 全局中间件
 app.use('*', logger());
-app.use('*', cors({
-  origin: ['https://aimake.cc', 'http://localhost:5173'],
-  credentials: true,
-}));
+app.use(
+  '*',
+  cors({
+    origin: ['https://aimake.cc', 'http://localhost:5173'],
+    credentials: true,
+  })
+);
 app.use('*', errorHandler());
 
 // 公开路由
@@ -728,28 +731,31 @@ const generateSchema = z.object({
 tts.post('/generate', zValidator('json', generateSchema), async (c) => {
   const user = c.get('user');
   const body = c.req.valid('json');
-  
+
   // 检查额度
   const quota = await getQuota(c.env.DB, user.id);
   const estimatedCost = estimateCost(body.text.length);
-  
+
   if (quota.remaining < estimatedCost) {
-    return c.json({
-      success: false,
-      error: {
-        code: 'QUOTA_EXCEEDED',
-        message: '额度不足，请升级套餐',
+    return c.json(
+      {
+        success: false,
+        error: {
+          code: 'QUOTA_EXCEEDED',
+          message: '额度不足，请升级套餐',
+        },
       },
-    }, 403);
+      403
+    );
   }
-  
+
   // 创建任务
   const ttsService = new TTSService(c.env);
   const job = await ttsService.createJob({
     userId: user.id,
     ...body,
   });
-  
+
   return c.json({
     success: true,
     data: {
@@ -764,19 +770,22 @@ tts.post('/generate', zValidator('json', generateSchema), async (c) => {
 tts.get('/status/:jobId', async (c) => {
   const { jobId } = c.req.param();
   const user = c.get('user');
-  
+
   const job = await getJob(c.env.DB, jobId, user.id);
-  
+
   if (!job) {
-    return c.json({
-      success: false,
-      error: {
-        code: 'NOT_FOUND',
-        message: '任务不存在',
+    return c.json(
+      {
+        success: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: '任务不存在',
+        },
       },
-    }, 404);
+      404
+    );
   }
-  
+
   return c.json({
     success: true,
     data: job,
@@ -796,47 +805,56 @@ import { verifyToken } from '@clerk/backend';
 export const authMiddleware = () => {
   return createMiddleware(async (c, next) => {
     const authHeader = c.req.header('Authorization');
-    
+
     if (!authHeader?.startsWith('Bearer ')) {
-      return c.json({
-        success: false,
-        error: {
-          code: 'UNAUTHORIZED',
-          message: '请先登录',
+      return c.json(
+        {
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: '请先登录',
+          },
         },
-      }, 401);
+        401
+      );
     }
-    
+
     const token = authHeader.slice(7);
-    
+
     try {
       const payload = await verifyToken(token, {
         secretKey: c.env.CLERK_SECRET_KEY,
       });
-      
+
       // 从数据库获取用户信息
       const user = await getUserByClerkId(c.env.DB, payload.sub);
-      
+
       if (!user) {
-        return c.json({
-          success: false,
-          error: {
-            code: 'USER_NOT_FOUND',
-            message: '用户不存在',
+        return c.json(
+          {
+            success: false,
+            error: {
+              code: 'USER_NOT_FOUND',
+              message: '用户不存在',
+            },
           },
-        }, 404);
+          404
+        );
       }
-      
+
       c.set('user', user);
       await next();
     } catch (error) {
-      return c.json({
-        success: false,
-        error: {
-          code: 'INVALID_TOKEN',
-          message: 'Token 无效或已过期',
+      return c.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_TOKEN',
+            message: 'Token 无效或已过期',
+          },
         },
-      }, 401);
+        401
+      );
     }
   });
 };
@@ -865,7 +883,7 @@ export const api = axios.create({
 // 请求拦截器 - 添加 Token
 export const useApiWithAuth = () => {
   const { getToken } = useAuth();
-  
+
   api.interceptors.request.use(async (config) => {
     const token = await getToken();
     if (token) {
@@ -873,7 +891,7 @@ export const useApiWithAuth = () => {
     }
     return config;
   });
-  
+
   return api;
 };
 
@@ -882,12 +900,12 @@ api.interceptors.response.use(
   (response) => response.data,
   (error: AxiosError<ErrorResponse>) => {
     const errorData = error.response?.data?.error;
-    
+
     // 处理特定错误
     if (errorData?.code === 'QUOTA_EXCEEDED') {
       // 显示升级提示
     }
-    
+
     throw errorData || { code: 'UNKNOWN', message: '网络错误' };
   }
 );
@@ -912,18 +930,18 @@ export const ttsService = {
   async generate(data: GenerateRequest) {
     return api.post<{ jobId: string; status: string }>('/tts/generate', data);
   },
-  
+
   // 查询状态
   async getStatus(jobId: string) {
     return api.get<TTSStatusResponse>(`/tts/status/${jobId}`);
   },
-  
+
   // 轮询等待完成
   async waitForCompletion(jobId: string, onProgress?: (progress: number) => void) {
     return new Promise((resolve, reject) => {
       const poll = async () => {
         const result = await this.getStatus(jobId);
-        
+
         if (result.status === 'completed') {
           resolve(result.audio);
         } else if (result.status === 'failed') {
@@ -933,7 +951,7 @@ export const ttsService = {
           setTimeout(poll, 1000);
         }
       };
-      
+
       poll();
     });
   },
@@ -952,15 +970,15 @@ import { useToast } from '@/hooks/useToast';
 export function useTTS() {
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
-  
+
   const mutation = useMutation({
     mutationFn: async (data: GenerateRequest) => {
       // 1. 创建任务
       const { jobId } = await ttsService.generate(data);
-      
+
       // 2. 等待完成
       const audio = await ttsService.waitForCompletion(jobId, setProgress);
-      
+
       return audio;
     },
     onError: (error: { code: string; message: string }) => {
@@ -975,7 +993,7 @@ export function useTTS() {
       setProgress(0);
     },
   });
-  
+
   return {
     generate: mutation.mutate,
     isLoading: mutation.isPending,
@@ -1111,7 +1129,13 @@ export interface Podcast {
   createdAt: string;
 }
 
-export type PodcastStatus = 'pending' | 'analyzing' | 'scripting' | 'synthesizing' | 'completed' | 'failed';
+export type PodcastStatus =
+  | 'pending'
+  | 'analyzing'
+  | 'scripting'
+  | 'synthesizing'
+  | 'completed'
+  | 'failed';
 
 export interface PodcastScript {
   segments: Array<{
@@ -1143,4 +1167,4 @@ export interface Subscription {
 
 ---
 
-*完整的 API 接口定义，可直接用于前后端开发！*
+_完整的 API 接口定义，可直接用于前后端开发！_

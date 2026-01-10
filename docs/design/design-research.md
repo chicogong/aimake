@@ -1,7 +1,6 @@
 # AIMake 深度调研与设计方案
 
-> 创建日期: 2026-01-09
-> 状态: 设计中
+> 创建日期: 2026-01-09状态: 设计中
 
 ---
 
@@ -9,18 +8,19 @@
 
 ### 评分矩阵
 
-| 方向 | 市场需求 | 技术难度 | 竞争程度 | 变现能力 | MVP速度 | 总分 |
-|------|:--------:|:--------:|:--------:|:--------:|:-------:|:----:|
-| **播客对话生成** | 5 | 3 | 3 | 4 | 4 | **19** |
-| **短视频配音** | 5 | 2 | 4 | 4 | 5 | **20** |
-| **有声书生成** | 4 | 4 | 3 | 4 | 3 | **18** |
-| **教育内容** | 4 | 3 | 2 | 3 | 4 | **16** |
+| 方向             | 市场需求 | 技术难度 | 竞争程度 | 变现能力 | MVP速度 |  总分  |
+| ---------------- | :------: | :------: | :------: | :------: | :-----: | :----: |
+| **播客对话生成** |    5     |    3     |    3     |    4     |    4    | **19** |
+| **短视频配音**   |    5     |    2     |    4     |    4     |    5    | **20** |
+| **有声书生成**   |    4     |    4     |    3     |    4     |    3    | **18** |
+| **教育内容**     |    4     |    3     |    2     |    3     |    4    | **16** |
 
 ### 推荐 MVP 方向
 
 **主方向**: 短视频配音 + 播客对话生成
 
 理由：
+
 1. 短视频配音 - 市场最大，技术成熟，见效快
 2. 播客对话生成 - 差异化明显，NotebookLM 验证了需求
 
@@ -145,32 +145,32 @@ Step 4: 后处理输出
 
 ### 产品与规划
 
-| 文档 | 描述 | 链接 |
-|------|------|------|
-| **产品规划** | 功能规划、定价、开发计划 | [product-plan.md](../planning/product-plan.md) |
-| **方向探索** | 内容类型、用户群体分析 | [content-generation-directions.md](../planning/content-generation-directions.md) |
-| **TTS 供应商对比** | 多供应商选型、成本分析 | [tts-providers-comparison.md](../planning/tts-providers-comparison.md) |
+| 文档               | 描述                     | 链接                                                                             |
+| ------------------ | ------------------------ | -------------------------------------------------------------------------------- |
+| **产品规划**       | 功能规划、定价、开发计划 | [product-plan.md](../planning/product-plan.md)                                   |
+| **方向探索**       | 内容类型、用户群体分析   | [content-generation-directions.md](../planning/content-generation-directions.md) |
+| **TTS 供应商对比** | 多供应商选型、成本分析   | [tts-providers-comparison.md](../planning/tts-providers-comparison.md)           |
 
 ### 技术设计
 
-| 文档 | 描述 | 链接 |
-|------|------|------|
-| **API 接口设计** | RESTful 接口定义、请求响应格式 | [api-design.md](./api-design.md) |
-| **数据库设计** | 表结构、索引、查询示例 | [database-schema.md](./database-schema.md) |
-| **前端架构** | 组件结构、状态管理、Hooks | [frontend-architecture.md](./frontend-architecture.md) |
-| **登录鉴权** | Clerk 集成方案 | [auth-design.md](./auth-design.md) |
-| **支付集成** | Stripe 订阅支付流程 | [payment-integration.md](./payment-integration.md) |
-| **Prompt 工程** | 播客对话生成的 Prompt 设计 | [prompt-engineering.md](./prompt-engineering.md) |
-| **错误处理** | 错误码、消息、前后端处理规范 | [error-handling.md](./error-handling.md) |
+| 文档             | 描述                           | 链接                                                   |
+| ---------------- | ------------------------------ | ------------------------------------------------------ |
+| **API 接口设计** | RESTful 接口定义、请求响应格式 | [api-design.md](./api-design.md)                       |
+| **数据库设计**   | 表结构、索引、查询示例         | [database-schema.md](./database-schema.md)             |
+| **前端架构**     | 组件结构、状态管理、Hooks      | [frontend-architecture.md](./frontend-architecture.md) |
+| **登录鉴权**     | Clerk 集成方案                 | [auth-design.md](./auth-design.md)                     |
+| **支付集成**     | Stripe 订阅支付流程            | [payment-integration.md](./payment-integration.md)     |
+| **Prompt 工程**  | 播客对话生成的 Prompt 设计     | [prompt-engineering.md](./prompt-engineering.md)       |
+| **错误处理**     | 错误码、消息、前后端处理规范   | [error-handling.md](./error-handling.md)               |
 
 ### 开发与运维
 
-| 文档 | 描述 | 链接 |
-|------|------|------|
-| **环境配置** | 环境变量、密钥管理 | [env-config.md](../development/env-config.md) |
-| **部署架构** | 生产环境部署、CI/CD、监控 | [deployment-architecture.md](../development/deployment-architecture.md) |
-| **自动化开发** | AI 工具、MCP、自动化测试 | [automation-plan.md](../development/automation-plan.md) |
-| **上线验证** | 冒烟测试、回归测试、发布流程 | [release-verification.md](../development/release-verification.md) |
+| 文档           | 描述                         | 链接                                                                    |
+| -------------- | ---------------------------- | ----------------------------------------------------------------------- |
+| **环境配置**   | 环境变量、密钥管理           | [env-config.md](../development/env-config.md)                           |
+| **部署架构**   | 生产环境部署、CI/CD、监控    | [deployment-architecture.md](../development/deployment-architecture.md) |
+| **自动化开发** | AI 工具、MCP、自动化测试     | [automation-plan.md](../development/automation-plan.md)                 |
+| **上线验证**   | 冒烟测试、回归测试、发布流程 | [release-verification.md](../development/release-verification.md)       |
 
 ---
 
@@ -193,11 +193,11 @@ Step 4: 后处理输出
 
 ## 八、文档更新日志
 
-| 日期 | 更新内容 |
-|------|----------|
-| 2026-01-09 | 创建初始设计文档 |
+| 日期       | 更新内容                                            |
+| ---------- | --------------------------------------------------- |
+| 2026-01-09 | 创建初始设计文档                                    |
 | 2026-01-09 | 添加 API 接口设计、支付集成、环境配置、错误处理文档 |
 
 ---
 
-*文档持续更新中...*
+_文档持续更新中..._
