@@ -1,0 +1,88 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- OG Image Template for Social Sharing -->
+
+  <!-- 背景渐变 -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+
+  <!-- 装饰性网格 -->
+  <g opacity="0.05">
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/>
+    </pattern>
+    <rect width="1200" height="630" fill="url(#grid)"/>
+  </g>
+
+  <!-- 主内容区 -->
+  <g transform="translate(600, 315)">
+
+    <!-- Logo 图标（居中放大） -->
+    <g transform="translate(-80, -180)">
+      <!-- 外圈渐变圆 -->
+      <circle cx="80" cy="80" r="70" fill="url(#logoGradient)" opacity="0.3"/>
+
+      <!-- 声波符号 -->
+      <path d="M80 40 L80 120" stroke="url(#waveGradient)" stroke-width="8" stroke-linecap="round"/>
+      <path d="M60 50 L60 110" stroke="url(#waveGradient)" stroke-width="7" stroke-linecap="round" opacity="0.8"/>
+      <path d="M100 50 L100 110" stroke="url(#waveGradient)" stroke-width="7" stroke-linecap="round" opacity="0.8"/>
+      <path d="M40 60 L40 100" stroke="url(#waveGradient)" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
+      <path d="M120 60 L120 100" stroke="url(#waveGradient)" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
+
+      <!-- AI 光环 -->
+      <circle cx="80" cy="80" r="60" stroke="url(#accentGradient)" stroke-width="4" stroke-dasharray="8 6" opacity="0.6" fill="none"/>
+    </g>
+
+    <!-- 品牌名称 -->
+    <text x="0" y="-30" font-family="'Space Grotesk', sans-serif" font-size="96" font-weight="700" fill="#FFFFFF" text-anchor="middle">
+      AIMake
+    </text>
+
+    <!-- 副标题 -->
+    <text x="0" y="35" font-family="'DM Sans', sans-serif" font-size="42" font-weight="400" fill="rgba(255,255,255,0.9)" text-anchor="middle">
+      AI 语音内容生成
+    </text>
+
+    <!-- 特性标签 -->
+    <g transform="translate(0, 90)">
+      <text x="0" y="0" font-family="'DM Sans', sans-serif" font-size="28" font-weight="500" fill="rgba(255,255,255,0.7)" text-anchor="middle">
+        播客 · 有声书 · 配音 · 教育
+      </text>
+    </g>
+
+    <!-- 装饰性光晕 -->
+    <circle cx="0" cy="-80" r="200" fill="url(#glowGradient)" opacity="0.15"/>
+  </g>
+
+  <!-- 渐变定义 -->
+  <defs>
+    <!-- 背景渐变 -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0A0E27;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1E3A8A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0A0E27;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Logo 渐变 -->
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2563EB;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- 声波渐变 -->
+    <linearGradient id="waveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#60A5FA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3B82F6;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- 强调色渐变 -->
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F97316;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FB923C;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- 光晕渐变 -->
+    <radialGradient id="glowGradient">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3B82F6;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+</svg>

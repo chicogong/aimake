@@ -34,12 +34,48 @@
 - 新增 `docs/development/cloudflare-pages-deployment.md` - 部署指南
 - 新增 `landing/README.md` - 落地页说明文档
 
+### 🎨 品牌视觉识别
+
+#### 新增资源
+- **Logo SVG** (`landing/assets/images/logo.svg`)
+  - 声波 + AI 元素结合的图标
+  - Space Grotesk 字体文字标识
+  - 蓝色渐变 + 橙色光环设计
+- **Favicon SVG** (`landing/assets/images/favicon.svg`)
+  - 简化的声波图标（仅图形）
+  - 适配小尺寸显示
+  - 蓝色背景 + 白色声波
+- **OG Image 模板** (`landing/assets/images/og-image-template.svg`)
+  - 1200x630px 社交分享图模板
+  - 品牌渐变背景 + Logo + 产品描述
+
+#### 品牌规范
+- 新增 `docs/design/brand-identity.md` - 完整品牌视觉识别系统
+  - Logo 使用规范（最小尺寸、安全区、颜色变体）
+  - 配色系统（主色调、中性色、渐变色）
+  - 字体系统（Space Grotesk + DM Sans）
+  - 资源生成指南（PNG、ICO、多尺寸）
+- 新增 `landing/assets/images/README.md` - 品牌资源使用指南
+
+#### 工具脚本
+- 新增 `scripts/generate-brand-assets.sh` - 自动生成所有尺寸图标
+  - 支持 Favicon (16/32/192px)
+  - 支持 Apple Touch Icon (180px)
+  - 支持 PWA Icons (192/512px)
+  - 支持 OG Image (1200x630px)
+  - 自动生成 favicon.ico
+
+#### 落地页集成
+- 更新导航栏和 Footer 使用 Logo SVG
+- 更新 HTML meta 标签引用新的 Favicon 和 OG Image
+- 域名配置更正为 `aimake.cc`
+
 ### 待完成
-- 生成 4 个音频演示文件（使用腾讯云 TTS）
-- 设计 Logo 和 Favicon
-- 创建 OG Image（1200x630px）
-- 部署到 Cloudflare Pages
-- 性能测试和优化
+- ✅ ~~设计 Logo 和 Favicon~~ (已完成)
+- ⏳ 生成 PNG 资源（运行 `scripts/generate-brand-assets.sh`）
+- ⏳ 生成 4 个音频演示文件（使用腾讯云 TTS）
+- ⏳ 部署到 Cloudflare Pages
+- ⏳ 性能测试和优化
 
 ---
 
