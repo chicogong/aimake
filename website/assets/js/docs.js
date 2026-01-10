@@ -11,6 +11,10 @@ class DocsViewer {
     this.searchIndex = [];
     this.selectedSearchIndex = 0;
 
+    // 文档模式: 'public' (默认) 或 'dev' (内部文档)
+    // 通过 window.DOCS_MODE 设置, devdocs.html 设置为 'dev'
+    this.docsMode = window.DOCS_MODE || 'public';
+
     // 文档结构
     this.docStructure = [
       {
@@ -86,7 +90,7 @@ class DocsViewer {
       },
     ];
 
-    // 扁平化文档列表
+    // 扁平化文档列表 (根据模式过滤)
     this.docList = this.flattenDocs();
 
     // 初始化
@@ -96,6 +100,7 @@ class DocsViewer {
   // ==================== 初始化 ====================
   async init() {
     this.initTheme();
+    this.filterDocStructure(); // 根据模式过滤文档
     this.renderSidebar();
     this.initSearch();
     this.initRouter();
@@ -120,6 +125,33 @@ class DocsViewer {
       const isDark = document.documentElement.classList.contains('dark');
       localStorage.setItem('docs-theme', isDark ? 'dark' : 'light');
     });
+  }
+
+  // ==================== 文档过滤 ====================
+  /**
+   * 根据文档模式过滤 docStructure
+   * - public 模式: 只显示 *.md (不包含 .md)
+   * - dev 模式: 只显示 *.md 文件
+   */
+  filterDocStructure() {
+    const isDevMode = this.docsMode === 'dev';
+
+    this.docStructure = this.docStructure
+      .map((section) => {
+        const filteredItems = section.items.filter((item) => {
+          const isDevDoc = item.path.endsWith('.md');
+          return isDevMode ? isDevDoc : !isDevDoc;
+        });
+        return { ...section, items: filteredItems };
+      })
+      .filter((section) => section.items.length > 0); // 移除空分类
+
+    // 重新扁平化文档列表
+    this.docList = this.flattenDocs();
+
+    console.log(
+      `📚 文档模式: ${isDevMode ? '内部开发文档' : '公开文档'}, 共 ${this.docList.length} 篇`
+    );
   }
 
   // ==================== 侧边栏 ====================
@@ -232,7 +264,9 @@ class DocsViewer {
 
   handleRoute() {
     const hash = window.location.hash;
-    const path = hash.startsWith('#!') ? hash.substring(2) : 'README.md';
+    // 根据模式设置默认文档
+    const defaultDoc = this.docsMode === 'dev' ? 'README.md' : 'README.md';
+    const path = hash.startsWith('#!') ? hash.substring(2) : defaultDoc;
     this.loadDoc(path);
   }
 
@@ -407,9 +441,12 @@ class DocsViewer {
     if (!container) return;
 
     const doc = this.docList.find((d) => d.path === path);
+    const defaultDoc = this.docsMode === 'dev' ? 'README.md' : 'README.md';
 
     container.innerHTML =
-      '<a href="#!README.md" class="hover:text-gray-900 dark:hover:text-gray-100 transition">文档</a>' +
+      '<a href="#!' +
+      defaultDoc +
+      '" class="hover:text-gray-900 dark:hover:text-gray-100 transition">文档</a>' +
       '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
       '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>' +
       '</svg>' +

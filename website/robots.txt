@@ -6,9 +6,10 @@ Allow: /
 # 优先抓取
 Sitemap: https://aimake.cc/sitemap.xml
 
-# 禁止抓取 (未来可能的路径)
+# 禁止抓取
 Disallow: /api/
 Disallow: /admin/
 Disallow: /_next/
+Disallow: /devdocs.html
 
 Sun Jan 11 01:42:47 +08 2026
