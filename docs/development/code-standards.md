@@ -8,28 +8,28 @@
 
 ### 1. 代码格式化
 
-| 工具             | 用途                  | 配置文件           |
-| ---------------- | --------------------- | ------------------ |
-| **Prettier**     | HTML/CSS/JS/MD 格式化 | `.prettierrc.json` |
-| **Black**        | Python 代码格式化     | `pyproject.toml`   |
-| **EditorConfig** | 统一编辑器配置        | `.editorconfig`    |
+| 工具             | 用途                   | 配置文件           |
+| ---------------- | ---------------------- | ------------------ |
+| **Prettier**     | HTML/CSS/JS/MD 格式化  | `.prettierrc.json` |
+| **Ruff**         | Python 代码格式化+检查 | `.ruffignore`      |
+| **EditorConfig** | 统一编辑器配置         | `.editorconfig`    |
 
 ### 2. 代码检查（Linting）
 
-| 工具             | 用途                           | 配置文件             |
-| ---------------- | ------------------------------ | -------------------- |
-| **ESLint**       | JavaScript 代码检查            | `.eslintrc.json`     |
-| **Stylelint**    | CSS 代码检查                   | `.stylelintrc.json`  |
-| **Ruff**         | Python 代码检查（替代 Flake8） | `pyproject.toml`     |
-| **Markdownlint** | Markdown 文档检查              | `.markdownlint.json` |
+| 工具             | 用途                                        | 配置文件             |
+| ---------------- | ------------------------------------------- | -------------------- |
+| **ESLint**       | JavaScript 代码检查                         | `.eslintrc.json`     |
+| **Stylelint**    | CSS 代码检查                                | `.stylelintrc.json`  |
+| **Ruff**         | Python 代码检查+格式化（替代 Black+Flake8） | `.ruffignore`        |
+| **Markdownlint** | Markdown 文档检查                           | `.markdownlint.json` |
 
 ### 3. Git 规范
 
-| 工具            | 用途             | 配置文件             |
-| --------------- | ---------------- | -------------------- |
-| **Commitlint**  | 提交消息规范检查 | `.commitlintrc.json` |
-| **Husky**       | Git hooks 管理   | `.husky/`            |
-| **Lint-staged** | 仅检查暂存文件   | `.lintstagedrc.json` |
+遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范手动编写提交消息。
+
+**格式**: `<type>(<scope>): <subject>`
+
+**类型**: feat, fix, docs, style, refactor, perf, test, build, ci, chore
 
 ### 4. CI/CD
 
@@ -173,31 +173,47 @@ landing/assets/audio/
 
 ---
 
-### Python - Ruff (`pyproject.toml`)
+### Python - Ruff (`.ruffignore`)
 
-```toml
-[tool.ruff]
-line-length = 100
-target-version = "py311"
+Ruff 是现代化的 Python Linter + Formatter，比 Black + Flake8 更快更强大。
 
-[tool.ruff.lint]
-select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # pyflakes
-    "I",  # isort
-    "B",  # flake8-bugbear
-    "C4", # flake8-comprehensions
-    "UP", # pyupgrade
-]
-ignore = [
-    "E501",  # line too long (handled by formatter)
-]
+**配置文件**:
 
-[tool.black]
-line-length = 100
-target-version = ['py311']
-include = '\.pyi?$'
+```ini
+# Ruff ignore file - exclude directories from linting
+
+# Claude Code 配置和技能目录
+.claude/
+.codebuddy/
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# 依赖目录
+node_modules/
+
+# 构建输出
+dist/
+build/
+.wrangler/
+
+# Git
+.git/
+```
+
+**使用方式**:
+
+```bash
+# 检查代码
+ruff check .
+
+# 自动修复
+ruff check . --fix
+
+# 格式化代码
+ruff format .
 ```
 
 ---
@@ -217,65 +233,6 @@ include = '\.pyi?$'
 ```
 
 ---
-
-### Commitlint (`.commitlintrc.json`)
-
-```json
-{
-  "extends": ["@commitlint/config-conventional"],
-  "rules": {
-    "type-enum": [
-      2,
-      "always",
-      ["feat", "fix", "docs", "style", "refactor", "perf", "test", "build", "ci", "chore", "revert"]
-    ],
-    "scope-case": [2, "always", "kebab-case"],
-    "subject-case": [2, "never", ["upper-case"]],
-    "subject-empty": [2, "never"],
-    "subject-full-stop": [2, "never", "."],
-    "header-max-length": [2, "always", 100]
-  }
-}
-```
-
-**提交消息格式**：
-
-```
-<type>(<scope>): <subject>
-
-<body>
-
-<footer>
-```
-
-**示例**：
-
-```
-feat(landing): 添加演示音频播放器
-
-- 支持播放/暂停
-- 显示进度条
-- 支持音量调节
-
-Closes #123
-```
-
----
-
-### Lint-staged (`.lintstagedrc.json`)
-
-```json
-{
-  "*.{js,jsx}": ["eslint --fix", "prettier --write"],
-  "*.{css,scss}": ["stylelint --fix", "prettier --write"],
-  "*.{html,json,md}": ["prettier --write"],
-  "*.py": ["ruff check --fix", "black"]
-}
-```
-
----
-
-## 🚀 GitHub Actions CI/CD
 
 ### 代码检查 (`.github/workflows/lint.yml`)
 
@@ -320,16 +277,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
 
       - name: Install dependencies
-        run: pip install ruff black
+        run: |
+          pip install ruff
 
       - name: Run Ruff
-        run: ruff check .
-
-      - name: Run Black
-        run: black --check .
+        run: ruff check . --exclude .claude --exclude .codebuddy
 
   format-check:
     name: Format Check
@@ -347,28 +301,6 @@ jobs:
 
       - name: Check formatting
         run: prettier --check "**/*.{js,css,html,md}"
-
-  commitlint:
-    name: Commit Lint
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install commitlint
-        run: npm install -g @commitlint/cli @commitlint/config-conventional
-
-      - name: Validate commits
-        run:
-          npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{
-          github.event.pull_request.head.sha }} --verbose
 ```
 
 ---
@@ -508,7 +440,7 @@ aimake/
 ├── .eslintrc.json              # ESLint 配置
 ├── .stylelintrc.json           # Stylelint 配置
 ├── .markdownlint.json          # Markdownlint 配置
-├── .commitlintrc.json          # Commitlint 配置
+├── .ruffignore                 # Ruff 忽略配置
 ├── .gitignore                  # Git 忽略文件
 ├── .env.example                # 环境变量示例
 ├── pyproject.toml              # Python 项目配置
@@ -534,19 +466,14 @@ aimake/
     "lint:md": "markdownlint '**/*.md' --ignore node_modules",
     "format": "prettier --write '**/*.{js,css,html,json,md}'",
     "format:check": "prettier --check '**/*.{js,css,html,json,md}'",
-    "prepare": "husky install",
     "test": "echo \"No tests yet\" && exit 0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^18.4.3",
-    "@commitlint/config-conventional": "^18.4.3",
-    "eslint": "^8.55.0",
-    "husky": "^8.0.3",
-    "lint-staged": "^15.2.0",
-    "markdownlint-cli": "^0.38.0",
-    "prettier": "^3.1.1",
-    "stylelint": "^16.1.0",
-    "stylelint-config-standard": "^36.0.0"
+    "eslint": "^8.57.1",
+    "markdownlint-cli": "^0.39.0",
+    "prettier": "^3.7.4",
+    "stylelint": "^16.26.1",
+    "stylelint-config-standard": "^36.0.1"
   }
 }
 ```
@@ -562,23 +489,10 @@ aimake/
 npm install
 
 # Python 依赖
-pip install ruff black
+pip install ruff
 ```
 
-### 第 2 步：初始化 Husky
-
-```bash
-npm run prepare
-```
-
-### 第 3 步：配置 Pre-commit Hook
-
-```bash
-npx husky add .husky/pre-commit "npx lint-staged"
-npx husky add .husky/commit-msg 'npx --no -- commitlint --edit ${1}'
-```
-
-### 第 4 步：首次格式化
+### 第 2 步：首次格式化
 
 ```bash
 # 格式化所有代码
@@ -586,10 +500,10 @@ npm run format
 
 # 检查 Python 代码
 ruff check --fix .
-black .
+ruff format .
 ```
 
-### 第 5 步：配置 GitHub Secrets
+### 第 3 步：配置 GitHub Secrets
 
 在 GitHub 仓库设置中添加：
 
@@ -605,7 +519,7 @@ black .
 - [ ] 代码已通过 `npm run lint`
 - [ ] 代码已格式化 `npm run format`
 - [ ] Python 代码已检查 `ruff check .`
-- [ ] Python 代码已格式化 `black .`
+- [ ] Python 代码已格式化 `ruff format .`
 - [ ] 提交消息符合 Conventional Commits 规范
 - [ ] 已更新 CHANGELOG.md
 - [ ] 已添加必要的文档
