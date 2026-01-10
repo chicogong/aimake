@@ -15,7 +15,8 @@
 请通过以下方式私下报告安全问题：
 
 1. **Email**: 发送邮件至 [chicogong@tencent.com](mailto:chicogong@tencent.com)
-2. **GitHub Security Advisory**: 使用 [GitHub 私有漏洞报告](https://github.com/chicogong/aimake/security/advisories/new)
+2. **GitHub Security Advisory**: 使用
+   [GitHub 私有漏洞报告](https://github.com/chicogong/aimake/security/advisories/new)
 
 ### 报告内容
 

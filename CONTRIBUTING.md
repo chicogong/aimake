@@ -79,6 +79,7 @@ aimake/
 ```
 
 类型：
+
 - `feat`: 新功能
 - `fix`: Bug 修复
 - `docs`: 文档更新
@@ -88,6 +89,7 @@ aimake/
 - `chore`: 构建/工具相关
 
 示例：
+
 ```
 feat(tts): add support for OpenAI TTS API
 fix(auth): resolve token refresh issue
@@ -101,11 +103,13 @@ docs: update API documentation
 - Markdown: Markdownlint
 
 运行检查：
+
 ```bash
 npm run lint
 ```
 
 自动修复：
+
 ```bash
 npm run lint:fix
 npm run format
