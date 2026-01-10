@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIMake - AI 语音内容生成平台 | 产品设计</title>
+    <meta name="description" content="用 AI 快速生成播客、有声书、配音、教育内容" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 40px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 3em;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      .header .tagline {
+        font-size: 1.3em;
+        opacity: 0.95;
+        margin-bottom: 20px;
+      }
+
+      .header .badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-size: 0.9em;
+        margin: 5px;
+      }
+
+      .content {
+        padding: 60px 40px;
+      }
+
+      .section {
+        margin-bottom: 60px;
+      }
+
+      .section-title {
+        font-size: 2.2em;
+        margin-bottom: 30px;
+        color: #667eea;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .section-title .icon {
+        font-size: 1.2em;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+      }
+
+      .feature-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 30px;
+        border-radius: 15px;
+        transition:
+          transform 0.3s,
+          box-shadow 0.3s;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+      }
+
+      .feature-card .icon {
+        font-size: 2.5em;
+        margin-bottom: 15px;
+      }
+
+      .feature-card h3 {
+        font-size: 1.4em;
+        margin-bottom: 10px;
+        color: #667eea;
+      }
+
+      .feature-card p {
+        color: #666;
+        line-height: 1.8;
+      }
+
+      .use-cases {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+      }
+
+      .use-case {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 12px;
+        border-left: 4px solid #667eea;
+      }
+
+      .use-case h4 {
+        color: #667eea;
+        margin-bottom: 10px;
+        font-size: 1.1em;
+      }
+
+      .use-case p {
+        color: #666;
+        font-size: 0.95em;
+      }
+
+      .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+      }
+
+      .pricing-card {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 15px;
+        padding: 35px;
+        text-align: center;
+        transition: all 0.3s;
+      }
+
+      .pricing-card:hover {
+        border-color: #667eea;
+        transform: scale(1.05);
+      }
+
+      .pricing-card.popular {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        position: relative;
+      }
+
+      .pricing-card.popular::before {
+        content: '推荐';
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 5px 20px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: bold;
+      }
+
+      .pricing-card .plan-name {
+        font-size: 1.5em;
+        margin-bottom: 15px;
+        color: #333;
+      }
+
+      .pricing-card .price {
+        font-size: 3em;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 20px;
+      }
+
+      .pricing-card .price span {
+        font-size: 0.4em;
+        color: #999;
+      }
+
+      .pricing-card .features {
+        list-style: none;
+        text-align: left;
+        margin: 25px 0;
+      }
+
+      .pricing-card .features li {
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+        color: #666;
+      }
+
+      .pricing-card .features li:before {
+        content: '✓';
+        color: #667eea;
+        font-weight: bold;
+        margin-right: 10px;
+      }
+
+      .cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 40px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1.1em;
+        margin-top: 20px;
+        transition:
+          transform 0.3s,
+          box-shadow 0.3s;
+      }
+
+      .cta-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      .timeline {
+        position: relative;
+        padding-left: 40px;
+      }
+
+      .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      }
+
+      .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+      }
+
+      .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -48px;
+        top: 25px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #667eea;
+        border: 3px solid white;
+        box-shadow: 0 0 0 3px #667eea;
+      }
+
+      .timeline-item h4 {
+        color: #667eea;
+        margin-bottom: 10px;
+        font-size: 1.1em;
+      }
+
+      .timeline-item p {
+        color: #666;
+        font-size: 0.95em;
+      }
+
+      .back-link {
+        display: inline-block;
+        margin-top: 30px;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .back-link:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 2em;
+        }
+
+        .content {
+          padding: 40px 20px;
+        }
+
+        .section-title {
+          font-size: 1.8em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          "
+        >
+          <a
+            href="index.html"
+            style="
+              color: white;
+              text-decoration: none;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              opacity: 0.9;
+              transition: opacity 0.2s;
+            "
+            onmouseover="this.style.opacity = '1'"
+            onmouseout="this.style.opacity = '0.9'"
+          >
+            <svg
+              style="width: 20px; height: 20px"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              ></path>
+            </svg>
+            返回首页
+          </a>
+          <div style="display: flex; gap: 16px">
+            <a
+              href="developers.html"
+              style="color: white; text-decoration: none; opacity: 0.9; transition: opacity 0.2s"
+              onmouseover="this.style.opacity = '1'"
+              onmouseout="this.style.opacity = '0.9'"
+            >
+              开发者文档
+            </a>
+            <a
+              href="docs.html"
+              style="
+                color: white;
+                text-decoration: none;
+                opacity: 0.9;
+                font-weight: 500;
+                transition: opacity 0.2s;
+              "
+              onmouseover="this.style.opacity = '1'"
+              onmouseout="this.style.opacity = '0.9'"
+            >
+              📖 查看技术文档
+            </a>
+          </div>
+        </div>
+        <h1>🎙️ AIMake</h1>
+        <p class="tagline">AI 语音内容生成平台 - 产品设计</p>
+        <div>
+          <span class="badge">📋 规划期</span>
+          <span class="badge">🎯 播客生成</span>
+          <span class="badge">🎙️ TTS 语音合成</span>
+          <span class="badge">📚 有声书</span>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- 产品定位 -->
+        <section class="section">
+          <h2 class="section-title">
+            <span class="icon">🎯</span>
+            产品定位
+          </h2>
+          <p style="font-size: 1.2em; color: #666; line-height: 1.8; margin-bottom: 30px">
+            <strong>输入文字,获得专业音频。</strong><br />
+            不需要录音设备,不需要配音演员,几秒内生成高质量语音内容。
+          </p>
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="icon">🎙️</div>
+              <h3>文本转语音</h3>
+              <p>输入文字,一键生成音频,支持多种自然音色</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon">👥</div>
+              <h3>播客生成</h3>
+              <p>输入话题,AI 自动生成双人对话播客脚本</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon">📚</div>
+              <h3>长文转音频</h3>
+              <p>文章、小说一键转换为有声书</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon">🎬</div>
+              <h3>视频配音</h3>
+              <p>为短视频快速生成专业配音</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 目标用户 -->
+        <section class="section">
+          <h2 class="section-title">
+            <span class="icon">👥</span>
+            目标用户
+          </h2>
+          <div class="use-cases">
+            <div class="use-case">
+              <h4>📹 内容创作者</h4>
+              <p>播客、YouTube、B站 UP 主,快速制作音频内容</p>
+            </div>
+            <div class="use-case">
+              <h4>✍️ 知识博主</h4>
+              <p>公众号、知乎作者,将文章转换为有声内容</p>
+            </div>
+            <div class="use-case">
+              <h4>📱 短视频作者</h4>
+              <p>抖音、快手创作者,为视频快速配音</p>
+            </div>
+            <div class="use-case">
+              <h4>🎓 教育从业者</h4>
+              <p>在线课程教师,制作教学音频</p>
+            </div>
+            <div class="use-case">
+              <h4>💻 独立开发者</h4>
+              <p>产品演示、应用配音</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 定价策略 -->
+        <section class="section">
+          <h2 class="section-title">
+            <span class="icon">💰</span>
+            定价策略
+          </h2>
+          <div class="pricing-grid">
+            <div class="pricing-card">
+              <div class="plan-name">免费版</div>
+              <div class="price">$0<span>/月</span></div>
+              <ul class="features">
+                <li>10 分钟/月</li>
+                <li>基础音色</li>
+                <li>标准音质</li>
+                <li>社区支持</li>
+              </ul>
+            </div>
+            <div class="pricing-card popular">
+              <div class="plan-name">Pro 版</div>
+              <div class="price">$19<span>/月</span></div>
+              <ul class="features">
+                <li>300 分钟/月</li>
+                <li>全部音色</li>
+                <li>高清音质</li>
+                <li>播客生成</li>
+                <li>优先客服</li>
+              </ul>
+            </div>
+            <div class="pricing-card">
+              <div class="plan-name">团队版</div>
+              <div class="price">$99<span>/月</span></div>
+              <ul class="features">
+                <li>无限时长</li>
+                <li>团队协作</li>
+                <li>API 接口</li>
+                <li>专属客服</li>
+                <li>定制音色</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- 核心功能 -->
+        <section class="section">
+          <h2 class="section-title">
+            <span class="icon">⚡</span>
+            核心功能
+          </h2>
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="icon">🎤</div>
+              <h3>10+ 自然音色</h3>
+              <p>男声、女声、儿童声,多种情感表达</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon">⚙️</div>
+              <h3>参数调节</h3>
+              <p>语速、音调、停顿自由控制</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon">💾</div>
+              <h3>音频库管理</h3>
+              <p>云端存储,随时随地访问</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon">📊</div>
+              <h3>额度管理</h3>
+              <p>实时查看使用量,合理规划</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon">🔄</div>
+              <h3>批量生成</h3>
+              <p>一次输入,多个音色同时生成</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon">📤</div>
+              <h3>多格式导出</h3>
+              <p>MP3、WAV、OGG 等格式</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 产品路线图 -->
+        <section class="section">
+          <h2 class="section-title">
+            <span class="icon">🗺️</span>
+            产品路线图
+          </h2>
+          <div class="timeline">
+            <div class="timeline-item">
+              <h4>📋 MVP 阶段 (当前)</h4>
+              <p>基础 TTS 功能、用户认证、额度管理、支付订阅</p>
+            </div>
+            <div class="timeline-item">
+              <h4>🎙️ 播客功能</h4>
+              <p>AI 生成对话脚本、多角色配音、背景音乐</p>
+            </div>
+            <div class="timeline-item">
+              <h4>🎬 高级功能</h4>
+              <p>声音克隆、情感控制、音频编辑器</p>
+            </div>
+            <div class="timeline-item">
+              <h4>🌍 国际化</h4>
+              <p>多语言支持、全球化部署</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 技术优势 -->
+        <section class="section">
+          <h2 class="section-title">
+            <span class="icon">🚀</span>
+            技术优势
+          </h2>
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="icon">⚡</div>
+              <h3>极速生成</h3>
+              <p>平均 2-5 秒生成 1 分钟音频</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon">🎯</div>
+              <h3>高清音质</h3>
+              <p>支持 22kHz 采样率,广播级音质</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon">🔒</div>
+              <h3>安全可靠</h3>
+              <p>数据加密存储,隐私保护</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon">💰</div>
+              <h3>成本优势</h3>
+              <p>零成本启动,按需付费</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 联系方式 -->
+        <section class="section" style="text-align: center">
+          <h2 class="section-title" style="justify-content: center">
+            <span class="icon">📧</span>
+            联系我们
+          </h2>
+          <p style="color: #666; margin-bottom: 20px">对产品有疑问或建议?欢迎联系我们!</p>
+          <a href="mailto:hello@aimake.cc" class="cta-button">发送邮件</a>
+          <br /><br />
+          <a href="index.html" class="back-link">← 返回首页</a>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>

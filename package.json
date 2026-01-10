@@ -3,13 +3,17 @@
   "version": "0.1.0",
   "description": "AI语音内容生成平台 - 播客、有声书、配音",
   "scripts": {
+    "dev": "npx live-server . --port=3000 --open=/website/index.html --watch=website,docs",
+    "dev:docs": "npx live-server . --port=3000 --open=/website/docs.html --watch=website,docs",
+    "dev:product": "npx live-server . --port=3000 --open=/website/product.html --watch=website",
+    "dev:developers": "npx live-server . --port=3000 --open=/website/developers.html --watch=website",
+    "preview": "npx serve . -l 3000",
     "lint": "npm run lint:js && npm run lint:css && npm run lint:md",
-    "lint:js": "eslint 'landing/**/*.js' --fix",
-    "lint:css": "stylelint 'landing/**/*.css' --fix",
+    "lint:js": "eslint 'website/**/*.js' --fix",
+    "lint:css": "stylelint 'website/**/*.css' --fix",
     "lint:md": "markdownlint '**/*.md' --ignore node_modules --ignore .venv",
     "format": "prettier --write '**/*.{js,css,html,json,md}' --ignore-path .prettierignore",
-    "format:check": "prettier --check '**/*.{js,css,html,json,md}' --ignore-path .prettierignore",
-    "test": "echo \"No tests yet\" && exit 0"
+    "format:check": "prettier --check '**/*.{js,css,html,json,md}' --ignore-path .prettierignore"
   },
   "repository": {
     "type": "git",
@@ -19,8 +23,10 @@
   "license": "MIT",
   "devDependencies": {
     "eslint": "^9.39.2",
+    "live-server": "^1.2.2",
     "markdownlint-cli": "^0.47.0",
     "prettier": "^3.2.4",
+    "serve": "^14.2.4",
     "stylelint": "^16.1.0",
     "stylelint-config-standard": "^39.0.1"
   }

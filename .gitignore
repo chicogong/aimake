@@ -62,3 +62,27 @@ coverage/
 # Misc
 *.tgz
 .turbo/
+
+# Test files
+*.test.js
+*.test.mjs
+*.spec.js
+*.spec.mjs
+**/test-*.js
+**/test-*.mjs
+**/*-test.js
+**/*-test.mjs
+**/performance-test.*
+**/TESTING_CHECKLIST.md
+
+# Development scripts
+landing/serve.sh
+scripts/*.local.sh
+
+# Temporary directories
+.playwright-mcp/
+.serena/
+.venv/
+
+# Claude/AI assistant settings (keep local)
+.claude/settings.local.json
