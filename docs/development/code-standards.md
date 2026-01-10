@@ -354,18 +354,6 @@ updates:
     reviewers:
       - 'chicogong'
 
-  # Python dependencies
-  - package-ecosystem: 'pip'
-    directory: '/'
-    schedule:
-      interval: 'weekly'
-    open-pull-requests-limit: 5
-    labels:
-      - 'dependencies'
-      - 'python'
-    reviewers:
-      - 'chicogong'
-
   # GitHub Actions
   - package-ecosystem: 'github-actions'
     directory: '/'
