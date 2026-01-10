@@ -5,15 +5,19 @@ on:
     branches:
       - master
     paths:
-      - 'landing/**'
+      - 'website/**'
+
+permissions:
+  contents: read
+  deployments: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy Landing Page
+    name: Deploy Website
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
@@ -21,5 +25,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: aimake-landing
-          directory: landing
+          directory: website
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}

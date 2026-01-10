@@ -104,7 +104,7 @@ dist/
 build/
 *.min.js
 *.min.css
-landing/assets/audio/
+website/assets/audio/
 ```
 
 ---
@@ -315,7 +315,7 @@ on:
     branches:
       - master
     paths:
-      - 'landing/**'
+      - 'website/**'
 
 jobs:
   deploy:
@@ -392,7 +392,7 @@ aimake/
 │   ├── design/                 # 技术设计文档
 │   └── development/            # 开发运维文档
 │
-├── landing/                    # 落地页 (静态站点)
+├── website/                    # 落地页 (静态站点)
 │   ├── assets/
 │   │   ├── css/
 │   │   ├── js/
@@ -449,8 +449,8 @@ aimake/
   "version": "0.1.0",
   "scripts": {
     "lint": "npm run lint:js && npm run lint:css && npm run lint:md",
-    "lint:js": "eslint 'landing/**/*.js' --fix",
-    "lint:css": "stylelint 'landing/**/*.css' --fix",
+    "lint:js": "eslint 'website/**/*.js' --fix",
+    "lint:css": "stylelint 'website/**/*.css' --fix",
     "lint:md": "markdownlint '**/*.md' --ignore node_modules",
     "format": "prettier --write '**/*.{js,css,html,json,md}'",
     "format:check": "prettier --check '**/*.{js,css,html,json,md}'",

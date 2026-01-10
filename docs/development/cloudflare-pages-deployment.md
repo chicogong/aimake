@@ -13,9 +13,11 @@
 ```bash
 # 确认目录结构
 aimake/
-├── landing/
+├── website/
 │   ├── index.html
+│   ├── docs.html
 │   ├── assets/
+│   ├── lib/
 │   ├── _headers
 │   ├── _redirects
 │   └── robots.txt
@@ -113,7 +115,7 @@ wrangler pages deploy landing
 
 1. Pages 项目 → **Web Analytics**
 2. 启用跟踪代码
-3. 复制跟踪代码到 `landing/index.html` 的 `</body>` 前
+3. 复制跟踪代码到 `website/index.html` 的 `</body>` 前
 
 ```html
 <!-- Cloudflare Web Analytics -->
@@ -157,7 +159,7 @@ on:
     branches:
       - master
     paths:
-      - 'landing/**'
+      - 'website/**'
 
 jobs:
   deploy:
@@ -227,7 +229,7 @@ jobs:
 
 **解决**：
 
-- 确认 `landing/` 目录存在
+- 确认 `website/` 目录存在
 - 检查 `wrangler.toml` 中 `pages_build_output_dir = "landing"`
 
 ### 2. 静态资源 404
@@ -253,7 +255,7 @@ jobs:
 
 **原因**：缺少 CORS 响应头
 
-**解决**：在 `landing/_headers` 添加：
+**解决**：在 `website/_headers` 添加：
 
 ```
 /api/*
@@ -294,7 +296,7 @@ jobs:
 
 部署前：
 
-- [ ] `landing/` 目录结构正确
+- [ ] `website/` 目录结构正确
 - [ ] `_headers` 和 `_redirects` 配置完成
 - [ ] 所有资源路径使用绝对路径 (`/assets/...`)
 - [ ] 测试 HTML/CSS/JS 在本地可正常运行

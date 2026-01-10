@@ -15,7 +15,7 @@
 
 ### 主 Logo
 
-**文件**: `landing/assets/images/logo.svg`
+**文件**: `website/assets/images/logo.svg`
 
 **设计理念**：
 
@@ -36,7 +36,7 @@
 
 ### 图标 Logo (Favicon)
 
-**文件**: `landing/assets/images/favicon.svg`
+**文件**: `website/assets/images/favicon.svg`
 
 **设计说明**：
 
@@ -202,7 +202,7 @@ Logo 周围需要预留至少 **Logo 高度的 50%** 作为安全留白。
 
 ### 当前已创建
 
-✅ `landing/assets/images/logo.svg` - 主 Logo（SVG 矢量）✅ `landing/assets/images/favicon.svg` -
+✅ `website/assets/images/logo.svg` - 主 Logo（SVG 矢量）✅ `website/assets/images/favicon.svg` -
 Favicon（SVG 矢量）
 
 ### 需要生成
@@ -254,17 +254,17 @@ brew install inkscape  # macOS
 # 或下载: https://inkscape.org/
 
 # 从 SVG 生成 PNG
-inkscape landing/assets/images/favicon.svg \
+inkscape website/assets/images/favicon.svg \
   --export-type=png \
-  --export-filename=landing/assets/images/favicon-32x32.png \
+  --export-filename=website/assets/images/favicon-32x32.png \
   --export-width=32 \
   --export-height=32
 
 # 批量生成
 for size in 16 32 192 180 512; do
-  inkscape landing/assets/images/favicon.svg \
+  inkscape website/assets/images/favicon.svg \
     --export-type=png \
-    --export-filename=landing/assets/images/favicon-${size}x${size}.png \
+    --export-filename=website/assets/images/favicon-${size}x${size}.png \
     --export-width=$size \
     --export-height=$size
 done
@@ -297,16 +297,16 @@ brew install imagemagick
 brew install librsvg
 
 # 生成 PNG
-magick landing/assets/images/favicon.svg \
+magick website/assets/images/favicon.svg \
   -resize 32x32 \
-  landing/assets/images/favicon-32x32.png
+  website/assets/images/favicon-32x32.png
 ```
 
 ---
 
 ## 📝 HTML 引用代码
 
-生成所有资源后，在 `landing/index.html` 的 `<head>` 中更新：
+生成所有资源后，在 `website/index.html` 的 `<head>` 中更新：
 
 ```html
 <!-- Favicon -->
@@ -376,10 +376,10 @@ magick landing/assets/images/favicon.svg \
 ```bash
 # 1. 使用 RealFaviconGenerator
 # 访问 https://realfavicongenerator.net/
-# 上传 landing/assets/images/favicon.svg
+# 上传 website/assets/images/favicon.svg
 # 下载生成的资源包
 
-# 2. 解压到 landing/assets/images/
+# 2. 解压到 website/assets/images/
 
 # 3. 更新 index.html 中的引用
 ```

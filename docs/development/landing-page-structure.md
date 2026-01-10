@@ -4,7 +4,7 @@
 
 ```
 aimake/
-├── landing/                   # 落地页根目录 (部署到 CF Pages)
+├── website/                   # 落地页根目录 (部署到 CF Pages)
 │   ├── index.html             # 主页
 │   ├── assets/
 │   │   ├── css/
@@ -104,7 +104,7 @@ aimake/
 ### \_headers 配置
 
 ```
-# landing/_headers
+# website/_headers
 
 /*
   X-Frame-Options: DENY
@@ -122,7 +122,7 @@ aimake/
 ### \_redirects 配置
 
 ```
-# landing/_redirects
+# website/_redirects
 
 # 重定向示例
 /start    /index.html#pricing   301
@@ -167,7 +167,7 @@ aimake/
 
 ### 阶段 1：目录重构 (30 分钟)
 
-1. 创建 `landing/` 目录结构
+1. 创建 `website/` 目录结构
 2. 拆分 HTML/CSS/JS
 3. 添加 `_headers` 和 `robots.txt`
 4. 更新资源引用路径

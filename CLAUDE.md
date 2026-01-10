@@ -14,7 +14,7 @@ repository.
 **当前阶段**: 规划期 - 设计文档完成,代码未开始开发
 
 - ✅ 完整的设计文档体系 (26 个文档)
-- ✅ Landing Page (`landing/`)
+- ✅ Website (`website/`)
 - ✅ 项目配置��件 (ESLint, Prettier, wrangler.toml)
 - ⏳ 前端 React 应用 (待创建 `frontend/`)
 - ⏳ 后端 Cloudflare Workers (待创建 `api/`)
@@ -75,7 +75,7 @@ aimake/
 │       ├── deployment-architecture.md  # Vercel + Cloudflare 部署
 │       └── release-verification.md     # 上线验证清单
 │
-├── landing/                   # Landing Page (已完成)
+├── website/                   # Landing Page (已完成)
 │   ├── index.html
 │   ├── assets/
 │   └── README.md
@@ -121,8 +121,8 @@ aimake/
 ```bash
 # 代码质量检查
 npm run lint              # ESLint + Stylelint + Markdownlint
-npm run lint:js           # 仅 ESLint (landing/**/*.js)
-npm run lint:css          # 仅 Stylelint (landing/**/*.css)
+npm run lint:js           # 仅 ESLint (website/**/*.js)
+npm run lint:css          # 仅 Stylelint (website/**/*.css)
 npm run lint:md           # 仅 Markdownlint
 npm run format            # Prettier 格式化
 npm run format:check      # Prettier 检查

@@ -72,7 +72,7 @@
 ### 2.3 实现代码
 
 ```tsx
-// components/landing/Navigation.tsx
+// components/website/Navigation.tsx
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -372,7 +372,7 @@ export function Navigation() {
 ### 7.1 FAQ 组件实现
 
 ```tsx
-// components/landing/FAQ.tsx
+// components/website/FAQ.tsx
 
 const faqs = [
   {
