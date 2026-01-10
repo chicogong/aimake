@@ -1,0 +1,11 @@
+node_modules/
+.venv/
+.wrangler/
+dist/
+build/
+*.min.js
+*.min.css
+landing/assets/audio/
+.git/
+.claude/
+.codebuddy/
