@@ -57,14 +57,6 @@
   - 资源生成指南（PNG、ICO、多尺寸）
 - 新增 `landing/assets/images/README.md` - 品牌资源使用指南
 
-#### 工具脚本
-- 新增 `scripts/generate-brand-assets.sh` - 自动生成所有尺寸图标
-  - 支持 Favicon (16/32/192px)
-  - 支持 Apple Touch Icon (180px)
-  - 支持 PWA Icons (192/512px)
-  - 支持 OG Image (1200x630px)
-  - 自动生成 favicon.ico
-
 #### 落地页集成
 - 更新导航栏和 Footer 使用 Logo SVG
 - 更新 HTML meta 标签引用新的 Favicon 和 OG Image
@@ -72,9 +64,10 @@
 
 #### OG Image 生成
 - 新增 `landing/assets/images/og-image.png` - 1200x630px 社交分享图
-  - 使用 ImageMagick 从 SVG 模板生成
-  - 文件大小：31KB
-  - 包含品牌 Logo + 产品描述
+  - 使用 Chrome DevTools 从 HTML 模板截图生成
+  - 文件大小：2.4MB (@2x 高清 2400x1260)
+  - 格式：PNG 8-bit RGB 彩色图像
+  - 包含品牌 Logo + 产品描述 + 功能标签
   - 深色渐变背景，专业科技感
 
 ### 🏗️ APP 设计方案
