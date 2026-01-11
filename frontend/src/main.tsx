@@ -7,7 +7,6 @@ import './index.css';
 
 // Clerk publishable key
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-const isDev = import.meta.env.DEV;
 
 // React Query client
 const queryClient = new QueryClient({
@@ -19,11 +18,17 @@ const queryClient = new QueryClient({
   },
 });
 
+// Check if Clerk key is valid
+const isValidClerkKey = CLERK_PUBLISHABLE_KEY && 
+  CLERK_PUBLISHABLE_KEY.startsWith('pk_') && 
+  !CLERK_PUBLISHABLE_KEY.includes('your_key_here') &&
+  !CLERK_PUBLISHABLE_KEY.includes('placeholder');
+
 // Wrapper component that conditionally uses Clerk
 const AppWrapper = () => {
-  // In dev mode without valid Clerk key, render without Clerk
-  if (isDev && (!CLERK_PUBLISHABLE_KEY || CLERK_PUBLISHABLE_KEY === 'pk_test_placeholder')) {
-    console.warn('Running in dev mode without Clerk authentication');
+  // Without valid Clerk key, render without Clerk
+  if (!isValidClerkKey) {
+    console.warn('Running without Clerk authentication (no valid key)');
     return (
       <QueryClientProvider client={queryClient}>
         <App />
