@@ -1,0 +1,38 @@
+# AIMake API - Cloudflare Workers Configuration
+name = "aimake-api"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# 开发环境变量 (生产环境使用 secrets)
+[vars]
+ENVIRONMENT = "development"
+CORS_ORIGIN = "http://localhost:5173"
+
+# D1 数据库
+[[d1_databases]]
+binding = "DB"
+database_name = "aimake-db"
+database_id = "28199a6a-5c94-490f-9690-02928f5419cd"
+
+# R2 存储桶 (音频文件) - 需要在 Dashboard 启用 R2
+# [[r2_buckets]]
+# binding = "R2"
+# bucket_name = "aimake-audio"
+
+# KV 缓存
+[[kv_namespaces]]
+binding = "KV"
+id = "7b7187064a21465faffae7f5f621e121"
+
+# 路由规则
+[triggers]
+crons = []
+
+# 开发环境配置
+[env.development]
+vars = { ENVIRONMENT = "development", CORS_ORIGIN = "http://localhost:5173" }
+
+# 生产环境配置
+[env.production]
+vars = { ENVIRONMENT = "production", CORS_ORIGIN = "https://app.aimake.cc" }
