@@ -4,10 +4,10 @@ main = "src/index.ts"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
-# 开发环境变量 (生产环境使用 secrets)
+# 环境变量
 [vars]
-ENVIRONMENT = "development"
-CORS_ORIGIN = "http://localhost:5173"
+ENVIRONMENT = "production"
+CORS_ORIGIN = "https://aimake-app.pages.dev,http://localhost:5173"
 
 # D1 数据库
 [[d1_databases]]

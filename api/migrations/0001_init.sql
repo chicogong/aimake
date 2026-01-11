@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS voices (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   name_zh TEXT NOT NULL,
-  provider TEXT NOT NULL CHECK (provider IN ('openai', 'elevenlabs', 'azure', 'tencent', 'minimax')),
+  provider TEXT NOT NULL CHECK (provider IN ('openai', 'elevenlabs', 'azure', 'tencent', 'minimax', 'siliconflow')),
   provider_voice_id TEXT,
   gender TEXT CHECK (gender IN ('male', 'female', 'neutral')),
   language TEXT,
@@ -150,4 +150,13 @@ INSERT OR IGNORE INTO voices (id, name, name_zh, provider, gender, language, sty
   ('openai-fable', 'Fable', '寓言', 'openai', 'female', 'zh-CN', '活泼女声', '活泼的女性声音，适合轻松内容', 0, 1, 3),
   ('openai-onyx', 'Onyx', '玛瑙', 'openai', 'male', 'zh-CN', '磁性男声', '低沉磁性的男性声音，适合配音和广告', 0, 1, 4),
   ('openai-nova', 'Nova', '新星', 'openai', 'female', 'zh-CN', '温柔女声', '温柔的女性声音，适合有声读物', 0, 1, 5),
-  ('openai-shimmer', 'Shimmer', '微光', 'openai', 'female', 'zh-CN', '清新女声', '清新的女性声音，适合教育内容', 0, 1, 6);
+  ('openai-shimmer', 'Shimmer', '微光', 'openai', 'female', 'zh-CN', '清新女声', '清新的女性声音，适合教育内容', 0, 1, 6),
+  -- SiliconFlow FishAudio voices
+  ('sf-alex', 'Alex', '艾利克斯', 'siliconflow', 'male', 'zh-CN', '稳重男声', 'FishAudio 稳重男声，适合新闻播报', 0, 1, 20),
+  ('sf-benjamin', 'Benjamin', '本杰明', 'siliconflow', 'male', 'zh-CN', '温暖男声', 'FishAudio 温暖男声，适合叙述', 0, 1, 21),
+  ('sf-charles', 'Charles', '查尔斯', 'siliconflow', 'male', 'zh-CN', '磁性男声', 'FishAudio 磁性男声，适合广告配音', 0, 1, 22),
+  ('sf-david', 'David', '大卫', 'siliconflow', 'male', 'zh-CN', '成熟男声', 'FishAudio 成熟男声', 0, 1, 23),
+  ('sf-anna', 'Anna', '安娜', 'siliconflow', 'female', 'zh-CN', '甜美女声', 'FishAudio 甜美女声，自然流畅', 0, 1, 24),
+  ('sf-bella', 'Bella', '贝拉', 'siliconflow', 'female', 'zh-CN', '活泼女声', 'FishAudio 活泼女声', 0, 1, 25),
+  ('sf-claire', 'Claire', '克莱尔', 'siliconflow', 'female', 'zh-CN', '温柔女声', 'FishAudio 温柔女声，适合有声读物', 0, 1, 26),
+  ('sf-diana', 'Diana', '黛安娜', 'siliconflow', 'female', 'zh-CN', '清新女声', 'FishAudio 清新女声，适合教育内容', 0, 1, 27);

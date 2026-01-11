@@ -48,7 +48,7 @@ export const voices = sqliteTable('voices', {
   name: text('name').notNull(),
   nameZh: text('name_zh'),
   provider: text('provider', {
-    enum: ['openai', 'elevenlabs', 'azure', 'tencent', 'minimax'],
+    enum: ['openai', 'elevenlabs', 'azure', 'tencent', 'minimax', 'siliconflow'],
   }).notNull(),
 
   // 属性

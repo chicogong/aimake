@@ -16,8 +16,12 @@ export const api = axios.create({
   timeout: 30000,
 });
 
+// Store getToken function for use in generateSync
+let _getToken: (() => Promise<string | null>) | null = null;
+
 // Request interceptor - adds auth token
 export function setupApiAuth(getToken: () => Promise<string | null>) {
+  _getToken = getToken;
   api.interceptors.request.use(async (config) => {
     try {
       const token = await getToken();
@@ -71,6 +75,7 @@ export const voicesApi = {
 
 // TTS
 export const ttsApi = {
+  // Async generate (requires R2 storage)
   generate: (data: {
     text: string;
     voiceId: string;
@@ -78,6 +83,45 @@ export const ttsApi = {
     pitch?: number;
     format?: 'mp3' | 'wav';
   }) => api.post('/tts/generate', data),
+
+  // Sync generate - returns audio blob directly
+  generateSync: async (data: {
+    text: string;
+    voiceId: string;
+    speed?: number;
+    pitch?: number;
+    format?: 'mp3' | 'wav';
+  }): Promise<Blob> => {
+    // Get token from stored getToken function
+    let token: string | null = null;
+    if (_getToken) {
+      try {
+        token = await _getToken();
+      } catch (e) {
+        console.error('Failed to get token for TTS:', e);
+      }
+    }
+    
+    // Use fetch directly to avoid axios response interceptor interfering with blob
+    const response = await fetch(`${API_BASE}/tts/generate-sync`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(data),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw {
+        code: errorData?.error?.code || 'TTS_ERROR',
+        message: errorData?.error?.message || '语音生成失败',
+      };
+    }
+    
+    return response.blob();
+  },
 
   getStatus: (jobId: string) => api.get(`/tts/status/${jobId}`),
 };

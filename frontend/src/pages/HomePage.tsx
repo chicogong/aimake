@@ -3,7 +3,7 @@
  * Main TTS generation page
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { useMutation } from '@tanstack/react-query';
 import { Sparkles, Zap, Clock, Shield } from 'lucide-react';
@@ -14,14 +14,20 @@ import { ttsApi, setupApiAuth, userApi } from '@/services/api';
 import { useTTSStore } from '@/stores/ttsStore';
 import { useUserStore } from '@/stores/userStore';
 import { toastHelpers } from '@/hooks/useToast';
-import type { TTSJob } from '@/types';
+
+// Audio result type
+interface AudioResult {
+  url: string;
+  duration: number;
+  size: number;
+}
 
 export function HomePage() {
   const { getToken, isSignedIn } = useAuth();
   const [progress, setProgress] = useState(0);
-  const [generatedAudio, setGeneratedAudio] = useState<TTSJob['audio'] | null>(null);
+  const [generatedAudio, setGeneratedAudio] = useState<AudioResult | null>(null);
 
-  const { text, selectedVoice, speed, pitch, format, isGenerating, setIsGenerating, reset } =
+  const { text, selectedVoice, speed, pitch, format, isGenerating, setIsGenerating } =
     useTTSStore();
   const { setUser, updateQuota } = useUserStore();
 
@@ -39,71 +45,54 @@ export function HomePage() {
     }
   }, [isSignedIn, getToken, setUser]);
 
-  // Poll for job status
-  const pollJobStatus = useCallback(
-    async (jobId: string): Promise<TTSJob> => {
-      const maxAttempts = 60;
-      let attempts = 0;
-
-      while (attempts < maxAttempts) {
-        const response = (await ttsApi.getStatus(jobId)) as any;
-        const job: TTSJob = response.data;
-
-        setProgress(job.progress || 0);
-
-        if (job.status === 'completed' && job.audio) {
-          return job;
-        }
-
-        if (job.status === 'failed') {
-          throw new Error(job.error?.message || '生成失败');
-        }
-
-        // Wait before next poll
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        attempts++;
-      }
-
-      throw new Error('生成超时，请重试');
-    },
-    []
-  );
-
-  // Generate mutation
+  // Generate mutation - using sync API
   const generateMutation = useMutation({
     mutationFn: async () => {
       if (!selectedVoice) throw new Error('请选择音色');
 
-      // Start job
-      const response = (await ttsApi.generate({
+      setProgress(30);
+
+      // Use sync API - returns audio blob directly
+      const blob = await ttsApi.generateSync({
         text,
         voiceId: selectedVoice.id,
         speed,
         pitch,
         format,
-      })) as any;
+      });
 
-      const { jobId } = response.data;
-      setProgress(10);
+      setProgress(90);
 
-      // Poll for completion
-      const completedJob = await pollJobStatus(jobId);
-      return completedJob;
+      // Create object URL from blob
+      const audioUrl = URL.createObjectURL(blob);
+      
+      // Estimate duration based on text length
+      const estimatedDuration = Math.ceil(text.length / 150);
+
+      return {
+        url: audioUrl,
+        duration: estimatedDuration,
+        size: blob.size,
+      };
     },
     onMutate: () => {
       setIsGenerating(true);
-      setProgress(0);
+      setProgress(10);
+      // Revoke previous audio URL if exists
+      if (generatedAudio?.url) {
+        URL.revokeObjectURL(generatedAudio.url);
+      }
       setGeneratedAudio(null);
     },
-    onSuccess: (job) => {
-      setGeneratedAudio(job.audio || null);
+    onSuccess: (result) => {
+      setGeneratedAudio(result);
       setProgress(100);
       toastHelpers.success('生成成功！', '音频已准备就绪');
 
       // Update quota
-      if (job.audio?.duration) {
+      if (result.duration) {
         updateQuota({
-          used: Math.ceil(job.audio.duration),
+          used: Math.ceil(result.duration),
         });
       }
     },

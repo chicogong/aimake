@@ -1,6 +1,7 @@
 /**
  * TTS Routes
- * POST /api/tts/generate - Generate audio
+ * POST /api/tts/generate - Generate audio (async with job)
+ * POST /api/tts/generate-sync - Generate audio (sync, returns audio directly)
  * GET /api/tts/status/:jobId - Get job status
  */
 
@@ -27,7 +28,7 @@ const generateSchema = z.object({
   format: z.enum(['mp3', 'wav']).default('mp3'),
 });
 
-// POST /api/tts/generate
+// POST /api/tts/generate (async - returns job ID)
 tts.post('/generate', ttsRateLimitMiddleware, zValidator('json', generateSchema), async (c) => {
   const user = c.get('user');
   const body = c.req.valid('json');
@@ -38,6 +39,30 @@ tts.post('/generate', ttsRateLimitMiddleware, zValidator('json', generateSchema)
   const result = await ttsService.createJob(user, body);
 
   return success(c, result);
+});
+
+// POST /api/tts/generate-sync (sync - returns audio directly)
+tts.post('/generate-sync', ttsRateLimitMiddleware, zValidator('json', generateSchema), async (c) => {
+  const user = c.get('user');
+  const body = c.req.valid('json');
+
+  const db = createDb(c.env.DB);
+  const ttsService = new TTSService(db, c.env);
+
+  // Generate audio directly without storing
+  const audioBuffer = await ttsService.generateDirect(user, body);
+
+  // Return audio as response
+  const contentType = body.format === 'mp3' ? 'audio/mpeg' : 'audio/wav';
+  
+  return new Response(audioBuffer, {
+    headers: {
+      'Content-Type': contentType,
+      'Content-Length': audioBuffer.byteLength.toString(),
+      'Content-Disposition': `attachment; filename="audio.${body.format}"`,
+      'Cache-Control': 'no-cache',
+    },
+  });
 });
 
 // GET /api/tts/status/:jobId

@@ -79,7 +79,7 @@ export interface PaginationParams {
 }
 
 // ============ Voice Types ============
-export type VoiceProvider = 'openai' | 'elevenlabs' | 'azure' | 'tencent' | 'minimax';
+export type VoiceProvider = 'openai' | 'elevenlabs' | 'azure' | 'tencent' | 'minimax' | 'siliconflow';
 
 export interface VoiceInfo {
   id: string;

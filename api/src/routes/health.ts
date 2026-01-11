@@ -30,16 +30,19 @@ health.get('/', async (c) => {
   }
 
   // Check R2
-  let r2Status: 'connected' | 'error' = 'error';
-  try {
-    await c.env.R2.head('health-check');
-    r2Status = 'connected';
-  } catch (e) {
-    // R2.head returns null for non-existent objects, which is fine
-    if (e instanceof Error && !e.message.includes('not found')) {
-      console.error('R2 health check failed:', e);
-    } else {
+  let r2Status: 'connected' | 'error' | 'not_configured' = 'not_configured';
+  if (c.env.R2) {
+    try {
+      await c.env.R2.head('health-check');
       r2Status = 'connected';
+    } catch (e) {
+      // R2.head returns null for non-existent objects, which is fine
+      if (e instanceof Error && !e.message.includes('not found')) {
+        console.error('R2 health check failed:', e);
+        r2Status = 'error';
+      } else {
+        r2Status = 'connected';
+      }
     }
   }
 

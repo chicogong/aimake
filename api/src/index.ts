@@ -41,17 +41,22 @@ app.use(
   '*',
   cors({
     origin: (origin, c) => {
-      // Allow configured origin
-      const allowed = c.env.CORS_ORIGIN;
-      if (allowed && origin === allowed) return origin;
+      if (!origin) return null;
+      
+      // Allow configured origins (comma-separated)
+      const allowed = c.env.CORS_ORIGIN?.split(',').map((s: string) => s.trim()) || [];
+      if (allowed.includes(origin)) return origin;
 
       // Allow localhost in development
-      if (c.env.ENVIRONMENT === 'development') {
-        if (origin?.startsWith('http://localhost:')) return origin;
-      }
+      if (origin.startsWith('http://localhost:')) return origin;
 
       // Allow production domains
       if (origin === 'https://aimake.cc' || origin === 'https://app.aimake.cc') {
+        return origin;
+      }
+      
+      // Allow Cloudflare Pages preview URLs
+      if (origin.includes('.aimake-app.pages.dev')) {
         return origin;
       }
 
