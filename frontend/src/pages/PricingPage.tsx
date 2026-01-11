@@ -75,7 +75,7 @@ const plans = [
 ];
 
 export function PricingPage() {
-  const { isSignedIn } = useAuth();
+  useAuth(); // Used for future authentication features
 
   const handleSelectPlan = (planId: string) => {
     if (planId === 'free') {

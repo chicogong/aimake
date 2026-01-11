@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { useTTSStore } from '../stores/ttsStore';
 import type { Voice } from '../types';
 

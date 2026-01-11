@@ -22,7 +22,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { audiosApi } from '@/services/api';
 import { formatDuration, formatDate, formatFileSize, truncateText } from '@/lib/utils';
 import { toastHelpers } from '@/hooks/useToast';
-import type { Audio } from '@/types';
+import type { Audio, ApiResponse } from '@/types';
 
 export function HistoryPage() {
   const { isSignedIn } = useAuth();
@@ -47,8 +47,8 @@ export function HistoryPage() {
     enabled: isSignedIn,
   });
 
-  const audios: Audio[] = (data as any)?.data?.items || [];
-  const total = (data as any)?.meta?.total || 0;
+  const audios: Audio[] = (data as ApiResponse<{ items: Audio[] }> | undefined)?.data?.items || [];
+  const total = (data as ApiResponse<{ items: Audio[] }> & { meta?: { total?: number } } | undefined)?.meta?.total || 0;
   const totalPages = Math.ceil(total / pageSize);
 
   const deleteMutation = useMutation({

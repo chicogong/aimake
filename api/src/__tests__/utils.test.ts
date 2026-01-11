@@ -41,24 +41,29 @@ describe('ID Utils', () => {
 });
 
 describe('Response Utils', () => {
-  // Mock Hono context
+  // Mock Hono context with proper typing
+  interface MockResponse {
+    data: unknown;
+    status: number;
+  }
+
   const createMockContext = () => {
     let responseData: unknown;
     let responseStatus = 200;
 
     return {
-      json: (data: unknown, status?: number) => {
+      json: (data: unknown, status?: number): MockResponse => {
         responseData = data;
         if (status) responseStatus = status;
         return { data: responseData, status: responseStatus };
       },
-      getResponse: () => ({ data: responseData, status: responseStatus }),
+      getResponse: (): MockResponse => ({ data: responseData, status: responseStatus }),
     };
   };
 
   it('success returns correct format', () => {
     const c = createMockContext();
-    const result = success(c as never, { message: 'test' });
+    const result = success(c as never, { message: 'test' }) as unknown as MockResponse;
 
     expect(result.data).toEqual({
       success: true,
@@ -69,7 +74,7 @@ describe('Response Utils', () => {
   it('success includes meta when provided', () => {
     const c = createMockContext();
     const meta = { total: 100, page: 1, pageSize: 20 };
-    const result = success(c as never, { items: [] }, meta);
+    const result = success(c as never, { items: [] }, meta) as unknown as MockResponse;
 
     expect(result.data).toEqual({
       success: true,
@@ -84,7 +89,7 @@ describe('Response Utils', () => {
 
   it('created returns 201 status', () => {
     const c = createMockContext();
-    const result = created(c as never, { id: '123' });
+    const result = created(c as never, { id: '123' }) as unknown as MockResponse;
 
     expect(result.data).toEqual({
       success: true,
@@ -95,7 +100,7 @@ describe('Response Utils', () => {
 
   it('error returns correct format', () => {
     const c = createMockContext();
-    const result = error(c as never, 'BAD_REQUEST', 'Invalid input', 400);
+    const result = error(c as never, 'BAD_REQUEST', 'Invalid input', 400) as unknown as MockResponse;
 
     expect(result.data).toEqual({
       success: false,
@@ -110,7 +115,7 @@ describe('Response Utils', () => {
   it('error includes details when provided', () => {
     const c = createMockContext();
     const details = { field: 'email' };
-    const result = error(c as never, 'VALIDATION_ERROR', 'Invalid email', 400, details);
+    const result = error(c as never, 'VALIDATION_ERROR', 'Invalid email', 400, details) as unknown as MockResponse;
 
     expect(result.data).toEqual({
       success: false,

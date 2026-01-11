@@ -14,6 +14,7 @@ import { ttsApi, setupApiAuth, userApi } from '@/services/api';
 import { useTTSStore } from '@/stores/ttsStore';
 import { useUserStore } from '@/stores/userStore';
 import { toastHelpers } from '@/hooks/useToast';
+import type { User } from '@/types';
 
 // Audio result type
 interface AudioResult {
@@ -37,7 +38,7 @@ export function HomePage() {
       setupApiAuth(getToken);
 
       // Fetch user data
-      userApi.getMe().then((res: any) => {
+      userApi.getMe().then((res: { data?: User }) => {
         if (res?.data) {
           setUser(res.data);
         }
@@ -96,7 +97,7 @@ export function HomePage() {
         });
       }
     },
-    onError: (error: any) => {
+    onError: (error: { message?: string }) => {
       toastHelpers.error('生成失败', error.message || '请稍后重试');
       setProgress(0);
     },
