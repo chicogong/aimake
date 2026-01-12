@@ -18,9 +18,14 @@ export const api = axios.create({
 
 // Store getToken function for use in generateSync
 let _getToken: (() => Promise<string | null>) | null = null;
+let _authSetup = false;
 
 // Request interceptor - adds auth token
 export function setupApiAuth(getToken: () => Promise<string | null>) {
+  if (_authSetup) {
+    return;
+  }
+  _authSetup = true;
   _getToken = getToken;
   api.interceptors.request.use(async (config) => {
     try {

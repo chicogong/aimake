@@ -10,7 +10,7 @@ import { Sparkles, Zap, Clock, Shield } from 'lucide-react';
 import { TTSForm } from '@/components/tts/TTSForm';
 import { AudioPlayer } from '@/components/tts/AudioPlayer';
 import { Card, CardContent } from '@/components/ui/card';
-import { ttsApi, setupApiAuth, userApi } from '@/services/api';
+import { ttsApi, userApi } from '@/services/api';
 import { useTTSStore } from '@/stores/ttsStore';
 import { useUserStore } from '@/stores/userStore';
 import { toastHelpers } from '@/hooks/useToast';
@@ -24,7 +24,7 @@ interface AudioResult {
 }
 
 export function HomePage() {
-  const { getToken, isSignedIn } = useAuth();
+  const { isSignedIn } = useAuth();
   const [progress, setProgress] = useState(0);
   const [generatedAudio, setGeneratedAudio] = useState<AudioResult | null>(null);
 
@@ -32,19 +32,16 @@ export function HomePage() {
     useTTSStore();
   const { setUser, updateQuota } = useUserStore();
 
-  // Setup API auth
+  // Fetch user data when signed in
   useEffect(() => {
     if (isSignedIn) {
-      setupApiAuth(getToken);
-
-      // Fetch user data
       userApi.getMe().then((res: { data?: User }) => {
         if (res?.data) {
           setUser(res.data);
         }
       });
     }
-  }, [isSignedIn, getToken, setUser]);
+  }, [isSignedIn, setUser]);
 
   // Generate mutation - using sync API
   const generateMutation = useMutation({
