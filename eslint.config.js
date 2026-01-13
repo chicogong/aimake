@@ -9,8 +9,8 @@ export default [
       '**/dist/**',
       '**/build/**',
       '**/.wrangler/**',
-      '**/lib/**',  // Ignore third-party libraries
-      '**/*.min.js',  // Ignore minified files
+      '**/lib/**', // Ignore third-party libraries
+      '**/*.min.js', // Ignore minified files
     ],
   },
   {
@@ -27,10 +27,10 @@ export default [
       },
     },
     rules: {
-      'indent': ['error', 2],
+      indent: ['error', 2],
       'linebreak-style': ['error', 'unix'],
-      'quotes': ['error', 'single'],
-      'semi': ['error', 'always'],
+      quotes: ['error', 'single'],
+      semi: ['error', 'always'],
       'no-unused-vars': 'warn',
       'no-console': 'off',
     },
