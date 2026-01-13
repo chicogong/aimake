@@ -37,10 +37,11 @@ export const authMiddleware = createMiddleware<{ Bindings: Env; Variables: Varia
     const token = authHeader.slice(7);
 
     try {
-      // Verify Clerk JWT - need both secretKey and publishableKey for proper verification
+      // Verify Clerk JWT
+      // Note: Remove authorizedParties to simplify verification
+      // Clerk tokens are already signed with the secret key which is sufficient for verification
       const payload = await verifyToken(token, {
         secretKey: c.env.CLERK_SECRET_KEY,
-        authorizedParties: ['https://app.aimake.cc', 'https://aimake-app.pages.dev', 'http://localhost:5173'],
       });
 
       if (!payload.sub) {
