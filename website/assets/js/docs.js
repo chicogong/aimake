@@ -601,7 +601,7 @@ class DocsViewer {
             title: this.extractTitle(content),
           });
         }
-      } catch (e) {
+      } catch {
         console.warn('无法索引: ' + doc.path);
       }
     }
@@ -779,10 +779,12 @@ class DocsViewer {
 }
 
 // ==================== 全局函数 ====================
+// eslint-disable-next-line no-unused-vars
 function closeSearch() {
   docsViewer?.closeSearch();
 }
 
+// eslint-disable-next-line no-unused-vars
 function closeSidebar() {
   docsViewer?.closeSidebar();
 }

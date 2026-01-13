@@ -1,8 +1,10 @@
 {
   "extends": ["stylelint-config-standard"],
   "rules": {
-    "color-named": "never",
-    "selector-max-id": 0,
+    "color-named": null,
+    "selector-max-id": null,
+    "no-descending-specificity": null,
+    "no-duplicate-selectors": null,
     "function-url-quotes": "always",
     "selector-pseudo-element-colon-notation": "double",
     "at-rule-no-unknown": [

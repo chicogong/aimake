@@ -1,6 +1,7 @@
 {
   "name": "aimake",
   "version": "0.1.0",
+  "type": "module",
   "description": "AI语音内容生成平台 - 播客、有声书、配音",
   "scripts": {
     "dev": "npx live-server . --port=3000 --open=/website/index.html --watch=website,docs",
@@ -11,7 +12,7 @@
     "lint": "npm run lint:js && npm run lint:css && npm run lint:md",
     "lint:js": "eslint 'website/**/*.js' --fix",
     "lint:css": "stylelint 'website/**/*.css' --fix",
-    "lint:md": "markdownlint '**/*.md' --ignore node_modules --ignore .venv",
+    "lint:md": "markdownlint '**/*.md' --ignore-path .markdownlintignore",
     "format": "prettier --write '**/*.{js,css,html,json,md}' --ignore-path .prettierignore",
     "format:check": "prettier --check '**/*.{js,css,html,json,md}' --ignore-path .prettierignore"
   },
@@ -22,7 +23,9 @@
   "author": "chicogong",
   "license": "MIT",
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "eslint": "^9.39.2",
+    "globals": "^17.0.0",
     "live-server": "^1.2.2",
     "markdownlint-cli": "^0.47.0",
     "prettier": "^3.2.4",
