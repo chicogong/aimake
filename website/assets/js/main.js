@@ -1,74 +1,184 @@
 // AIMake Landing Page JavaScript
+// Refactored version - 2026-01-15
 
-// ==================== Mobile Menu Toggle ====================
-function toggleMobileMenu() {
-  const menu = document.getElementById('mobile-menu');
-  const menuIcon = document.getElementById('menu-icon');
-  const closeIcon = document.getElementById('close-icon');
+// ==================== Constants ====================
+const CONSTANTS = {
+  CHAR_LIMIT: 1000,
+  CHAR_WARNING_THRESHOLD: 900,
+  HERO_SCROLL_THRESHOLD: 800,
+  STATS_ANIMATION_DURATION: 2000,
+  PROGRESS_INTERVAL: 50,
+  FAQ_TRANSITION_DELAY: 300,
+};
 
-  if (menu) {
-    menu.classList.toggle('open');
+// ==================== DOM Cache ====================
+const DOM = {};
 
-    // Toggle icons
-    if (menuIcon && closeIcon) {
-      menuIcon.classList.toggle('hidden');
-      closeIcon.classList.toggle('hidden');
+function cacheDOMElements() {
+  // Mobile menu
+  DOM.mobileMenu = document.getElementById('mobile-menu');
+  DOM.menuIcon = document.getElementById('menu-icon');
+  DOM.closeIcon = document.getElementById('close-icon');
+  DOM.mobileMenuToggle = document.querySelector('[data-mobile-menu-toggle]');
+
+  // Demo section
+  DOM.demoTextarea = document.getElementById('demo-textarea');
+  DOM.charCounter = document.getElementById('char-counter');
+  DOM.generateBtn = document.getElementById('generate-btn');
+  DOM.demoAudioPlayer = document.getElementById('demo-audio-player');
+  DOM.demoAudio = document.getElementById('demo-audio');
+
+  // Sticky CTA
+  DOM.stickyCTA = document.querySelector('.sticky-cta');
+
+  // Stats section
+  DOM.statsSection = document.querySelector('.stats-section');
+}
+
+// ==================== Unified Initialization ====================
+function init() {
+  cacheDOMElements();
+  initMobileMenu();
+  initSmoothScroll();
+  initScrollAnimations();
+  initStatsCounter();
+  initAudioPlayers();
+  initCharacterCounter();
+  initFAQAccordion();
+  initStickyCTA();
+  initEventDelegation();
+
+  // Console welcome message
+  console.log(
+    '%c🎙️ AIMake - AI 语音内容生成',
+    'font-size: 20px; font-weight: bold; color: #3B82F6;'
+  );
+  console.log('%c感谢使用 AIMake！如有问题请联系我们。', 'font-size: 14px; color: #6B7280;');
+}
+
+// ==================== Event Delegation ====================
+function initEventDelegation() {
+  // Handle all clicks with data attributes
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+
+    const action = target.dataset.action;
+
+    switch (action) {
+    case 'toggle-mobile-menu':
+      toggleMobileMenu();
+      break;
+    case 'simulate-generation':
+      simulateGeneration();
+      break;
+    case 'preview-voice':
+      previewVoice(target.dataset.voiceId);
+      break;
+    default:
+      console.warn('Unknown action:', action);
     }
+  });
+
+  // Handle voice selector changes
+  document.addEventListener('change', (e) => {
+    if (e.target.matches('[data-voice-selector]')) {
+      const voiceId = e.target.value;
+      if (voiceId) {
+        previewVoice(voiceId);
+      }
+    }
+  });
+}
+
+// ==================== Mobile Menu ====================
+function initMobileMenu() {
+  if (!DOM.mobileMenu) return;
+
+  // Close menu when clicking on links
+  const links = DOM.mobileMenu.querySelectorAll('a');
+  links.forEach((link) => {
+    link.addEventListener('click', () => {
+      toggleMobileMenu();
+    });
+  });
+}
+
+function toggleMobileMenu() {
+  if (!DOM.mobileMenu) return;
+
+  DOM.mobileMenu.classList.toggle('open');
+
+  // Toggle icons
+  if (DOM.menuIcon && DOM.closeIcon) {
+    DOM.menuIcon.classList.toggle('hidden');
+    DOM.closeIcon.classList.toggle('hidden');
   }
 }
 
-// Close mobile menu when clicking on a link
-document.addEventListener('DOMContentLoaded', () => {
-  const mobileMenu = document.getElementById('mobile-menu');
-  if (mobileMenu) {
-    const links = mobileMenu.querySelectorAll('a');
-    links.forEach((link) => {
-      link.addEventListener('click', () => {
-        toggleMobileMenu();
-      });
-    });
-  }
-});
-
 // ==================== Smooth Scroll ====================
-document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-  anchor.addEventListener('click', function (e) {
-    e.preventDefault();
-    const target = document.querySelector(this.getAttribute('href'));
-    if (target) {
-      target.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }
+function initSmoothScroll() {
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+    });
   });
-});
+}
 
 // ==================== Scroll Animations ====================
-const observerOptions = {
-  threshold: 0.1,
-  rootMargin: '0px 0px -50px 0px',
-};
+function initScrollAnimations() {
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px',
+  };
 
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('fade-in-up');
-      observer.unobserve(entry.target);
-    }
-  });
-}, observerOptions);
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('fade-in-up');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOptions);
 
-// Observe all feature cards, use cases, testimonials
-document.addEventListener('DOMContentLoaded', () => {
+  // Observe all animated elements
   const animatedElements = document.querySelectorAll(
     '.feature-card, .use-case-card, .testimonial-card, .pricing-card'
   );
   animatedElements.forEach((el) => observer.observe(el));
-});
+}
 
-// ==================== Number Counter Animation ====================
-function animateNumber(element, target, duration = 2000) {
+// ==================== Stats Counter Animation ====================
+function initStatsCounter() {
+  if (!DOM.statsSection) return;
+
+  const statsObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const numbers = entry.target.querySelectorAll('.stat-number');
+          numbers.forEach((num) => {
+            const target = parseInt(num.dataset.target);
+            animateNumber(num, target);
+          });
+          statsObserver.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.5 }
+  );
+
+  statsObserver.observe(DOM.statsSection);
+}
+
+function animateNumber(element, target, duration = CONSTANTS.STATS_ANIMATION_DURATION) {
   const increment = target / (duration / 16);
   let current = 0;
 
@@ -83,31 +193,7 @@ function animateNumber(element, target, duration = 2000) {
   }, 16);
 }
 
-// Trigger number animation when scrolling to stats section
-const statsObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const numbers = entry.target.querySelectorAll('.stat-number');
-        numbers.forEach((num) => {
-          const target = parseInt(num.dataset.target);
-          animateNumber(num, target);
-        });
-        statsObserver.unobserve(entry.target);
-      }
-    });
-  },
-  { threshold: 0.5 }
-);
-
-document.addEventListener('DOMContentLoaded', () => {
-  const statsSection = document.querySelector('.stats-section');
-  if (statsSection) {
-    statsObserver.observe(statsSection);
-  }
-});
-
-// ==================== Audio Player Control ====================
+// ==================== Audio Player ====================
 class AudioPlayer {
   constructor(audioElement, controls) {
     this.audio = audioElement;
@@ -194,11 +280,10 @@ class AudioPlayer {
   }
 }
 
-// Initialize audio players
-document.addEventListener('DOMContentLoaded', () => {
-  const demoAudio = document.getElementById('demo-audio');
-  if (demoAudio) {
-    new AudioPlayer(demoAudio, {
+function initAudioPlayers() {
+  // Initialize main demo audio
+  if (DOM.demoAudio) {
+    new AudioPlayer(DOM.demoAudio, {
       playBtn: document.getElementById('demo-play-btn'),
       progressBar: document.querySelector('.demo-progress-bar'),
       progressFill: document.querySelector('.demo-progress-fill'),
@@ -206,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Initialize all demo audio elements
+  // Initialize all demo audio items
   document.querySelectorAll('.demo-audio-item').forEach((item) => {
     const audio = item.querySelector('audio');
     if (audio) {
@@ -218,23 +303,19 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   });
-});
+}
 
-// ==================== Simulate Generation ====================
-// Exported to window for HTML onclick usage
+// ==================== Demo Generation ====================
 function simulateGeneration() {
-  const button = document.getElementById('generate-btn');
-  const audioPlayer = document.getElementById('demo-audio-player');
-
-  if (!button) return;
+  if (!DOM.generateBtn) return;
 
   // 1. Change button to loading state
-  const originalText = button.textContent;
-  button.textContent = '生成中...';
-  button.disabled = true;
-  button.classList.add('opacity-75', 'cursor-not-allowed');
+  const originalText = DOM.generateBtn.textContent;
+  DOM.generateBtn.textContent = '生成中...';
+  DOM.generateBtn.disabled = true;
+  DOM.generateBtn.classList.add('opacity-75', 'cursor-not-allowed');
 
-  // 2. Simulate progress (3 seconds)
+  // 2. Simulate progress
   let progress = 0;
   const progressInterval = setInterval(() => {
     progress += 2;
@@ -242,27 +323,52 @@ function simulateGeneration() {
       clearInterval(progressInterval);
 
       // 3. Show success and audio player
-      button.textContent = '✅ 生成成功';
-      button.classList.remove('opacity-75', 'cursor-not-allowed');
+      DOM.generateBtn.textContent = '✅ 生成成功';
+      DOM.generateBtn.classList.remove('opacity-75', 'cursor-not-allowed');
 
-      if (audioPlayer) {
-        audioPlayer.classList.remove('hidden');
+      if (DOM.demoAudioPlayer) {
+        DOM.demoAudioPlayer.classList.remove('hidden');
       }
 
       // Reset button after 2 seconds
       setTimeout(() => {
-        button.textContent = originalText;
-        button.disabled = false;
+        DOM.generateBtn.textContent = originalText;
+        DOM.generateBtn.disabled = false;
       }, 2000);
     }
-  }, 50);
+  }, CONSTANTS.PROGRESS_INTERVAL);
 }
 
-// Export to global scope for HTML inline event handlers
-window.simulateGeneration = simulateGeneration;
+// ==================== Character Counter ====================
+function initCharacterCounter() {
+  if (!DOM.demoTextarea || !DOM.charCounter) return;
 
-// ==================== FAQ Smooth Toggle ====================
-document.addEventListener('DOMContentLoaded', () => {
+  DOM.demoTextarea.addEventListener('input', (e) => {
+    const count = e.target.value.length;
+    DOM.charCounter.textContent = `${count}/${CONSTANTS.CHAR_LIMIT}`;
+
+    // Warning color when approaching limit
+    if (count > CONSTANTS.CHAR_WARNING_THRESHOLD) {
+      DOM.charCounter.classList.add('text-orange-500');
+    } else {
+      DOM.charCounter.classList.remove('text-orange-500');
+    }
+  });
+}
+
+// ==================== Voice Preview ====================
+function previewVoice(voiceId) {
+  if (!voiceId) return;
+
+  const audio = new Audio(`/assets/audio/preview-${voiceId}.mp3`);
+  audio.volume = 0.5;
+  audio.play().catch((err) => {
+    console.log('Audio preview not available:', err);
+  });
+}
+
+// ==================== FAQ Accordion ====================
+function initFAQAccordion() {
   const details = document.querySelectorAll('details');
 
   details.forEach((detail) => {
@@ -282,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 10);
         setTimeout(() => {
           detail.open = false;
-        }, 300);
+        }, CONSTANTS.FAQ_TRANSITION_DELAY);
       } else {
         // Opening
         detail.open = true;
@@ -293,60 +399,31 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
-});
+}
 
-// ==================== Sticky CTA (Mobile) ====================
-let lastScroll = 0;
-const stickyCTA = document.querySelector('.sticky-cta');
+// ==================== Sticky CTA ====================
+function initStickyCTA() {
+  if (!DOM.stickyCTA) return;
 
-if (stickyCTA) {
+  let lastScroll = 0;
+
   window.addEventListener('scroll', () => {
     const currentScroll = window.scrollY;
 
     // Show when scrolling down past hero section
-    if (currentScroll > 800 && currentScroll > lastScroll) {
-      stickyCTA.classList.add('visible');
+    if (currentScroll > CONSTANTS.HERO_SCROLL_THRESHOLD && currentScroll > lastScroll) {
+      DOM.stickyCTA.classList.add('visible');
     } else if (currentScroll < lastScroll) {
-      stickyCTA.classList.remove('visible');
+      DOM.stickyCTA.classList.remove('visible');
     }
 
     lastScroll = currentScroll;
   });
 }
 
-// ==================== Character Counter ====================
-document.addEventListener('DOMContentLoaded', () => {
-  const textarea = document.getElementById('demo-textarea');
-  const counter = document.getElementById('char-counter');
-
-  if (textarea && counter) {
-    textarea.addEventListener('input', (e) => {
-      const count = e.target.value.length;
-      counter.textContent = `${count}/1000`;
-
-      // Warning color when approaching limit
-      if (count > 900) {
-        counter.classList.add('text-orange-500');
-      } else {
-        counter.classList.remove('text-orange-500');
-      }
-    });
-  }
-});
-
-// ==================== Voice Preview ====================
-// Exported to window for HTML onchange usage
-function previewVoice(voiceId) {
-  const audio = new Audio(`/assets/audio/preview-${voiceId}.mp3`);
-  audio.volume = 0.5;
-  audio.play().catch((err) => {
-    console.log('Audio preview not available:', err);
-  });
+// ==================== Initialize on DOM Ready ====================
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
 }
-
-// Export to global scope for HTML inline event handlers
-window.previewVoice = previewVoice;
-
-// ==================== Console Welcome Message ====================
-console.log('%c🎙️ AIMake - AI 语音内容生成', 'font-size: 20px; font-weight: bold; color: #3B82F6;');
-console.log('%c感谢使用 AIMake！如有问题请联系我们。', 'font-size: 14px; color: #6B7280;');

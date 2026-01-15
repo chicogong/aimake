@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "stylelint.vscode-stylelint",
+    "davidanson.vscode-markdownlint",
+    "bradlc.vscode-tailwindcss",
+    "cloudflare.vscode-cloudflare-workers"
+  ]
+}
