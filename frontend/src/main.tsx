@@ -19,16 +19,16 @@ const queryClient = new QueryClient({
 });
 
 // Check if Clerk key is valid
-const isValidClerkKey = CLERK_PUBLISHABLE_KEY && 
-  CLERK_PUBLISHABLE_KEY.startsWith('pk_') && 
+const isValidClerkKey =
+  CLERK_PUBLISHABLE_KEY &&
+  CLERK_PUBLISHABLE_KEY.startsWith('pk_') &&
   !CLERK_PUBLISHABLE_KEY.includes('your_key_here') &&
   !CLERK_PUBLISHABLE_KEY.includes('placeholder');
 
 // Wrapper component that conditionally uses Clerk
 const AppWrapper = () => {
-  // Without valid Clerk key, render without Clerk
   if (!isValidClerkKey) {
-    console.warn('Running without Clerk authentication (no valid key)');
+    console.warn('Authentication disabled: Missing or invalid VITE_CLERK_PUBLISHABLE_KEY');
     return (
       <QueryClientProvider client={queryClient}>
         <App />

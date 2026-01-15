@@ -17,9 +17,7 @@ export function Layout() {
       <footer className="border-t py-8 mt-auto">
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">
-              © 2026 AIMake. All rights reserved.
-            </p>
+            <p className="text-sm text-muted-foreground">© 2026 AIMake. All rights reserved.</p>
             <div className="flex items-center gap-6">
               <a
                 href="https://aimake.cc"

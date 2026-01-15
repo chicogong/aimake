@@ -80,15 +80,6 @@ export const voicesApi = {
 
 // TTS
 export const ttsApi = {
-  // Async generate (requires R2 storage)
-  generate: (data: {
-    text: string;
-    voiceId: string;
-    speed?: number;
-    pitch?: number;
-    format?: 'mp3' | 'wav';
-  }) => api.post('/tts/generate', data),
-
   // Sync generate - returns audio blob directly
   generateSync: async (data: {
     text: string;
@@ -106,7 +97,7 @@ export const ttsApi = {
         console.error('Failed to get token for TTS:', e);
       }
     }
-    
+
     // Use fetch directly to avoid axios response interceptor interfering with blob
     const response = await fetch(`${API_BASE}/tts/generate-sync`, {
       method: 'POST',
@@ -116,7 +107,7 @@ export const ttsApi = {
       },
       body: JSON.stringify(data),
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw {
@@ -124,11 +115,9 @@ export const ttsApi = {
         message: errorData?.error?.message || '语音生成失败',
       };
     }
-    
+
     return response.blob();
   },
-
-  getStatus: (jobId: string) => api.get(`/tts/status/${jobId}`),
 };
 
 // Audios

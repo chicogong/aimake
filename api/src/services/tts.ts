@@ -19,18 +19,18 @@ const PROVIDERS = {
     voices: ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'],
   },
   siliconflow: {
-    // SiliconFlow FishAudio TTS
+    // SiliconFlow MOSS-TTSD TTS
     baseUrl: 'https://api.siliconflow.cn/v1/audio/speech',
-    model: 'fishaudio/fish-speech-1.5',
+    model: 'fnlp/MOSS-TTSD-v0.5',
     voices: [
-      'fishaudio/fish-speech-1.5:alex',      // 男声
-      'fishaudio/fish-speech-1.5:benjamin',  // 男声
-      'fishaudio/fish-speech-1.5:charles',   // 男声
-      'fishaudio/fish-speech-1.5:david',     // 男声
-      'fishaudio/fish-speech-1.5:anna',      // 女声
-      'fishaudio/fish-speech-1.5:bella',     // 女声
-      'fishaudio/fish-speech-1.5:claire',    // 女声
-      'fishaudio/fish-speech-1.5:diana',     // 女声
+      'fnlp/MOSS-TTSD-v0.5:alex',      // 男声
+      'fnlp/MOSS-TTSD-v0.5:benjamin',  // 男声
+      'fnlp/MOSS-TTSD-v0.5:charles',   // 男声
+      'fnlp/MOSS-TTSD-v0.5:david',     // 男声
+      'fnlp/MOSS-TTSD-v0.5:anna',      // 女声
+      'fnlp/MOSS-TTSD-v0.5:bella',     // 女声
+      'fnlp/MOSS-TTSD-v0.5:claire',    // 女声
+      'fnlp/MOSS-TTSD-v0.5:diana',     // 女声
     ],
   },
 };
@@ -361,6 +361,12 @@ export class TTSService {
   }): Promise<ArrayBuffer> {
     const { text, voiceId, speed, format, provider } = params;
 
+    // Fallback to SiliconFlow if OpenAI key is not configured
+    if (provider === 'openai' && !this.env.OPENAI_API_KEY) {
+      console.log('OpenAI API key not configured, falling back to SiliconFlow');
+      return this.generateSiliconFlow(text, voiceId, speed, format);
+    }
+
     switch (provider) {
       case 'openai':
         return this.generateOpenAI(text, voiceId, speed, format);
@@ -411,7 +417,7 @@ export class TTSService {
   }
 
   /**
-   * Generate audio using SiliconFlow (FishAudio) TTS
+   * Generate audio using SiliconFlow (MOSS-TTSD) TTS
    */
   private async generateSiliconFlow(
     text: string,
@@ -430,20 +436,20 @@ export class TTSService {
       .replace('siliconflow-', '')
       .replace('fish-', '');
 
-    // Map to full reference format if needed
+    // Map to full reference format for MOSS-TTSD model
     const voiceMap: Record<string, string> = {
       // 默认音色
-      'default': 'fishaudio/fish-speech-1.5',
+      'default': 'fnlp/MOSS-TTSD-v0.5:alex',
       // 男声
-      'alex': 'fishaudio/fish-speech-1.5:alex',
-      'benjamin': 'fishaudio/fish-speech-1.5:benjamin',
-      'charles': 'fishaudio/fish-speech-1.5:charles',
-      'david': 'fishaudio/fish-speech-1.5:david',
+      'alex': 'fnlp/MOSS-TTSD-v0.5:alex',
+      'benjamin': 'fnlp/MOSS-TTSD-v0.5:benjamin',
+      'charles': 'fnlp/MOSS-TTSD-v0.5:charles',
+      'david': 'fnlp/MOSS-TTSD-v0.5:david',
       // 女声
-      'anna': 'fishaudio/fish-speech-1.5:anna',
-      'bella': 'fishaudio/fish-speech-1.5:bella',
-      'claire': 'fishaudio/fish-speech-1.5:claire',
-      'diana': 'fishaudio/fish-speech-1.5:diana',
+      'anna': 'fnlp/MOSS-TTSD-v0.5:anna',
+      'bella': 'fnlp/MOSS-TTSD-v0.5:bella',
+      'claire': 'fnlp/MOSS-TTSD-v0.5:claire',
+      'diana': 'fnlp/MOSS-TTSD-v0.5:diana',
     };
 
     const reference = voiceMap[voice] || voiceMap['default'];

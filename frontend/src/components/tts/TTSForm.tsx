@@ -52,10 +52,7 @@ export function TTSForm({ onGenerate, isGenerating, progress }: TTSFormProps) {
               输入文本
             </CardTitle>
             <div
-              className={cn(
-                'text-sm',
-                isOverLimit ? 'text-destructive' : 'text-muted-foreground'
-              )}
+              className={cn('text-sm', isOverLimit ? 'text-destructive' : 'text-muted-foreground')}
             >
               {charCount} / {maxChars}
             </div>
@@ -120,9 +117,7 @@ export function TTSForm({ onGenerate, isGenerating, progress }: TTSFormProps) {
               <Settings2 className="h-5 w-5 text-primary" />
               高级设置
             </CardTitle>
-            <span className="text-sm text-muted-foreground">
-              {showSettings ? '收起' : '展开'}
-            </span>
+            <span className="text-sm text-muted-foreground">{showSettings ? '收起' : '展开'}</span>
           </button>
         </CardHeader>
         {showSettings && (
@@ -152,7 +147,10 @@ export function TTSForm({ onGenerate, isGenerating, progress }: TTSFormProps) {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium">音调</label>
-                <span className="text-sm text-muted-foreground">{pitch > 0 ? '+' : ''}{pitch}</span>
+                <span className="text-sm text-muted-foreground">
+                  {pitch > 0 ? '+' : ''}
+                  {pitch}
+                </span>
               </div>
               <Slider
                 value={[pitch]}

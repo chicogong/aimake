@@ -221,11 +221,7 @@ export function AudioPlayer({
             variant="gradient"
             className="h-14 w-14 rounded-full shadow-lg"
           >
-            {isPlaying ? (
-              <Pause className="h-6 w-6" />
-            ) : (
-              <Play className="h-6 w-6 ml-0.5" />
-            )}
+            {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-0.5" />}
           </Button>
 
           <button

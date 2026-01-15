@@ -4,6 +4,7 @@
  */
 
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { Voice, TTSJob } from '@/types';
 
 interface TTSState {
@@ -37,7 +38,19 @@ interface TTSState {
 
 const initialState = {
   text: '',
-  selectedVoice: null,
+  // Default to SiliconFlow voice (sf-anna is a good default female voice)
+  selectedVoice: {
+    id: 'sf-anna',
+    name: 'Anna',
+    nameZh: '安娜',
+    provider: 'siliconflow',
+    gender: 'female',
+    language: ['zh-CN'],
+    style: '甜美女声',
+    previewUrl: null,
+    isPremium: false,
+    tags: ['甜美女声'],
+  } as Voice,
   speed: 1.0,
   pitch: 0,
   format: 'mp3' as const,
@@ -47,26 +60,40 @@ const initialState = {
   currentAudioUrl: null,
 };
 
-export const useTTSStore = create<TTSState>()((set) => ({
-  ...initialState,
+export const useTTSStore = create<TTSState>()(
+  persist(
+    (set) => ({
+      ...initialState,
 
-  setText: (text) => set({ text }),
+      setText: (text) => set({ text }),
 
-  setVoice: (selectedVoice) => set({ selectedVoice }),
+      setVoice: (selectedVoice) => set({ selectedVoice }),
 
-  setSpeed: (speed) => set({ speed }),
+      setSpeed: (speed) => set({ speed }),
 
-  setPitch: (pitch) => set({ pitch }),
+      setPitch: (pitch) => set({ pitch }),
 
-  setFormat: (format) => set({ format }),
+      setFormat: (format) => set({ format }),
 
-  setCurrentJob: (currentJob) => set({ currentJob }),
+      setCurrentJob: (currentJob) => set({ currentJob }),
 
-  setIsGenerating: (isGenerating) => set({ isGenerating }),
+      setIsGenerating: (isGenerating) => set({ isGenerating }),
 
-  setIsPlaying: (isPlaying) => set({ isPlaying }),
+      setIsPlaying: (isPlaying) => set({ isPlaying }),
 
-  setCurrentAudioUrl: (currentAudioUrl) => set({ currentAudioUrl }),
+      setCurrentAudioUrl: (currentAudioUrl) => set({ currentAudioUrl }),
 
-  reset: () => set(initialState),
-}));
+      reset: () => set(initialState),
+    }),
+    {
+      name: 'aimake-tts-v2', // Versioned to reset state
+      partialize: (state) => ({
+        text: state.text,
+        selectedVoice: state.selectedVoice,
+        speed: state.speed,
+        pitch: state.pitch,
+        format: state.format,
+      }),
+    }
+  )
+);

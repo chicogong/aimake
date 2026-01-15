@@ -14,14 +14,7 @@ import { ttsApi, userApi } from '@/services/api';
 import { useTTSStore } from '@/stores/ttsStore';
 import { useUserStore } from '@/stores/userStore';
 import { toastHelpers } from '@/hooks/useToast';
-import type { User } from '@/types';
-
-// Audio result type
-interface AudioResult {
-  url: string;
-  duration: number;
-  size: number;
-}
+import type { User, AudioResult } from '@/types';
 
 export function HomePage() {
   const { isSignedIn } = useAuth();
@@ -63,7 +56,7 @@ export function HomePage() {
 
       // Create object URL from blob
       const audioUrl = URL.createObjectURL(blob);
-      
+
       // Estimate duration based on text length
       const estimatedDuration = Math.ceil(text.length / 150);
 

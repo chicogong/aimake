@@ -205,9 +205,7 @@ export function PricingPage() {
       <div className="mt-24 text-center">
         <Card className="bg-gradient-to-r from-primary/10 to-purple-500/10 border-primary/20 p-8">
           <h3 className="text-2xl font-bold mb-4">还有疑问？</h3>
-          <p className="text-muted-foreground mb-6">
-            联系我们的团队，获取个性化的方案建议
-          </p>
+          <p className="text-muted-foreground mb-6">联系我们的团队，获取个性化的方案建议</p>
           <Button variant="outline" asChild>
             <a href="mailto:support@aimake.cc">联系我们</a>
           </Button>

@@ -48,7 +48,9 @@ export function HistoryPage() {
   });
 
   const audios: Audio[] = (data as ApiResponse<{ items: Audio[] }> | undefined)?.data?.items || [];
-  const total = (data as ApiResponse<{ items: Audio[] }> & { meta?: { total?: number } } | undefined)?.meta?.total || 0;
+  const total =
+    (data as (ApiResponse<{ items: Audio[] }> & { meta?: { total?: number } }) | undefined)?.meta
+      ?.total || 0;
   const totalPages = Math.ceil(total / pageSize);
 
   const deleteMutation = useMutation({
@@ -180,18 +182,14 @@ export function HistoryPage() {
                     <h4 className="font-medium mb-1 truncate">
                       {audio.title || truncateText(audio.text, 50)}
                     </h4>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                      {audio.text}
-                    </p>
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{audio.text}</p>
                     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         {formatDuration(audio.duration)}
                       </span>
                       <span>{formatFileSize(audio.size)}</span>
-                      <span className="px-2 py-0.5 bg-muted rounded">
-                        {audio.voiceName}
-                      </span>
+                      <span className="px-2 py-0.5 bg-muted rounded">{audio.voiceName}</span>
                       <span>{formatDate(audio.createdAt)}</span>
                     </div>
                   </div>

@@ -57,9 +57,21 @@ export interface Voice {
   tags: string[];
 }
 
-export type VoiceProvider = 'openai' | 'elevenlabs' | 'azure' | 'tencent' | 'minimax';
+export type VoiceProvider =
+  | 'openai'
+  | 'elevenlabs'
+  | 'azure'
+  | 'tencent'
+  | 'minimax'
+  | 'siliconflow';
 
 // ============ Audio Types ============
+export interface AudioResult {
+  url: string;
+  duration: number;
+  size: number;
+}
+
 export interface Audio {
   id: string;
   title: string | null;
