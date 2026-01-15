@@ -66,17 +66,17 @@ function initEventDelegation() {
     const action = target.dataset.action;
 
     switch (action) {
-    case 'toggle-mobile-menu':
-      toggleMobileMenu();
-      break;
-    case 'simulate-generation':
-      simulateGeneration();
-      break;
-    case 'preview-voice':
-      previewVoice(target.dataset.voiceId);
-      break;
-    default:
-      console.warn('Unknown action:', action);
+      case 'toggle-mobile-menu':
+        toggleMobileMenu();
+        break;
+      case 'simulate-generation':
+        simulateGeneration();
+        break;
+      case 'preview-voice':
+        previewVoice(target.dataset.voiceId);
+        break;
+      default:
+        console.warn('Unknown action:', action);
     }
   });
 
