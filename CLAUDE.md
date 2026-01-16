@@ -11,11 +11,11 @@ repository.
 
 ## 项目状态
 
-**当前阶段**: 规划期 - 设计文档完成,代码未开始开发
+**当前阶段**: 开发中 - 文档完善，代码实现进行中
 
-- ✅ 完整的设计文档体系 (26 个文档)
-- ✅ Website (`website/`)
-- ✅ 项目配置��件 (ESLint, Prettier, wrangler.toml)
+- ✅ 完整的设计文档体系 (34 个文档)
+- ✅ Website Landing Page (`website/`)
+- ✅ 项目配置文件 (ESLint 9.x, Prettier, wrangler.toml)
 - ⏳ 前端 React 应用 (待创建 `frontend/`)
 - ⏳ 后端 Cloudflare Workers (待创建 `api/`)
 
@@ -54,7 +54,7 @@ Cloudflare Workers + Hono + D1 (SQLite) + R2 (存储) + KV (缓存)
 
 ```
 aimake/
-├── docs/                      # 📚 设计文档 (26 个)
+├── docs/                      # 📚 设计文档 (34 个)
 │   ├── README.md              # 文档索引 (必读)
 │   ├── planning/              # 产品规划 (7 个)
 │   │   ├── product-plan.md
@@ -128,10 +128,10 @@ npm run format            # Prettier 格式化
 npm run format:check      # Prettier 检查
 
 # 部署 Landing Page
-npx wrangler pages publish landing  # 发布到 Cloudflare Pages
+npx wrangler pages publish website  # 发布到 Cloudflare Pages
 ```
 
-### 前端开发 (frontend/ 目录,待创建)
+### 前端开发 (frontend/ 目录)
 
 ```bash
 cd frontend
@@ -142,7 +142,7 @@ npm run preview            # 预览构建产物
 npm run lint               # ESLint + TypeScript 检查
 ```
 
-### 后端开发 (api/ 目录,待创建)
+### 后端开发 (api/ 目录)
 
 ```bash
 cd api
@@ -349,4 +349,5 @@ cp .env.example .dev.vars
 
 ---
 
-**最后更新**: 2026-01-10 **文档总数**: 26 个设计文档 (planning: 7, design: 15, development: 4)
+**最后更新**: 2026-01-15 **文档总数**: 34 个设计文档 (planning: 7, design: 19, development: 4,
+research: 4)
