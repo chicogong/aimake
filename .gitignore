@@ -86,3 +86,4 @@ scripts/*.local.sh
 
 # Claude/AI assistant settings (keep local)
 .claude/settings.local.json
+.mcp.json
