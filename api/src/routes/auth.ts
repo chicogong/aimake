@@ -99,7 +99,7 @@ clerkWebhook.post('/clerk', async (c) => {
           quotaResetAt: getNextMonthReset(),
         });
 
-        console.log(`User created: ${email}`);
+        // User created via webhook
         break;
       }
 
@@ -117,19 +117,19 @@ clerkWebhook.post('/clerk', async (c) => {
           })
           .where(eq(users.clerkId, body.data.id));
 
-        console.log(`User updated: ${body.data.id}`);
+        // User updated via webhook
         break;
       }
 
       case 'user.deleted': {
         await db.delete(users).where(eq(users.clerkId, body.data.id));
 
-        console.log(`User deleted: ${body.data.id}`);
+        // User deleted via webhook
         break;
       }
 
       default:
-        console.log(`Unhandled webhook type: ${body.type}`);
+        console.warn(`Unhandled webhook type: ${body.type}`);
     }
 
     return c.json({ success: true });

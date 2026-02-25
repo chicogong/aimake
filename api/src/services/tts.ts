@@ -23,14 +23,14 @@ const PROVIDERS = {
     baseUrl: 'https://api.siliconflow.cn/v1/audio/speech',
     model: 'fnlp/MOSS-TTSD-v0.5',
     voices: [
-      'fnlp/MOSS-TTSD-v0.5:alex',      // 男声
-      'fnlp/MOSS-TTSD-v0.5:benjamin',  // 男声
-      'fnlp/MOSS-TTSD-v0.5:charles',   // 男声
-      'fnlp/MOSS-TTSD-v0.5:david',     // 男声
-      'fnlp/MOSS-TTSD-v0.5:anna',      // 女声
-      'fnlp/MOSS-TTSD-v0.5:bella',     // 女声
-      'fnlp/MOSS-TTSD-v0.5:claire',    // 女声
-      'fnlp/MOSS-TTSD-v0.5:diana',     // 女声
+      'fnlp/MOSS-TTSD-v0.5:alex', // 男声
+      'fnlp/MOSS-TTSD-v0.5:benjamin', // 男声
+      'fnlp/MOSS-TTSD-v0.5:charles', // 男声
+      'fnlp/MOSS-TTSD-v0.5:david', // 男声
+      'fnlp/MOSS-TTSD-v0.5:anna', // 女声
+      'fnlp/MOSS-TTSD-v0.5:bella', // 女声
+      'fnlp/MOSS-TTSD-v0.5:claire', // 女声
+      'fnlp/MOSS-TTSD-v0.5:diana', // 女声
     ],
   },
 };
@@ -64,7 +64,9 @@ export class TTSService {
     const remaining = user.quotaLimit - user.quotaUsed;
 
     if (remaining < estimatedDuration) {
-      throw errors.quotaExceeded(`额度不足，剩余 ${remaining} 秒，预计需要 ${estimatedDuration} 秒`);
+      throw errors.quotaExceeded(
+        `额度不足，剩余 ${remaining} 秒，预计需要 ${estimatedDuration} 秒`
+      );
     }
 
     // Determine provider based on voice ID
@@ -119,7 +121,9 @@ export class TTSService {
     const remaining = user.quotaLimit - user.quotaUsed;
 
     if (remaining < estimatedDuration) {
-      throw errors.quotaExceeded(`额度不足，剩余 ${remaining} 秒，预计需要 ${estimatedDuration} 秒`);
+      throw errors.quotaExceeded(
+        `额度不足，剩余 ${remaining} 秒，预计需要 ${estimatedDuration} 秒`
+      );
     }
 
     // Create job record
@@ -363,7 +367,7 @@ export class TTSService {
 
     // Fallback to SiliconFlow if OpenAI key is not configured
     if (provider === 'openai' && !this.env.OPENAI_API_KEY) {
-      console.log('OpenAI API key not configured, falling back to SiliconFlow');
+      console.warn('OpenAI API key not configured, falling back to SiliconFlow');
       return this.generateSiliconFlow(text, voiceId, speed, format);
     }
 
@@ -431,29 +435,26 @@ export class TTSService {
 
     // Parse voice ID - support multiple formats
     // sf-alex, siliconflow-alex, fish-alex, or just alex
-    let voice = voiceId
-      .replace('sf-', '')
-      .replace('siliconflow-', '')
-      .replace('fish-', '');
+    let voice = voiceId.replace('sf-', '').replace('siliconflow-', '').replace('fish-', '');
 
     // Map to full reference format for MOSS-TTSD model
     const voiceMap: Record<string, string> = {
       // 默认音色
-      'default': 'fnlp/MOSS-TTSD-v0.5:alex',
+      default: 'fnlp/MOSS-TTSD-v0.5:alex',
       // 男声
-      'alex': 'fnlp/MOSS-TTSD-v0.5:alex',
-      'benjamin': 'fnlp/MOSS-TTSD-v0.5:benjamin',
-      'charles': 'fnlp/MOSS-TTSD-v0.5:charles',
-      'david': 'fnlp/MOSS-TTSD-v0.5:david',
+      alex: 'fnlp/MOSS-TTSD-v0.5:alex',
+      benjamin: 'fnlp/MOSS-TTSD-v0.5:benjamin',
+      charles: 'fnlp/MOSS-TTSD-v0.5:charles',
+      david: 'fnlp/MOSS-TTSD-v0.5:david',
       // 女声
-      'anna': 'fnlp/MOSS-TTSD-v0.5:anna',
-      'bella': 'fnlp/MOSS-TTSD-v0.5:bella',
-      'claire': 'fnlp/MOSS-TTSD-v0.5:claire',
-      'diana': 'fnlp/MOSS-TTSD-v0.5:diana',
+      anna: 'fnlp/MOSS-TTSD-v0.5:anna',
+      bella: 'fnlp/MOSS-TTSD-v0.5:bella',
+      claire: 'fnlp/MOSS-TTSD-v0.5:claire',
+      diana: 'fnlp/MOSS-TTSD-v0.5:diana',
     };
 
     const reference = voiceMap[voice] || voiceMap['default'];
-    
+
     const response = await fetch(PROVIDERS.siliconflow.baseUrl, {
       method: 'POST',
       headers: {

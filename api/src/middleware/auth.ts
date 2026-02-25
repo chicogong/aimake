@@ -54,9 +54,10 @@ export const authMiddleware = createMiddleware<{ Bindings: Env; Variables: Varia
 
       // Auto-create user if not exists (first login)
       if (!user) {
-        const email = typeof payload.email === 'string' ? payload.email : `user_${payload.sub}@aimake.cc`;
+        const email =
+          typeof payload.email === 'string' ? payload.email : `user_${payload.sub}@aimake.cc`;
         const newUserId = generateId();
-        
+
         await db.insert(users).values({
           id: newUserId,
           clerkId: payload.sub,
@@ -71,8 +72,8 @@ export const authMiddleware = createMiddleware<{ Bindings: Env; Variables: Varia
 
         // Fetch the newly created user
         [user] = await db.select().from(users).where(eq(users.id, newUserId)).limit(1);
-        
-        console.log(`Auto-created user: ${email} (${payload.sub})`);
+
+        // Auto-created user on first login
       }
 
       if (!user) {
@@ -92,16 +93,13 @@ export const authMiddleware = createMiddleware<{ Bindings: Env; Variables: Varia
       c.set('user', user);
       await next();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('Auth error:', errorMessage);
-      console.error('Token prefix:', token.substring(0, 50));
+      console.error('Auth error:', error instanceof Error ? error.message : String(error));
       return c.json(
         {
           success: false,
           error: {
             code: 'UNAUTHORIZED',
             message: 'Token 无效或已过期',
-            debug: errorMessage,
           },
         },
         401

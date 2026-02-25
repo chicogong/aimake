@@ -11,13 +11,16 @@ repository.
 
 ## 项目状态
 
-**当前阶段**: 开发中 - 文档完善，代码实现进行中
+**当前阶段**: 开发中 - 核心功能已实现
 
 - ✅ 完整的设计文档体系 (34 个文档)
 - ✅ Website Landing Page (`website/`)
 - ✅ 项目配置文件 (ESLint 9.x, Prettier, wrangler.toml)
-- ⏳ 前端 React 应用 (待创建 `frontend/`)
-- ⏳ 后端 Cloudflare Workers (待创建 `api/`)
+- ✅ 前端 React 应用 (`frontend/`) - Vite + React 18 + TypeScript + Tailwind CSS
+- ✅ 后端 Cloudflare Workers (`api/`) - Hono + D1 + R2
+- ✅ TTS 生成 (OpenAI + SiliconFlow/FishAudio 双 provider)
+- ✅ 用户认证 (Clerk)
+- ✅ 生成历史 + 定价页面
 
 ---
 
@@ -54,45 +57,36 @@ Cloudflare Workers + Hono + D1 (SQLite) + R2 (存储) + KV (缓存)
 
 ```
 aimake/
-├── docs/                      # 📚 设计文档 (34 个)
-│   ├── README.md              # 文档索引 (必读)
-│   ├── planning/              # 产品规划 (7 个)
-│   │   ├── product-plan.md
-│   │   ├── ai-providers-overview.md      # 🎯 AI 供应商选型总览
-│   │   ├── tts-free-providers.md         # TTS 快速接入
-│   │   └── llm-asr-providers.md          # LLM & ASR 快速接入
-│   ├── design/                # 技术设计 (15 个)
-│   │   ├── api-design.md               # API 接口定义、TypeScript 类型
-│   │   ├── database-schema.md          # D1 数据库表结构、Drizzle schema
-│   │   ├── backend-architecture.md     # Hono 路由、中间件、服务层
-│   │   ├── frontend-architecture.md    # 组件结构、Hooks、Store
-│   │   ├── auth-design.md              # Clerk 集成、JWT 验证
-│   │   ├── payment-integration.md      # Stripe Checkout、订阅管理
-│   │   └── error-handling.md           # 错误码定义、处理规范
-│   └── development/           # 开发运维 (4 个)
-│       ├── env-config.md               # 环境变量完整清单
-│       ├── automation-plan.md          # AI 工具矩阵、测试自动化
-│       ├── deployment-architecture.md  # Vercel + Cloudflare 部署
-│       └── release-verification.md     # 上线验证清单
+├── api/                       # 🔧 后端 Cloudflare Workers (Hono)
+│   ├── src/
+│   │   ├── routes/            # API 路由 (voices, tts, audios, auth, user, health)
+│   │   ├── services/          # 业务逻辑 (TTS 生成 - OpenAI/SiliconFlow)
+│   │   ├── middleware/        # 中间件 (auth, error, rateLimit)
+│   │   ├── db/                # 数据库 schema (Drizzle ORM)
+│   │   ├── utils/             # 工具函数
+│   │   └── __tests__/         # 单元测试 (Vitest)
+│   └── migrations/            # D1 数据库迁移 (SQL)
 │
-├── website/                   # Landing Page (已完成)
+├── frontend/                  # 🎨 前端 React 应用 (Vite)
+│   └── src/
+│       ├── pages/             # 页面 (Home, History, Pricing)
+│       ├── components/        # 组件 (tts/, layout/, ui/)
+│       ├── stores/            # Zustand 状态管理
+│       ├── services/          # API 客户端
+│       ├── types/             # TypeScript 类型
+│       └── __tests__/         # 单元测试 (Vitest)
+│
+├── website/                   # 🌐 Landing Page (已完成)
 │   ├── index.html
-│   ├── assets/
-│   └── README.md
+│   └── assets/
 │
-├── scripts/                   # ���具脚本
-│   └── generate-demo-audio.py # Python 音频生成脚本
+├── docs/                      # 📚 设计文档 (34 个)
 │
+├── scripts/                   # 🛠 工具脚本
 ├── .env.example               # 环境变量模板
 ├── wrangler.toml              # Cloudflare 配置
-├── package.json               # 根 package.json (代码质量工具)
-└── README.md
+└── package.json               # 根 package.json (代码质量工具)
 ```
-
-**待创建目录**:
-
-- `frontend/` - React 前端应用
-- `api/` - Cloudflare Workers 后端
 
 ---
 
@@ -155,12 +149,18 @@ npx wrangler d1 migrations apply aimake-db --local
 npx wrangler d1 migrations apply aimake-db       # 生产环境
 ```
 
-### 测试 (待配置)
+### 测试
 
 ```bash
-npm run test               # Vitest 单元测试
-npm run test:e2e           # Playwright E2E 测试
-npm run test:coverage      # 测试覆盖率
+# API 测试
+cd api && npx vitest run   # 31 tests (schema, error, routes)
+
+# 前端测试
+cd frontend && npx vitest run  # 25 tests (utils, stores)
+
+# TypeScript 类型检查
+cd api && npx tsc --noEmit
+cd frontend && npx tsc --noEmit
 ```
 
 ---
@@ -190,9 +190,9 @@ Pages → Components → Hooks → Stores → Services
 
 **关键设计**:
 
-- **状态管理**: Zustand stores (`authStore`, `audioStore`, `uiStore`)
+- **状态管理**: Zustand stores (`ttsStore`, `userStore`)
 - **数据请求**: React Query (`useQuery` / `useMutation`)
-- **组件结构**: `components/ui/` (基础) / `components/audio/` (音频) / `components/layout/` (布局)
+- **组件结构**: `components/ui/` (基础) / `components/tts/` (TTS) / `components/layout/` (布局)
 - **API 调用**: 统一 axios 实例,自动注入 Clerk JWT token
 
 ### 数据流 (TTS 生成示例)
@@ -202,8 +202,8 @@ Pages → Components → Hooks → Stores → Services
   → 前端: TTSForm 组件
   → API: POST /api/tts
   → Middleware: auth (验证 JWT) + rateLimit (检查额度)
-  → Service: TTSService.generateText()
-  → External: 腾讯云 TTS API
+  → Service: TTSService.generateDirect()
+  → External: SiliconFlow / OpenAI TTS API
   → Storage: R2 上传音频文件
   → Database: 保存 audio 记录 (D1)
   → Response: 返回音频 URL
@@ -331,7 +331,7 @@ cp .env.example .dev.vars
 - ❌ 不要猜测 API URLs,所有接口必须在 `api-design.md` 中定义
 - ❌ 不要硬编码密钥 (使用环境变量)
 - ❌ 不要跳过错误处理
-- ❌ 当前是规划期,除非用户明确要求开始开发
+- ❌ 不要在生产代码中使用 `console.log`，使用 `console.warn` 或 `console.error`
 
 ---
 
@@ -349,5 +349,5 @@ cp .env.example .dev.vars
 
 ---
 
-**最后更新**: 2026-01-15 **文档总数**: 34 个设计文档 (planning: 7, design: 19, development: 4,
+**最后更新**: 2026-02-25 **文档总数**: 34 个设计文档 (planning: 7, design: 19, development: 4,
 research: 4)
