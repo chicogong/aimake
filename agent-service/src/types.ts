@@ -105,7 +105,6 @@ export interface AudioCallbackPayload {
 export interface ServiceConfig {
   codebuddyApiKey: string;
   llmModel: string;
-  openaiApiKey?: string;
   siliconflowApiKey?: string;
   workersApiUrl: string;
   internalApiSecret: string;
@@ -124,7 +123,6 @@ export function loadConfig(): ServiceConfig {
   return {
     codebuddyApiKey: required('CODEBUDDY_API_KEY'),
     llmModel: process.env.LLM_MODEL || 'deepseek-v3.1',
-    openaiApiKey: process.env.OPENAI_API_KEY,
     siliconflowApiKey: process.env.SILICONFLOW_API_KEY,
     workersApiUrl: required('WORKERS_API_URL'),
     internalApiSecret: required('INTERNAL_API_SECRET'),

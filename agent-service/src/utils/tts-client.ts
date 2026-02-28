@@ -1,47 +1,23 @@
 /**
  * Direct TTS API client for segment generation
+ * Provider: SiliconFlow (FishAudio)
  */
 
-const PROVIDERS = {
-  openai: {
-    baseUrl: 'https://api.openai.com/v1/audio/speech',
-    model: 'tts-1',
-  },
-  siliconflow: {
-    baseUrl: 'https://api.siliconflow.cn/v1/audio/speech',
-    model: 'fnlp/MOSS-TTSD-v0.5',
-  },
+const SILICONFLOW_CONFIG = {
+  baseUrl: 'https://api.siliconflow.cn/v1/audio/speech',
+  model: 'fnlp/MOSS-TTSD-v0.5',
 } as const;
 
-type Provider = 'openai' | 'siliconflow';
-
 interface TTSConfig {
-  openaiApiKey?: string;
   siliconflowApiKey?: string;
-}
-
-function resolveProvider(voiceId: string): Provider {
-  if (voiceId.startsWith('openai-')) return 'openai';
-  return 'siliconflow';
 }
 
 function stripVoicePrefix(voiceId: string): string {
   return voiceId
-    .replace('openai-', '')
     .replace('sf-', '')
     .replace('siliconflow-', '')
     .replace('fish-', '');
 }
-
-// When OpenAI voices fall back to SiliconFlow, map to closest equivalent
-const OPENAI_TO_SF_VOICE: Record<string, string> = {
-  alloy: 'alex',
-  echo: 'benjamin',
-  fable: 'bella',
-  onyx: 'charles',
-  nova: 'anna',
-  shimmer: 'claire',
-};
 
 const MP3_BITRATES: Record<number, number[]> = {
   // MPEG1 Layer 3
@@ -131,41 +107,22 @@ export class TTSClient {
   }): Promise<{ audioBase64: string; duration: number }> {
     const { text, voiceId, speed = 1.0, format = 'mp3' } = params;
 
-    let provider = resolveProvider(voiceId);
-    let wasOpenAiFallback = false;
-
-    if (provider === 'openai' && !this.config.openaiApiKey) {
-      console.warn('OpenAI API key not configured, falling back to SiliconFlow');
-      provider = 'siliconflow';
-      wasOpenAiFallback = true;
-    }
-
-    const apiKey =
-      provider === 'openai' ? this.config.openaiApiKey : this.config.siliconflowApiKey;
-
+    const apiKey = this.config.siliconflowApiKey;
     if (!apiKey) {
-      throw new Error(`${provider} API key not configured`);
+      throw new Error('SiliconFlow API key not configured');
     }
 
     const voice = stripVoicePrefix(voiceId);
-    const providerConfig = PROVIDERS[provider];
+    const voiceParam = `${SILICONFLOW_CONFIG.model}:${voice}`;
 
-    let resolvedVoice = voice;
-    if (wasOpenAiFallback && OPENAI_TO_SF_VOICE[voice]) {
-      resolvedVoice = OPENAI_TO_SF_VOICE[voice];
-    }
-
-    const voiceParam =
-      provider === 'siliconflow' ? `${providerConfig.model}:${resolvedVoice}` : resolvedVoice;
-
-    const response = await fetch(providerConfig.baseUrl, {
+    const response = await fetch(SILICONFLOW_CONFIG.baseUrl, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: providerConfig.model,
+        model: SILICONFLOW_CONFIG.model,
         input: text,
         voice: voiceParam,
         speed,
@@ -175,7 +132,7 @@ export class TTSClient {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'unknown');
-      throw new Error(`TTS API error (${provider}): ${response.status} — ${errorText}`);
+      throw new Error(`TTS API error (siliconflow): ${response.status} — ${errorText}`);
     }
 
     const buffer = await response.arrayBuffer();

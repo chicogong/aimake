@@ -57,13 +57,7 @@ export interface Voice {
   tags: string[];
 }
 
-export type VoiceProvider =
-  | 'openai'
-  | 'elevenlabs'
-  | 'azure'
-  | 'tencent'
-  | 'minimax'
-  | 'siliconflow';
+export type VoiceProvider = 'siliconflow';
 
 // ============ Content Types ============
 export type ContentType = 'podcast' | 'audiobook' | 'voiceover' | 'education' | 'tts';

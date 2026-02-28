@@ -18,10 +18,6 @@ export interface Env {
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
 
-  OPENAI_API_KEY: string;
-  TENCENT_SECRET_ID?: string;
-  TENCENT_SECRET_KEY?: string;
-  ELEVENLABS_API_KEY?: string;
   SILICONFLOW_API_KEY?: string;
 
   // Agent Service
@@ -150,7 +146,7 @@ export interface QuickTTSRequest {
 }
 
 // ============ Voice Types ============
-export type VoiceProvider = 'openai' | 'elevenlabs' | 'azure' | 'tencent' | 'minimax' | 'siliconflow';
+export type VoiceProvider = 'siliconflow';
 
 export interface VoiceInfo {
   id: string;

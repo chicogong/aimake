@@ -24,7 +24,6 @@ function main() {
     console.info(`LLM model: ${config.llmModel}`);
     console.info(`Workers API: ${config.workersApiUrl}`);
     console.info(`TTS providers: ${[
-      config.openaiApiKey ? 'OpenAI' : null,
       config.siliconflowApiKey ? 'SiliconFlow' : null,
     ].filter(Boolean).join(', ') || 'none configured'}`);
   });

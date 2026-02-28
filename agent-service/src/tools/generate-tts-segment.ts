@@ -14,7 +14,6 @@ let ttsClient: TTSClient | null = null;
 function getClient(): TTSClient {
   if (!ttsClient) {
     ttsClient = new TTSClient({
-      openaiApiKey: process.env.OPENAI_API_KEY,
       siliconflowApiKey: process.env.SILICONFLOW_API_KEY,
     });
   }
@@ -29,7 +28,7 @@ export const generateTtsSegmentTool = tool(
   {
     jobId: z.string().describe('The job ID'),
     text: z.string().describe('The text to convert to speech'),
-    voiceId: z.string().describe('Voice ID (e.g., "sf-alex", "openai-nova")'),
+    voiceId: z.string().describe('Voice ID (e.g., "sf-alex", "sf-bella")'),
     speed: z.number().optional().describe('Speech speed multiplier (default: 1.0)'),
     index: z.number().int().describe('Segment index for ordering'),
   },

@@ -98,12 +98,7 @@ export function VoiceSelector({ selectedVoice, selectedId, onSelect, disabled }:
   );
 
   const providerNames: Record<string, string> = {
-    openai: 'OpenAI',
     siliconflow: 'SiliconFlow',
-    tencent: '腾讯云',
-    elevenlabs: 'ElevenLabs',
-    azure: 'Azure',
-    minimax: 'MiniMax',
   };
 
   return (
