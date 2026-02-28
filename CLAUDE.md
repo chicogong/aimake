@@ -1,353 +1,137 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this
-repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
----
+## Project Overview
 
-# AIMake - AI 语音内容生成平台
+AIMake is an AI voice content generation platform. Users input text or URLs, and an Agent generates podcasts, audiobooks, voiceovers, or educational audio content. The system uses a unified "jobs" model where all content types flow through a single pipeline.
 
-> 用 AI 快速生成播客、有声书、配音、教育内容
+## Architecture
 
-## 项目状态
-
-**当前阶段**: 开发中 - 核心功能已实现
-
-- ✅ 完整的设计文档体系 (34 个文档)
-- ✅ Website Landing Page (`website/`)
-- ✅ 项目配置文件 (ESLint 9.x, Prettier, wrangler.toml)
-- ✅ 前端 React 应用 (`frontend/`) - Vite + React 18 + TypeScript + Tailwind CSS
-- ✅ 后端 Cloudflare Workers (`api/`) - Hono + D1 + R2
-- ✅ TTS 生成 (OpenAI + SiliconFlow/FishAudio 双 provider)
-- ✅ 用户认证 (Clerk)
-- ✅ 生成历史 + 定价页面
-
----
-
-## 技术栈
-
-### 前端
+Three services communicate via HTTP:
 
 ```
-React 18 + TypeScript + Vite + Tailwind CSS + Zustand + React Query
+Frontend (React)          API (CF Workers)              Agent Service (Node.js)
+localhost:5173            localhost:8787                 localhost:3001
+                   REST + Clerk JWT          HTTP POST /generate
+  CreatePage ──────────────► /api/jobs ──────────────────► voice-agent
+  JobDetailPage ◄── SSE ─── /api/jobs/:id/stream         (Agent SDK)
+                             /api/internal ◄──── callbacks ──┘
 ```
 
-### 后端
+- **Frontend → API**: REST with Clerk JWT in Authorization header. SSE for real-time progress.
+- **API → Agent**: Fire-and-forget HTTP POST to `/generate` with `X-Internal-Secret` header.
+- **Agent → API**: HTTP callbacks to `/api/internal/jobs/:id/*` to update progress, save scripts, upload audio.
 
-```
-Cloudflare Workers + Hono + D1 (SQLite) + R2 (存储) + KV (缓存)
-```
+## Development Commands
 
-### 第三方服务
-
-| 服务               | 用途         | 免费额度/成本         | 文档                                          |
-| ------------------ | ------------ | --------------------- | --------------------------------------------- |
-| 腾讯云 TTS         | 语音合成     | 800 万字符免费 (3 年) | `docs/planning/tts-free-providers.md`         |
-| 硅基流动 LLM       | 播客脚本生成 | 2000 万 tokens 免费   | `docs/planning/llm-asr-providers.md`          |
-| Clerk              | 用户认证     | 5,000 月活用户免费    | `docs/design/auth-design.md`                  |
-| Stripe             | 支付订阅     | 按交易抽成            | `docs/design/payment-integration.md`          |
-| Cloudflare Pages   | 前端托管     | 无限请求免费          | `docs/development/deployment-architecture.md` |
-| Cloudflare Workers | 后端运行时   | 100,000 请求/天免费   | `docs/development/deployment-architecture.md` |
-
-**零成本启动**: 详见 `docs/planning/ai-providers-overview.md`
-
----
-
-## 项目结构
-
-```
-aimake/
-├── api/                       # 🔧 后端 Cloudflare Workers (Hono)
-│   ├── src/
-│   │   ├── routes/            # API 路由 (voices, tts, audios, auth, user, health)
-│   │   ├── services/          # 业务逻辑 (TTS 生成 - OpenAI/SiliconFlow)
-│   │   ├── middleware/        # 中间件 (auth, error, rateLimit)
-│   │   ├── db/                # 数据库 schema (Drizzle ORM)
-│   │   ├── utils/             # 工具函数
-│   │   └── __tests__/         # 单元测试 (Vitest)
-│   └── migrations/            # D1 数据库迁移 (SQL)
-│
-├── frontend/                  # 🎨 前端 React 应用 (Vite)
-│   └── src/
-│       ├── pages/             # 页面 (Home, History, Pricing)
-│       ├── components/        # 组件 (tts/, layout/, ui/)
-│       ├── stores/            # Zustand 状态管理
-│       ├── services/          # API 客户端
-│       ├── types/             # TypeScript 类型
-│       └── __tests__/         # 单元测试 (Vitest)
-│
-├── website/                   # 🌐 Landing Page (已完成)
-│   ├── index.html
-│   └── assets/
-│
-├── docs/                      # 📚 设计文档 (34 个)
-│
-├── scripts/                   # 🛠 工具脚本
-├── .env.example               # 环境变量模板
-├── wrangler.toml              # Cloudflare 配置
-└── package.json               # 根 package.json (代码质量工具)
-```
-
----
-
-## 核心设计文档
-
-开发前必读的优先级文档:
-
-| 优先级     | 文档                                     | 关键内容                                      |
-| ---------- | ---------------------------------------- | --------------------------------------------- |
-| ⭐⭐⭐⭐⭐ | `docs/README.md`                         | **文档索引** - 完整导航                       |
-| ⭐⭐⭐⭐⭐ | `docs/planning/ai-providers-overview.md` | **AI 供应商选型** - TTS/LLM/ASR 快速决策表    |
-| ⭐⭐⭐⭐⭐ | `docs/design/api-design.md`              | **RESTful 接口** - 路由定义、TypeScript 类型  |
-| ⭐⭐⭐⭐⭐ | `docs/design/database-schema.md`         | **D1 数据库** - ER 图、表结构、Drizzle schema |
-| ⭐⭐⭐⭐   | `docs/design/backend-architecture.md`    | Hono 中间件链、服务层、Bindings               |
-| ⭐⭐⭐⭐   | `docs/design/frontend-architecture.md`   | 组件设计、Hooks 模式、Zustand Store 结构      |
-| ⭐⭐⭐⭐   | `docs/design/error-handling.md`          | 错误码定义 (`ERR_TTS_XXX`)、处理规范          |
-| ⭐⭐⭐⭐   | `docs/development/env-config.md`         | **环境变量** - 前后端完整配置清单             |
-| ⭐⭐⭐     | `docs/planning/product-plan.md`          | 功能规划、定价策略、MVP 范围                  |
-
----
-
-## 开发命令
-
-### 当前可用 (根目录)
-
+### API (`api/`)
 ```bash
-# 代码质量检查
-npm run lint              # ESLint + Stylelint + Markdownlint
-npm run lint:js           # 仅 ESLint (website/**/*.js)
-npm run lint:css          # 仅 Stylelint (website/**/*.css)
-npm run lint:md           # 仅 Markdownlint
-npm run format            # Prettier 格式化
-npm run format:check      # Prettier 检查
-
-# 部署 Landing Page
-npx wrangler pages publish website  # 发布到 Cloudflare Pages
+npm run dev              # Wrangler dev server at localhost:8787
+npm run test             # Vitest
+npx vitest run src/__tests__/schema.test.ts  # Single test file
+npm run typecheck        # tsc --noEmit
+npm run db:migrate       # Apply D1 migrations locally
+npm run db:migrate:prod  # Apply D1 migrations to production
 ```
 
-### 前端开发 (frontend/ 目录)
-
+### Frontend (`frontend/`)
 ```bash
-cd frontend
-npm install
-npm run dev                # http://localhost:5173
-npm run build              # 生产构建
-npm run preview            # 预览构建产物
-npm run lint               # ESLint + TypeScript 检查
+npm run dev              # Vite dev server at localhost:5173
+npm run build            # TypeScript check + Vite production build
+npm run test             # Vitest
+npx vitest run src/__tests__/utils.test.ts   # Single test file
+npm run typecheck        # tsc --noEmit
 ```
 
-### 后端开发 (api/ 目录)
-
+### Agent Service (`agent-service/`)
 ```bash
-cd api
-npm install
-npm run dev                # http://localhost:8787 (wrangler dev)
-npm run deploy             # 部署到 Cloudflare Workers
-
-# 数据库迁移
-npx wrangler d1 migrations apply aimake-db --local
-npx wrangler d1 migrations apply aimake-db       # 生产环境
+npm run dev              # tsx watch with hot reload
+npm run build            # TypeScript compilation
+npm run test             # Vitest
 ```
 
-### 测试
-
+### Root (code quality)
 ```bash
-# API 测试
-cd api && npx vitest run   # 31 tests (schema, error, routes)
-
-# 前端测试
-cd frontend && npx vitest run  # 25 tests (utils, stores)
-
-# TypeScript 类型检查
-cd api && npx tsc --noEmit
-cd frontend && npx tsc --noEmit
+npm run lint             # ESLint + Stylelint + Markdownlint
+npm run format           # Prettier
 ```
 
----
+## API Route Structure (`api/src/index.ts`)
 
-## 架构概览
+Public routes (no auth): `/api/health`, `/api/voices`, `/api/webhook`, `/api/internal`
 
-### 后端架构 (Hono + Cloudflare Workers)
+Protected routes (Clerk JWT → authMiddleware → rateLimitMiddleware):
+- `/api/jobs` — CRUD + SSE progress stream + download
+- `/api/tts` — Quick TTS only (`POST /api/tts/quick`)
+- `/api/auth` — `GET /api/auth/me`
+- `/api/user` — Quota and usage
 
-```
-请求 → Middleware → Routes → Services → Bindings
-       [认证/限流]   [路由]   [业务逻辑]  [D1/R2/KV]
-```
+Middleware chain: `logger()` → `timing()` → `secureHeaders()` → `cors()` → `errorHandler` → `authMiddleware` → `rateLimitMiddleware()`
 
-**关键设计**:
+### Dev Auth Bypass
+In development, send `X-Dev-Bypass: true` header to skip Clerk JWT verification. Auto-creates a `dev@aimake.cc` user.
 
-- **Middleware 链**: `auth.ts` → `rateLimit.ts` → `logger.ts` → `errorHandler.ts`
-- **服务层**: `tts.ts` (TTS 生成) / `podcast.ts` (LLM 脚本 + TTS) / `storage.ts` (R2 上传)
-- **数据库**: Drizzle ORM, D1 (SQLite), 表结构见 `database-schema.md`
-- **错误处理**: 统一格式 `{ code: "ERR_TTS_XXX", message: "...", details: {...} }`
+## Database (Drizzle ORM + Cloudflare D1)
 
-### 前端架构 (React + Zustand)
+5 tables defined in `api/src/db/schema.ts`:
+- **users** — Clerk users with plan/quota tracking
+- **voices** — TTS voice catalog (static seed data in `api/src/routes/voices.ts`)
+- **jobs** — Unified table replacing old audios/ttsJobs/podcasts. Tracks content_type, source, settings, script, audio output, 6-stage progress
+- **subscriptions** — Stripe subscription state
+- **usageLogs** — Per-request usage/cost tracking with job_id reference
 
-```
-Pages → Components → Hooks → Stores → Services
-       [UI 层]     [逻辑]  [状态]   [API 调用]
-```
+Key job statuses: `pending` → `classifying` → `extracting` → `analyzing` → `scripting` → `synthesizing` → `assembling` → `completed` | `failed`
 
-**关键设计**:
+Content types: `podcast`, `audiobook`, `voiceover`, `education`, `tts`
 
-- **状态管理**: Zustand stores (`ttsStore`, `userStore`)
-- **数据请求**: React Query (`useQuery` / `useMutation`)
-- **组件结构**: `components/ui/` (基础) / `components/tts/` (TTS) / `components/layout/` (布局)
-- **API 调用**: 统一 axios 实例,自动注入 Clerk JWT token
+## Agent Service (`agent-service/`)
 
-### 数据流 (TTS 生成示例)
+Uses `@tencent-ai/agent-sdk` with `query()` function. The agent runs a 6-stage pipeline orchestrated by an LLM (deepseek-v3.1) with 6 MCP tools:
 
-```
-用户输入文本
-  → 前端: TTSForm 组件
-  → API: POST /api/tts
-  → Middleware: auth (验证 JWT) + rateLimit (检查额度)
-  → Service: TTSService.generateDirect()
-  → External: SiliconFlow / OpenAI TTS API
-  → Storage: R2 上传音频文件
-  → Database: 保存 audio 记录 (D1)
-  → Response: 返回音频 URL
-  → 前端: AudioPlayer 播放
-```
+| Tool | Purpose |
+|------|---------|
+| `extract_content` | Fetch text from URL |
+| `report_progress` | Callback to API with stage/progress |
+| `save_script` | Callback to API with generated script JSON |
+| `generate_tts_segment` | Call SiliconFlow TTS API for one segment |
+| `assemble_audio` | Concatenate audio segments |
+| `upload_audio` | Callback to API with final audio (base64) |
 
----
+Tools are registered as an MCP server in `agent-service/src/tools/index.ts`. The agent communicates back to the API via `CallbackClient` (`agent-service/src/utils/callback-client.ts`).
 
-## AI Coding 参考指南
+## Frontend Patterns
 
-### 添加新 API 接口
+- **Routing**: React Router in `frontend/src/App.tsx` — `/` (CreatePage), `/jobs/:id` (JobDetailPage), `/history`, `/pricing`
+- **Auth**: Clerk's `<SignedIn>` / `<SignedOut>` components gate UI. `ApiAuthProvider` wraps the app.
+- **API Client**: Axios instance in `frontend/src/services/api.ts` with Clerk JWT auto-injection via request interceptor
+- **State**: Zustand `userStore` for user profile/quota. React Query for server data.
+- **SSE**: `useJobStream` hook (`frontend/src/hooks/useJobStream.ts`) connects to `/api/jobs/:id/stream?token=xxx`
+- **UI Components**: shadcn/ui primitives in `frontend/src/components/ui/`
 
-**参考文档顺序**:
+## Error Handling
 
-1. `api-design.md` - 定义路由路径、请求/响应类型
-2. `database-schema.md` - 确认相关表结构
-3. `error-handling.md` - 选择错误码 (`ERR_XXX_YYY`)
-4. `backend-architecture.md` - 理解中间件和服务层模式
+Backend uses `AppError` class from `api/src/middleware/error.ts`. Factory functions: `errors.validation()`, `errors.unauthorized()`, `errors.notFound()`, `errors.quotaExceeded()`, `errors.rateLimited()`, `errors.ttsError()`, `errors.jobError()`, `errors.serviceUnavailable()`.
 
-**代码位置**:
+Response format: `{ success: false, error: { code: "ERROR_CODE", message: "..." } }`
 
-- 路由: `api/src/routes/`
-- 服务: `api/src/services/`
-- 类型定义: `api/src/types/`
+Error codes: `BAD_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `VALIDATION_ERROR`, `QUOTA_EXCEEDED`, `RATE_LIMITED`, `TTS_ERROR`, `JOB_ERROR`, `SERVICE_UNAVAILABLE`, `INTERNAL_ERROR`
 
-### 添加新页面
+In route handlers, throw errors directly: `throw errors.validation('message')` — the global `errorHandler` catches them.
 
-**参考文档顺序**:
+## Environment Variables
 
-1. `pages-design.md` - 查看页面线框图
-2. `frontend-architecture.md` - 理解组件结构
-3. `ui-ux-design.md` - 遵循 UI 规范
-4. `i18n-design.md` - 添加多语言 Key (如需)
+**API** (`api/.dev.vars`): `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `SILICONFLOW_API_KEY`, `INTERNAL_API_SECRET`, `AGENT_SERVICE_URL`, `ENVIRONMENT`, `CORS_ORIGIN`
 
-**代码位置**:
+**Agent Service** (`agent-service/.env`): `CODEBUDDY_API_KEY`, `LLM_MODEL`, `SILICONFLOW_API_KEY`, `WORKERS_API_URL`, `INTERNAL_API_SECRET`, `PORT`
 
-- 页面组件: `frontend/src/pages/`
-- 可复用组件: `frontend/src/components/`
-- 路由配置: `frontend/src/App.tsx`
+**Frontend** (`frontend/.env.local`): `VITE_API_URL`, `VITE_CLERK_PUBLISHABLE_KEY`
 
-### 多语言文案
+## Code Conventions
 
-1. 添加翻译 Key 到 `frontend/src/i18n/locales/zh-CN.json`
-2. 同步到 `en.json`
-3. 组件中使用 `useTranslation()` hook
-
-详见 `i18n-design.md`
-
-### 数据库变更
-
-1. 更新 `docs/design/database-schema.md` 的表结构
-2. 生成 Drizzle migration: `npx drizzle-kit generate`
-3. 应用迁移: `npx wrangler d1 migrations apply aimake-db`
-
----
-
-## 环境变量配置
-
-### 必需环境变量
-
-**前端 (frontend/.env.local)**:
-
-```
-VITE_API_URL=http://localhost:8787/api
-VITE_CLERK_PUBLISHABLE_KEY=pk_test_xxx
-```
-
-**后端 (wrangler secret put)**:
-
-```
-CLERK_SECRET_KEY=sk_test_xxx
-STRIPE_SECRET_KEY=sk_test_xxx
-
-# TTS (选一个)
-TENCENT_SECRET_ID=xxx
-TENCENT_SECRET_KEY=xxx
-
-# LLM (播客脚本生成)
-LLM_API_KEY=sk-xxx          # 硅基流动
-LLM_BASE_URL=https://api.siliconflow.cn/v1
-LLM_MODEL=Qwen/Qwen2.5-7B-Instruct
-```
-
-完整清单见 `docs/development/env-config.md` 和 `.env.example`
-
-### 密钥管理
-
-```bash
-# Cloudflare Workers Secrets (后端)
-npx wrangler secret put CLERK_SECRET_KEY
-npx wrangler secret put TENCENT_SECRET_ID
-
-# 本地开发使用 .dev.vars (不要提交到 Git)
-cp .env.example .dev.vars
-```
-
----
-
-## 代码规范
-
-### TypeScript
-
-- 严格模式 (`strict: true`)
-- 优先使用 `interface` over `type`
-- 函数组件 + Hooks (禁止 Class 组件)
-- 避免使用 `any`, 使用 `unknown` 或具体类型
-
-### 样式
-
-- Tailwind CSS 工具类优先
-- 响应式设计: `sm:`, `md:`, `lg:`, `xl:` 断点
-- 禁止内联样式 (除非动态计算值)
-
-### 错误处理
-
-- 使用 `docs/design/error-handling.md` 定义的错误码
-- 前端: Error Boundary + Toast 提示
-- 后端: 统一错误响应格式
-
----
-
-## 禁止事项
-
-- ❌ 不要创建冗余文档 (SETUP.md, CONTRIBUTING.md 等)
-- ❌ 不要猜测 API URLs,所有接口必须在 `api-design.md` 中定义
-- ❌ 不要硬编码密钥 (使用环境变量)
-- ❌ 不要跳过错误处理
-- ❌ 不要在生产代码中使用 `console.log`，使用 `console.warn` 或 `console.error`
-
----
-
-## 常见开发场景
-
-| 任务                | 参考文档                                                 |
-| ------------------- | -------------------------------------------------------- |
-| 集成新的 TTS 供应商 | `tts-free-providers.md` → `backend-architecture.md`      |
-| 添加新的播客模板    | `prompt-engineering.md` → `api-design.md`                |
-| 修改定价策略        | `product-plan.md` → `payment-integration.md`             |
-| 添加新的音色        | `database-schema.md` (voices 表)                         |
-| 配置新的环境变量    | `env-config.md`                                          |
-| 写测试              | `automation-plan.md`                                     |
-| 部署到生产环境      | `deployment-architecture.md` → `release-verification.md` |
-
----
-
-**最后更新**: 2026-02-25 **文档总数**: 34 个设计文档 (planning: 7, design: 19, development: 4,
-research: 4)
+- No `console.log` in production code — use `console.warn` or `console.error`
+- Prefer `interface` over `type` for object shapes
+- Tailwind CSS utility classes only, no inline styles (except dynamic values)
+- Functional React components + Hooks only
+- All environment secrets go in `.dev.vars` / `.env` (never committed)
+- Migrations are in `api/migrations/` as raw SQL files
