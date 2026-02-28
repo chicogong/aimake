@@ -9,6 +9,7 @@ import { eq } from 'drizzle-orm';
 import type { Env, Variables } from '../types';
 import { createDb, users } from '../db';
 import { generateId } from '../utils/id';
+import { getNextMonthReset } from '../utils/date';
 import { success } from '../utils/response';
 
 const auth = new Hono<{ Bindings: Env; Variables: Variables }>();
@@ -17,7 +18,6 @@ const auth = new Hono<{ Bindings: Env; Variables: Variables }>();
 auth.get('/me', (c) => {
   const user = c.get('user');
 
-  // Calculate remaining quota
   const remaining = Math.max(0, user.quotaLimit - user.quotaUsed);
 
   return success(c, {
@@ -37,22 +37,13 @@ auth.get('/me', (c) => {
   });
 });
 
-// Helper to get next month reset date
-function getNextMonthReset(): string {
-  const now = new Date();
-  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  return nextMonth.toISOString();
-}
-
 export default auth;
 
 // ============ Clerk Webhook Handler ============
-// This is exported separately to be mounted at /api/webhook/clerk
 
 export const clerkWebhook = new Hono<{ Bindings: Env; Variables: Variables }>();
 
 clerkWebhook.post('/clerk', async (c) => {
-  // Verify webhook signature (Svix)
   const svixId = c.req.header('svix-id');
   const svixTimestamp = c.req.header('svix-timestamp');
   const svixSignature = c.req.header('svix-signature');
@@ -60,9 +51,6 @@ clerkWebhook.post('/clerk', async (c) => {
   if (!svixId || !svixTimestamp || !svixSignature) {
     return c.json({ success: false, error: 'Missing webhook headers' }, 400);
   }
-
-  // TODO: Verify signature with @svix/node in production
-  // For now, we'll process the webhook
 
   const body = await c.req.json<{
     type: string;
@@ -94,12 +82,10 @@ clerkWebhook.post('/clerk', async (c) => {
           name,
           avatarUrl: body.data.image_url || null,
           plan: 'free',
-          quotaLimit: 600, // 10 minutes for free tier
+          quotaLimit: 600,
           quotaUsed: 0,
           quotaResetAt: getNextMonthReset(),
         });
-
-        console.log(`User created: ${email}`);
         break;
       }
 
@@ -116,20 +102,16 @@ clerkWebhook.post('/clerk', async (c) => {
             updatedAt: new Date().toISOString(),
           })
           .where(eq(users.clerkId, body.data.id));
-
-        console.log(`User updated: ${body.data.id}`);
         break;
       }
 
       case 'user.deleted': {
         await db.delete(users).where(eq(users.clerkId, body.data.id));
-
-        console.log(`User deleted: ${body.data.id}`);
         break;
       }
 
       default:
-        console.log(`Unhandled webhook type: ${body.type}`);
+        console.warn(`Unhandled webhook type: ${body.type}`);
     }
 
     return c.json({ success: true });

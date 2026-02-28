@@ -1,5 +1,5 @@
 /**
- * Frontend Type Definitions
+ * Frontend Type Definitions — Universal Jobs Model
  */
 
 // ============ API Response Types ============
@@ -57,48 +57,79 @@ export interface Voice {
   tags: string[];
 }
 
-export type VoiceProvider =
-  | 'openai'
-  | 'elevenlabs'
-  | 'azure'
-  | 'tencent'
-  | 'minimax'
-  | 'siliconflow';
+export type VoiceProvider = 'siliconflow';
 
-// ============ Audio Types ============
-export interface AudioResult {
-  url: string;
-  duration: number;
-  size: number;
-}
+// ============ Content Types ============
+export type ContentType = 'podcast' | 'audiobook' | 'voiceover' | 'education' | 'tts';
 
-export interface Audio {
+export type SourceType = 'text' | 'url' | 'document';
+
+export type JobStatus =
+  | 'pending'
+  | 'classifying'
+  | 'extracting'
+  | 'analyzing'
+  | 'scripting'
+  | 'synthesizing'
+  | 'assembling'
+  | 'completed'
+  | 'failed';
+
+// ============ Job Types ============
+export interface Job {
   id: string;
   title: string | null;
-  text: string;
-  type: 'tts' | 'podcast';
-  voiceId: string | null;
-  voiceName: string;
-  duration: number;
-  size: number;
-  url: string;
+  contentType: ContentType;
+  sourceType: SourceType;
+  status: JobStatus;
+  progress: number;
+  currentStage: string | null;
+  audioUrl: string | null;
+  audioFormat: string | null;
+  duration: number | null;
+  fileSize: number | null;
+  streamToken: string | null;
+  error?: {
+    code: string;
+    message: string;
+  };
   createdAt: string;
+  updatedAt: string;
 }
 
-export interface AudioDetail extends Audio {
+export interface JobDetail extends Job {
+  sourceContent: string;
+  settings: string;
+  script: string | null;
+  detectedContentType: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+}
+
+export interface CreateJobRequest {
+  source: {
+    type: SourceType;
+    content: string;
+    documentId?: string;
+  };
+  contentType: 'auto' | ContentType;
   settings: {
-    speed: number | null;
-    pitch: number | null;
-    format: string;
+    duration: number;
+    language?: 'zh' | 'en';
+    style?: string;
+    voices: Array<{ role: string; voiceId: string }>;
   };
-  usage: {
-    characters: number;
-    cost: number;
-  };
+  title?: string;
 }
 
-// ============ TTS Types ============
-export interface TTSRequest {
+export interface CreateJobResponse {
+  id: string;
+  status: string;
+  streamToken: string;
+}
+
+// ============ Quick TTS Types ============
+export interface QuickTTSRequest {
   text: string;
   voiceId: string;
   speed?: number;
@@ -106,49 +137,38 @@ export interface TTSRequest {
   format?: 'mp3' | 'wav';
 }
 
-export interface TTSJob {
-  jobId: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  progress?: number;
-  estimatedTime?: number;
-  audio?: {
-    id: string;
-    url: string;
-    duration: number;
-    size: number;
-  };
-  error?: {
-    code: string;
-    message: string;
-  };
+// ============ Script Types ============
+export interface GeneratedScript {
+  title: string;
+  segments: Array<{
+    index: number;
+    speaker: string;
+    text: string;
+    emotion?: string;
+    speed?: number;
+  }>;
+  estimatedDuration: number;
 }
 
-// ============ Usage Types ============
-export interface UsageRecord {
-  id: string;
-  type: 'tts' | 'podcast';
-  audioId: string | null;
-  podcastId: string | null;
-  characters: number;
+// ============ SSE Types ============
+export interface SSEProgressEvent {
+  type: 'progress';
+  status: JobStatus;
+  progress: number;
+  currentStage: string | null;
+}
+
+export interface SSECompleteEvent {
+  type: 'complete';
+  audioUrl: string;
   duration: number;
-  cost: number;
-  provider: string | null;
-  createdAt: string;
+  fileSize?: number;
 }
 
-export interface UsageSummary {
-  totalCharacters: number;
-  totalDuration: number;
-  totalCost: number;
+export interface SSEErrorEvent {
+  type: 'error';
+  code: string;
+  message: string;
 }
 
-// ============ Subscription Types ============
-export interface Subscription {
-  status: 'none' | 'active' | 'canceled' | 'past_due';
-  plan: Plan;
-  currentPeriod?: {
-    start: string;
-    end: string;
-  };
-  cancelAtPeriodEnd?: boolean;
-}
+export type SSEEvent = SSEProgressEvent | SSECompleteEvent | SSEErrorEvent;

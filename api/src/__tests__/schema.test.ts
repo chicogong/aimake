@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { users, voices, audios, ttsJobs, podcasts, subscriptions, usageLogs } from '../db/schema';
+import { users, voices, jobs, subscriptions, usageLogs } from '../db/schema';
 
 describe('Database Schema', () => {
   describe('Users Table', () => {
@@ -23,33 +23,38 @@ describe('Database Schema', () => {
     });
   });
 
-  describe('Audios Table', () => {
+  describe('Jobs Table', () => {
     it('has required columns', () => {
-      expect(audios.id).toBeDefined();
-      expect(audios.userId).toBeDefined();
-      expect(audios.text).toBeDefined();
-      expect(audios.voiceId).toBeDefined();
-      expect(audios.audioUrl).toBeDefined();
-      expect(audios.duration).toBeDefined();
+      expect(jobs.id).toBeDefined();
+      expect(jobs.userId).toBeDefined();
+      expect(jobs.contentType).toBeDefined();
+      expect(jobs.sourceType).toBeDefined();
+      expect(jobs.sourceContent).toBeDefined();
+      expect(jobs.status).toBeDefined();
     });
-  });
 
-  describe('TTS Jobs Table', () => {
-    it('has required columns', () => {
-      expect(ttsJobs.id).toBeDefined();
-      expect(ttsJobs.userId).toBeDefined();
-      expect(ttsJobs.status).toBeDefined();
-      expect(ttsJobs.text).toBeDefined();
-      expect(ttsJobs.voiceId).toBeDefined();
+    it('has progress tracking columns', () => {
+      expect(jobs.progress).toBeDefined();
+      expect(jobs.currentStage).toBeDefined();
+      expect(jobs.errorCode).toBeDefined();
+      expect(jobs.errorMessage).toBeDefined();
+      expect(jobs.isDeleted).toBeDefined();
     });
-  });
 
-  describe('Podcasts Table', () => {
-    it('has required columns', () => {
-      expect(podcasts.id).toBeDefined();
-      expect(podcasts.userId).toBeDefined();
-      expect(podcasts.title).toBeDefined();
-      expect(podcasts.status).toBeDefined();
+    it('has output columns', () => {
+      expect(jobs.audioUrl).toBeDefined();
+      expect(jobs.audioFormat).toBeDefined();
+      expect(jobs.duration).toBeDefined();
+      expect(jobs.fileSize).toBeDefined();
+      expect(jobs.script).toBeDefined();
+    });
+
+    it('has settings and metadata columns', () => {
+      expect(jobs.settings).toBeDefined();
+      expect(jobs.title).toBeDefined();
+      expect(jobs.detectedContentType).toBeDefined();
+      expect(jobs.isQuickTts).toBeDefined();
+      expect(jobs.streamToken).toBeDefined();
     });
   });
 
@@ -69,6 +74,10 @@ describe('Database Schema', () => {
       expect(usageLogs.type).toBeDefined();
       expect(usageLogs.charsUsed).toBeDefined();
       expect(usageLogs.durationUsed).toBeDefined();
+    });
+
+    it('has job reference', () => {
+      expect(usageLogs.jobId).toBeDefined();
     });
   });
 });

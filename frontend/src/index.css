@@ -80,25 +80,3 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
 }
-
-/* Audio player custom styles */
-.audio-visualizer {
-  background: linear-gradient(
-    90deg,
-    hsl(var(--primary)) 0%,
-    hsl(var(--primary) / 0.6) 50%,
-    hsl(var(--primary)) 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite linear;
-}
-
-/* Loading skeleton */
-.skeleton {
-  @apply animate-pulse bg-muted rounded;
-}
-
-/* Glass effect */
-.glass {
-  @apply bg-background/80 backdrop-blur-lg border border-border/50;
-}

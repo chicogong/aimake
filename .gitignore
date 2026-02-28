@@ -87,3 +87,9 @@ scripts/*.local.sh
 # Claude/AI assistant settings (keep local)
 .claude/settings.local.json
 .mcp.json
+
+# Local files (PDFs, archived docs, etc.)
+local/
+
+# Screenshots (test artifacts)
+*.png

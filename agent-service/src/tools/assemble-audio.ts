@@ -1,0 +1,75 @@
+/**
+ * assemble_audio tool
+ * Reads all stored audio segments and concatenates them.
+ */
+
+import { tool } from '@tencent-ai/agent-sdk';
+import { z } from 'zod';
+import { concatenateSegments } from '../utils/audio.js';
+import { audioStore } from '../utils/audio-store.js';
+
+export const assembleAudioTool = tool(
+  'assemble_audio',
+  'Concatenate all stored audio segments into a single audio file. ' +
+    'Segments are read from internal storage (populated by generate_tts_segment). ' +
+    'The assembled audio is stored internally for upload_audio to use.',
+  {
+    jobId: z.string().describe('The job ID'),
+    gapMs: z
+      .number()
+      .int()
+      .optional()
+      .describe('Silence gap between segments in milliseconds (default: 500)'),
+  },
+  async ({ jobId, gapMs }) => {
+    try {
+      const segments = audioStore.getAll(jobId);
+
+      if (segments.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({
+                success: false,
+                error: 'No audio segments found. Generate segments first.',
+              }),
+            },
+          ],
+        };
+      }
+
+      const result = concatenateSegments(segments, gapMs ?? 500);
+
+      audioStore.setAssembled(jobId, {
+        audioBase64: result.audioBase64,
+        totalDuration: result.totalDuration,
+      });
+
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({
+              success: true,
+              segmentCount: segments.length,
+              totalDuration: result.totalDuration,
+            }),
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({
+              success: false,
+              error: error instanceof Error ? error.message : 'Audio assembly failed',
+            }),
+          },
+        ],
+      };
+    }
+  }
+);
