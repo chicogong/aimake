@@ -18,7 +18,7 @@ import { rateLimitMiddleware } from './middleware/rateLimit';
 import healthRoutes from './routes/health';
 import authRoutes, { clerkWebhook } from './routes/auth';
 import voicesRoutes from './routes/voices';
-import jobsRoutes from './routes/jobs';
+import jobsRoutes, { jobsStreamRouter } from './routes/jobs';
 import ttsRoutes from './routes/tts';
 import userRoutes from './routes/user';
 import internalRoutes from './routes/internal';
@@ -67,6 +67,7 @@ app.route('/api/health', healthRoutes);
 app.route('/api/voices', voicesRoutes);
 app.route('/api/webhook', clerkWebhook);
 app.route('/api/internal', internalRoutes);
+app.route('/api/jobs', jobsStreamRouter); // SSE stream uses token auth, no JWT needed
 
 // ============ Protected Routes ============
 

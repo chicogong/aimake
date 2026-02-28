@@ -76,6 +76,33 @@ export const jobsApi = {
   getDetail: (id: string) => api.get(`/jobs/${id}`),
 
   delete: (id: string) => api.delete(`/jobs/${id}`),
+
+  downloadAudio: async (id: string): Promise<Blob> => {
+    let token: string | null = null;
+    if (_getToken) {
+      try {
+        token = await _getToken();
+      } catch (e) {
+        console.error('Failed to get token for download:', e);
+      }
+    }
+
+    const response = await fetch(`${API_BASE}/jobs/${id}/download`, {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw {
+        code: errorData?.error?.code || 'DOWNLOAD_ERROR',
+        message: errorData?.error?.message || '下载失败',
+      };
+    }
+
+    return response.blob();
+  },
 };
 
 // Quick TTS

@@ -159,8 +159,10 @@ jobsRouter.get('/:id', async (c) => {
   });
 });
 
-// GET /api/jobs/:id/stream — SSE progress stream
-jobsRouter.get('/:id/stream', async (c) => {
+// SSE stream router — mounted as public route (no auth required, uses stream token)
+export const jobsStreamRouter = new Hono<{ Bindings: Env; Variables: Variables }>();
+
+jobsStreamRouter.get('/:id/stream', async (c) => {
   const { id } = c.req.param();
   const token = c.req.query('token');
 

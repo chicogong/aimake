@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useJobStream } from '@/hooks/useJobStream';
 import { jobsApi } from '@/services/api';
-import type { JobDetail, JobStatus } from '@/types';
+import type { JobDetail } from '@/types';
 import { formatDuration } from '@/lib/utils';
 
 const STAGE_LABELS: Record<string, string> = {
@@ -32,8 +32,18 @@ export function JobDetailPage() {
   const [job, setJob] = useState<JobDetail | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const [audioBlobUrl, setAudioBlobUrl] = useState<string | null>(null);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
 
   const stream = useJobStream(id ?? null, streamToken);
+
+  // Cleanup blob URL on unmount
+  useEffect(() => {
+    return () => {
+      if (audioBlobUrl) URL.revokeObjectURL(audioBlobUrl);
+      audioElement?.pause();
+    };
+  }, [audioBlobUrl, audioElement]);
 
   // Fetch job detail on mount
   useEffect(() => {
@@ -64,7 +74,25 @@ export function JobDetailPage() {
 
   const isTerminal = currentStatus === 'completed' || currentStatus === 'failed';
 
-  const handlePlayPause = () => {
+  const fetchAudioBlob = async (): Promise<string | null> => {
+    if (audioBlobUrl) return audioBlobUrl;
+    if (!id) return null;
+
+    setIsLoadingAudio(true);
+    try {
+      const blob = await jobsApi.downloadAudio(id);
+      const url = URL.createObjectURL(blob);
+      setAudioBlobUrl(url);
+      return url;
+    } catch (err) {
+      console.error('Failed to load audio:', err);
+      return null;
+    } finally {
+      setIsLoadingAudio(false);
+    }
+  };
+
+  const handlePlayPause = async () => {
     if (!audioUrl || !id) return;
 
     if (audioElement) {
@@ -78,13 +106,28 @@ export function JobDetailPage() {
       return;
     }
 
-    // Create download URL (use the job download endpoint)
-    const downloadUrl = `/api/jobs/${id}/download`;
-    const audio = new Audio(downloadUrl);
+    const blobUrl = await fetchAudioBlob();
+    if (!blobUrl) return;
+
+    const audio = new Audio(blobUrl);
     audio.onended = () => setIsPlaying(false);
     audio.play();
     setIsPlaying(true);
     setAudioElement(audio);
+  };
+
+  const handleDownload = async () => {
+    if (!id) return;
+
+    const blobUrl = await fetchAudioBlob();
+    if (!blobUrl) return;
+
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = `${job?.title || 'audio'}.${job?.audioFormat || 'mp3'}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   return (
@@ -155,12 +198,10 @@ export function JobDetailPage() {
                 )}
               </div>
               {id && (
-                <a href={`/api/jobs/${id}/download`}>
-                  <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-1" />
-                    下载
-                  </Button>
-                </a>
+                <Button variant="outline" size="sm" onClick={handleDownload} disabled={isLoadingAudio}>
+                  <Download className="h-4 w-4 mr-1" />
+                  下载
+                </Button>
               )}
             </div>
 
