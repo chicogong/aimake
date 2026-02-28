@@ -1,5 +1,5 @@
 /**
- * AIMake API
+ * AIMake API — Universal Voice Content Agent
  * Cloudflare Workers + Hono
  */
 
@@ -18,44 +18,34 @@ import { rateLimitMiddleware } from './middleware/rateLimit';
 import healthRoutes from './routes/health';
 import authRoutes, { clerkWebhook } from './routes/auth';
 import voicesRoutes from './routes/voices';
+import jobsRoutes from './routes/jobs';
 import ttsRoutes from './routes/tts';
-import audiosRoutes from './routes/audios';
 import userRoutes from './routes/user';
+import internalRoutes from './routes/internal';
 
-// Create app
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 
 // ============ Global Middleware ============
 
-// Logging
 app.use('*', logger());
-
-// Timing headers
 app.use('*', timing());
-
-// Security headers
 app.use('*', secureHeaders());
 
-// CORS
 app.use(
   '*',
   cors({
     origin: (origin, c) => {
       if (!origin) return null;
-      
-      // Allow configured origins (comma-separated)
+
       const allowed = c.env.CORS_ORIGIN?.split(',').map((s: string) => s.trim()) || [];
       if (allowed.includes(origin)) return origin;
 
-      // Allow localhost in development
       if (origin.startsWith('http://localhost:')) return origin;
 
-      // Allow production domains
       if (origin === 'https://aimake.cc' || origin === 'https://app.aimake.cc') {
         return origin;
       }
-      
-      // Allow Cloudflare Pages preview URLs
+
       if (origin.includes('.aimake-app.pages.dev')) {
         return origin;
       }
@@ -69,43 +59,27 @@ app.use(
   })
 );
 
-// Error handler
 app.onError(errorHandler);
 
 // ============ Public Routes ============
 
-// Health check
 app.route('/api/health', healthRoutes);
-
-// Voices (public, no auth needed)
 app.route('/api/voices', voicesRoutes);
-
-// Webhooks (no auth, verified by signature)
 app.route('/api/webhook', clerkWebhook);
+app.route('/api/internal', internalRoutes);
 
 // ============ Protected Routes ============
 
-// Apply auth middleware to all /api/* routes below
 app.use('/api/*', authMiddleware);
-
-// Apply rate limiting
 app.use('/api/*', rateLimitMiddleware());
 
-// Auth routes
 app.route('/api/auth', authRoutes);
-
-// TTS routes
+app.route('/api/jobs', jobsRoutes);
 app.route('/api/tts', ttsRoutes);
-
-// Audio routes
-app.route('/api/audios', audiosRoutes);
-
-// User routes
 app.route('/api/user', userRoutes);
 
 // ============ Fallback ============
 
-// 404 handler
 app.notFound((c) => {
   return c.json(
     {
@@ -118,7 +92,5 @@ app.notFound((c) => {
     404
   );
 });
-
-// ============ Export ============
 
 export default app;

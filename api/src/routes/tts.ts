@@ -1,81 +1,51 @@
 /**
- * TTS Routes
- * POST /api/tts/generate - Generate audio (async with job)
- * POST /api/tts/generate-sync - Generate audio (sync, returns audio directly)
- * GET /api/tts/status/:jobId - Get job status
+ * Quick TTS Routes
+ * POST /api/tts/quick — Direct TTS, no Agent, returns audio buffer
  */
 
 import { Hono } from 'hono';
-import { zValidator } from '@hono/zod-validator';
-import { z } from 'zod';
-import type { Env, Variables } from '../types';
+import type { Env, Variables, QuickTTSRequest } from '../types';
 import { createDb } from '../db';
 import { TTSService } from '../services/tts';
-import { success } from '../utils/response';
+import { errors } from '../middleware/error';
 import { ttsRateLimitMiddleware } from '../middleware/rateLimit';
 
-const tts = new Hono<{ Bindings: Env; Variables: Variables }>();
+const ttsRouter = new Hono<{ Bindings: Env; Variables: Variables }>();
 
-// Validation schema
-const generateSchema = z.object({
-  text: z
-    .string()
-    .min(1, '请输入文本')
-    .max(5000, '文本长度不能超过 5000 字符'),
-  voiceId: z.string().min(1, '请选择音色'),
-  speed: z.number().min(0.5).max(2.0).default(1.0),
-  pitch: z.number().min(-10).max(10).default(0),
-  format: z.enum(['mp3', 'wav']).default('mp3'),
-});
-
-// POST /api/tts/generate (async - returns job ID)
-tts.post('/generate', ttsRateLimitMiddleware, zValidator('json', generateSchema), async (c) => {
+// POST /api/tts/quick — Quick TTS (sync, returns audio blob)
+ttsRouter.post('/quick', ttsRateLimitMiddleware, async (c) => {
   const user = c.get('user');
-  const body = c.req.valid('json');
+  const body = await c.req.json<QuickTTSRequest>();
+
+  if (!body.text || body.text.length === 0) {
+    throw errors.validation('文本不能为空');
+  }
+  if (body.text.length > 5000) {
+    throw errors.validation('文本长度不能超过 5000 字符');
+  }
+  if (!body.voiceId) {
+    throw errors.validation('voiceId 不能为空');
+  }
 
   const db = createDb(c.env.DB);
   const ttsService = new TTSService(db, c.env);
 
-  const result = await ttsService.createJob(user, body);
+  const audioBuffer = await ttsService.generateDirect(user, {
+    text: body.text,
+    voiceId: body.voiceId,
+    speed: body.speed,
+    pitch: body.pitch,
+    format: body.format,
+  });
 
-  return success(c, result);
-});
+  const contentType = body.format === 'wav' ? 'audio/wav' : 'audio/mpeg';
 
-// POST /api/tts/generate-sync (sync - returns audio directly)
-tts.post('/generate-sync', ttsRateLimitMiddleware, zValidator('json', generateSchema), async (c) => {
-  const user = c.get('user');
-  const body = c.req.valid('json');
-
-  const db = createDb(c.env.DB);
-  const ttsService = new TTSService(db, c.env);
-
-  // Generate audio directly without storing
-  const audioBuffer = await ttsService.generateDirect(user, body);
-
-  // Return audio as response
-  const contentType = body.format === 'mp3' ? 'audio/mpeg' : 'audio/wav';
-  
   return new Response(audioBuffer, {
     headers: {
       'Content-Type': contentType,
-      'Content-Length': audioBuffer.byteLength.toString(),
-      'Content-Disposition': `attachment; filename="audio.${body.format}"`,
-      'Cache-Control': 'no-cache',
+      'Content-Disposition': `inline; filename="tts.${body.format || 'mp3'}"`,
     },
   });
 });
 
-// GET /api/tts/status/:jobId
-tts.get('/status/:jobId', async (c) => {
-  const { jobId } = c.req.param();
-  const user = c.get('user');
-
-  const db = createDb(c.env.DB);
-  const ttsService = new TTSService(db, c.env);
-
-  const result = await ttsService.getJobStatus(jobId, user.id);
-
-  return success(c, result);
-});
-
-export default tts;
+export default ttsRouter;

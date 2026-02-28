@@ -8,6 +8,8 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 ENVIRONMENT = "production"
 CORS_ORIGIN = "https://app.aimake.cc,https://aimake-app.pages.dev,http://localhost:5173"
+# Agent service URL (INTERNAL_API_SECRET set via wrangler secret put)
+# AGENT_SERVICE_URL = "https://agent.aimake.cc"
 
 # D1 数据库
 [[d1_databases]]
@@ -31,7 +33,7 @@ crons = []
 
 # 开发环境配置
 [env.development]
-vars = { ENVIRONMENT = "development", CORS_ORIGIN = "http://localhost:5173" }
+vars = { ENVIRONMENT = "development", CORS_ORIGIN = "http://localhost:5173", AGENT_SERVICE_URL = "http://localhost:3001" }
 
 # 生产环境配置
 [env.production]

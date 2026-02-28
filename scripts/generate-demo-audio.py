@@ -92,7 +92,7 @@ async def main():
     tts = EdgeTTS()
 
     # 输出目录
-    output_dir = Path(__file__).parent.parent / "landing" / "assets" / "audio"
+    output_dir = Path(__file__).parent.parent / "website" / "assets" / "audio"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"📁 输出目录: {output_dir}")
@@ -130,7 +130,7 @@ async def main():
     print()
     print("📂 文件位置:")
     for filename in DEMO_TEXTS.keys():
-        print(f"   - landing/assets/audio/{filename}")
+        print(f"   - website/assets/audio/{filename}")
 
 
 if __name__ == "__main__":

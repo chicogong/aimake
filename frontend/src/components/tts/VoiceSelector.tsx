@@ -10,13 +10,14 @@ import { cn } from '@/lib/utils';
 import { voicesApi } from '@/services/api';
 import type { Voice } from '@/types';
 
-interface VoiceSelectorProps {
-  selectedVoice: Voice | null;
+export interface VoiceSelectorProps {
+  selectedVoice?: Voice | null;
+  selectedId?: string;
   onSelect: (voice: Voice) => void;
   disabled?: boolean;
 }
 
-export function VoiceSelector({ selectedVoice, onSelect, disabled }: VoiceSelectorProps) {
+export function VoiceSelector({ selectedVoice, selectedId, onSelect, disabled }: VoiceSelectorProps) {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
@@ -121,14 +122,14 @@ export function VoiceSelector({ selectedVoice, onSelect, disabled }: VoiceSelect
                 className={cn(
                   'relative flex flex-col items-start p-4 rounded-xl border-2 transition-all duration-200 text-left',
                   'hover:border-primary/50 hover:bg-primary/5',
-                  selectedVoice?.id === voice.id
+                  selectedVoice?.id === voice.id || selectedId === voice.id
                     ? 'border-primary bg-primary/10'
                     : 'border-border bg-card',
                   disabled && 'opacity-50 cursor-not-allowed'
                 )}
               >
                 {/* Selected check */}
-                {selectedVoice?.id === voice.id && (
+                {(selectedVoice?.id === voice.id || selectedId === voice.id) && (
                   <div className="absolute top-2 right-2 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
                     <Check className="h-3 w-3 text-primary-foreground" />
                   </div>

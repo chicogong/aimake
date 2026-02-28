@@ -105,4 +105,34 @@ describe('Error Factory Functions', () => {
     expect(err.code).toBe('TTS_ERROR');
     expect(err.message).toBe('TTS generation failed');
   });
+
+  it('errors.jobError creates 500 error with JOB_ERROR code', () => {
+    const err = errors.jobError('Job generation failed');
+
+    expect(err.statusCode).toBe(500);
+    expect(err.code).toBe('JOB_ERROR');
+    expect(err.message).toBe('Job generation failed');
+  });
+
+  it('errors.jobError includes details', () => {
+    const details = { stage: 'scripting', reason: 'timeout' };
+    const err = errors.jobError('Job error', details);
+
+    expect(err.details).toEqual(details);
+  });
+
+  it('errors.serviceUnavailable creates 503 error', () => {
+    const err = errors.serviceUnavailable();
+
+    expect(err.statusCode).toBe(503);
+    expect(err.code).toBe('SERVICE_UNAVAILABLE');
+    expect(err.message).toBe('服务暂不可用');
+  });
+
+  it('errors.serviceUnavailable accepts custom message', () => {
+    const err = errors.serviceUnavailable('Agent service offline');
+
+    expect(err.statusCode).toBe(503);
+    expect(err.message).toBe('Agent service offline');
+  });
 });

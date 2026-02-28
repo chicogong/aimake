@@ -1,34 +1,32 @@
 /**
- * AIMake API Type Definitions
+ * AIMake API Type Definitions — Universal Jobs Model
  */
 
 import type { User } from '../db/schema';
 
 // ============ Environment Bindings ============
 export interface Env {
-  // Cloudflare Services
   DB: D1Database;
   KV: KVNamespace;
-  R2?: R2Bucket; // Optional, needs to be enabled in Dashboard
+  R2?: R2Bucket;
 
-  // Environment Variables
   ENVIRONMENT: 'development' | 'production';
   CORS_ORIGIN: string;
 
-  // Secrets (set via wrangler secret put)
   CLERK_SECRET_KEY: string;
   CLERK_PUBLISHABLE_KEY: string;
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
 
-  // TTS API Keys
   OPENAI_API_KEY: string;
   TENCENT_SECRET_ID?: string;
   TENCENT_SECRET_KEY?: string;
   ELEVENLABS_API_KEY?: string;
-
-  // LLM API Keys
   SILICONFLOW_API_KEY?: string;
+
+  // Agent Service
+  AGENT_SERVICE_URL?: string;
+  INTERNAL_API_SECRET?: string;
 }
 
 // ============ Hono Context Variables ============
@@ -68,7 +66,8 @@ export type ErrorCode =
   | 'INTERNAL_ERROR'
   | 'SERVICE_UNAVAILABLE'
   | 'TTS_ERROR'
-  | 'PAYMENT_ERROR';
+  | 'PAYMENT_ERROR'
+  | 'JOB_ERROR';
 
 // ============ Pagination ============
 export interface PaginationParams {
@@ -76,6 +75,78 @@ export interface PaginationParams {
   pageSize?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+}
+
+// ============ Content Types ============
+export type ContentType = 'podcast' | 'audiobook' | 'voiceover' | 'education' | 'tts';
+
+export type SourceType = 'text' | 'url' | 'document';
+
+export type JobStatus =
+  | 'pending'
+  | 'classifying'
+  | 'extracting'
+  | 'analyzing'
+  | 'scripting'
+  | 'synthesizing'
+  | 'assembling'
+  | 'completed'
+  | 'failed';
+
+// ============ Job Types ============
+export interface CreateJobRequest {
+  source: {
+    type: SourceType;
+    content: string;
+    documentId?: string;
+  };
+  contentType: 'auto' | ContentType;
+  settings: {
+    duration: number;
+    language?: 'zh' | 'en';
+    style?: string;
+    voices: Array<{ role: string; voiceId: string }>;
+  };
+  title?: string;
+}
+
+export interface JobResponse {
+  id: string;
+  title: string | null;
+  contentType: ContentType;
+  sourceType: SourceType;
+  status: JobStatus;
+  progress: number;
+  currentStage: string | null;
+  audioUrl: string | null;
+  audioFormat: string | null;
+  duration: number | null;
+  fileSize: number | null;
+  streamToken: string | null;
+  error?: {
+    code: string;
+    message: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface JobDetailResponse extends JobResponse {
+  sourceContent: string;
+  settings: string;
+  script: string | null;
+  detectedContentType: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+}
+
+// ============ Quick TTS Types ============
+export interface QuickTTSRequest {
+  text: string;
+  voiceId: string;
+  speed?: number;
+  pitch?: number;
+  format?: 'mp3' | 'wav';
 }
 
 // ============ Voice Types ============
@@ -94,56 +165,27 @@ export interface VoiceInfo {
   tags?: string[];
 }
 
-// ============ TTS Types ============
-export interface TTSGenerateRequest {
-  text: string;
-  voiceId: string;
-  speed?: number;
-  pitch?: number;
-  format?: 'mp3' | 'wav';
+// ============ SSE Event Types ============
+export interface SSEProgressEvent {
+  type: 'progress';
+  status: JobStatus;
+  progress: number;
+  currentStage: string | null;
 }
 
-export interface TTSJobResult {
-  jobId: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  progress?: number;
-  estimatedTime?: number;
-  audio?: {
-    id: string;
-    url: string;
-    duration: number;
-    size: number;
-  };
-  error?: {
-    code: string;
-    message: string;
-  };
+export interface SSECompleteEvent {
+  type: 'complete';
+  audioUrl: string;
+  duration: number;
 }
 
-// ============ Podcast Types ============
-export interface PodcastGenerateRequest {
-  source: {
-    type: 'text' | 'url';
-    content: string;
-  };
-  settings: {
-    duration: 5 | 10 | 15 | 20;
-    style: 'casual' | 'professional' | 'debate';
-    hostVoiceId: string;
-    guestVoiceId: string;
-    language?: 'zh' | 'en';
-  };
-  title?: string;
+export interface SSEErrorEvent {
+  type: 'error';
+  code: string;
+  message: string;
 }
 
-export interface PodcastScript {
-  segments: Array<{
-    speaker: 'host' | 'guest';
-    text: string;
-    startTime: number;
-    endTime: number;
-  }>;
-}
+export type SSEEvent = SSEProgressEvent | SSECompleteEvent | SSEErrorEvent;
 
 // ============ Subscription Types ============
 export type Plan = 'free' | 'pro' | 'team';
@@ -156,25 +198,23 @@ export interface QuotaInfo {
   resetAt: string;
 }
 
-export interface SubscriptionInfo {
-  status: 'none' | 'active' | 'canceled' | 'past_due';
-  plan: Plan;
-  currentPeriod?: {
-    start: string;
-    end: string;
-  };
-  cancelAtPeriodEnd?: boolean;
+// ============ Internal Callback Types ============
+export interface ProgressCallbackPayload {
+  status: JobStatus;
+  progress: number;
+  currentStage: string;
+  detectedContentType?: string;
+  errorCode?: string;
+  errorMessage?: string;
 }
 
-// ============ Checkout Types ============
-export interface CheckoutRequest {
-  plan: 'pro' | 'team';
-  interval: 'month' | 'year';
-  successUrl: string;
-  cancelUrl: string;
+export interface ScriptCallbackPayload {
+  script: string;
+  title?: string;
 }
 
-export interface CheckoutResponse {
-  checkoutUrl: string;
-  sessionId: string;
+export interface AudioCallbackPayload {
+  audioBase64: string;
+  duration: number;
+  format: string;
 }

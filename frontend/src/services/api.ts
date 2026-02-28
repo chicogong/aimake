@@ -4,7 +4,7 @@
  */
 
 import axios, { AxiosError } from 'axios';
-import type { ApiError } from '@/types';
+import type { ApiError, CreateJobRequest } from '@/types';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -16,11 +16,9 @@ export const api = axios.create({
   timeout: 30000,
 });
 
-// Store getToken function for use in generateSync
 let _getToken: (() => Promise<string | null>) | null = null;
 let _authSetup = false;
 
-// Request interceptor - adds auth token
 export function setupApiAuth(getToken: () => Promise<string | null>) {
   if (_authSetup) {
     return;
@@ -40,22 +38,19 @@ export function setupApiAuth(getToken: () => Promise<string | null>) {
   });
 }
 
-// Response interceptor - handles errors
+// Response interceptor
 api.interceptors.response.use(
   (response) => response.data,
   (error: AxiosError<ApiError>) => {
     const errorData = error.response?.data?.error;
 
-    // Create a standardized error
     const apiError = {
       code: errorData?.code || 'NETWORK_ERROR',
       message: errorData?.message || '网络错误，请稍后重试',
       details: errorData?.details,
     };
 
-    // Handle specific error codes
     if (apiError.code === 'UNAUTHORIZED') {
-      // Redirect to login or show login modal
       window.dispatchEvent(new CustomEvent('auth:required'));
     }
 
@@ -65,30 +60,33 @@ api.interceptors.response.use(
 
 // ============ API Methods ============
 
-// Health check
-export const healthApi = {
-  check: () => api.get('/health'),
-};
-
 // Voices
 export const voicesApi = {
   list: (params?: { provider?: string; gender?: string; premium?: boolean }) =>
     api.get('/voices', { params }),
-
-  getPreview: (id: string) => api.get(`/voices/${id}/preview`),
 };
 
-// TTS
+// Jobs
+export const jobsApi = {
+  create: (data: CreateJobRequest) => api.post('/jobs', data),
+
+  list: (params?: { page?: number; pageSize?: number; contentType?: string }) =>
+    api.get('/jobs', { params }),
+
+  getDetail: (id: string) => api.get(`/jobs/${id}`),
+
+  delete: (id: string) => api.delete(`/jobs/${id}`),
+};
+
+// Quick TTS
 export const ttsApi = {
-  // Sync generate - returns audio blob directly
-  generateSync: async (data: {
+  quick: async (data: {
     text: string;
     voiceId: string;
     speed?: number;
     pitch?: number;
     format?: 'mp3' | 'wav';
   }): Promise<Blob> => {
-    // Get token from stored getToken function
     let token: string | null = null;
     if (_getToken) {
       try {
@@ -98,8 +96,7 @@ export const ttsApi = {
       }
     }
 
-    // Use fetch directly to avoid axios response interceptor interfering with blob
-    const response = await fetch(`${API_BASE}/tts/generate-sync`, {
+    const response = await fetch(`${API_BASE}/tts/quick`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -120,18 +117,6 @@ export const ttsApi = {
   },
 };
 
-// Audios
-export const audiosApi = {
-  list: (params?: { page?: number; pageSize?: number; type?: string; search?: string }) =>
-    api.get('/audios', { params }),
-
-  get: (id: string) => api.get(`/audios/${id}`),
-
-  delete: (id: string) => api.delete(`/audios/${id}`),
-
-  download: (id: string) => api.get(`/audios/${id}/download`, { responseType: 'blob' }),
-};
-
 // User
 export const userApi = {
   getMe: () => api.get('/auth/me'),
@@ -147,14 +132,7 @@ export const userApi = {
   }) => api.get('/user/usage', { params }),
 };
 
-// Subscription
-export const subscriptionApi = {
-  get: () => api.get('/subscription'),
-
-  createCheckout: (data: {
-    plan: 'pro' | 'team';
-    interval: 'month' | 'year';
-    successUrl: string;
-    cancelUrl: string;
-  }) => api.post('/subscription/checkout', data),
-};
+// SSE stream URL helper
+export function getJobStreamUrl(jobId: string, streamToken: string): string {
+  return `${API_BASE}/jobs/${jobId}/stream?token=${streamToken}`;
+}

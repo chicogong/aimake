@@ -16,7 +16,7 @@ export function Header() {
   const user = useUserStore((state) => state.user);
 
   const navLinks = [
-    { href: '/', label: '文字转语音' },
+    { href: '/', label: '创建' },
     { href: '/history', label: '历史记录' },
     { href: '/pricing', label: '定价' },
   ];

@@ -18,7 +18,6 @@ export class AppError extends Error {
   }
 }
 
-// Common error factories
 export const errors = {
   badRequest: (message: string, details?: unknown) =>
     new AppError('BAD_REQUEST', 400, message, details),
@@ -44,14 +43,19 @@ export const errors = {
   ttsError: (message: string, details?: unknown) =>
     new AppError('TTS_ERROR', 500, message, details),
 
+  jobError: (message: string, details?: unknown) =>
+    new AppError('JOB_ERROR', 500, message, details),
+
   paymentError: (message: string, details?: unknown) =>
     new AppError('PAYMENT_ERROR', 400, message, details),
+
+  serviceUnavailable: (message = '服务暂不可用') =>
+    new AppError('SERVICE_UNAVAILABLE', 503, message),
 };
 
 export const errorHandler: ErrorHandler<{ Bindings: Env; Variables: Variables }> = (err, c) => {
   console.error('Error:', err);
 
-  // Handle AppError
   if (err instanceof AppError) {
     const response: {
       success: false;
@@ -68,15 +72,13 @@ export const errorHandler: ErrorHandler<{ Bindings: Env; Variables: Variables }>
       },
     };
 
-    // Only include details in development
     if (c.env.ENVIRONMENT === 'development' && err.details) {
       response.error.details = err.details;
     }
 
-    return c.json(response, err.statusCode as 400 | 401 | 403 | 404 | 429 | 500);
+    return c.json(response, err.statusCode as 400 | 401 | 403 | 404 | 429 | 500 | 503);
   }
 
-  // Handle Zod validation errors
   if (err.name === 'ZodError') {
     return c.json(
       {
@@ -91,7 +93,6 @@ export const errorHandler: ErrorHandler<{ Bindings: Env; Variables: Variables }>
     );
   }
 
-  // Handle unknown errors
   return c.json(
     {
       success: false,

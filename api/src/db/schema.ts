@@ -1,7 +1,9 @@
 /**
- * AIMake Database Schema
+ * AIMake Database Schema — Universal Jobs Model
  * Database: Cloudflare D1 (SQLite)
  * ORM: Drizzle
+ *
+ * Merged tts_jobs + podcasts + audios → unified `jobs` table
  */
 
 import { sql } from 'drizzle-orm';
@@ -11,24 +13,21 @@ import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core
 export const users = sqliteTable(
   'users',
   {
-    id: text('id').primaryKey(), // UUID
+    id: text('id').primaryKey(),
     clerkId: text('clerk_id').notNull().unique(),
     email: text('email').notNull().unique(),
     name: text('name'),
     avatarUrl: text('avatar_url'),
 
-    // 套餐信息
     plan: text('plan', { enum: ['free', 'pro', 'team'] })
       .notNull()
       .default('free'),
-    quotaLimit: integer('quota_limit').notNull().default(600), // 秒 (10分钟)
+    quotaLimit: integer('quota_limit').notNull().default(600),
     quotaUsed: integer('quota_used').notNull().default(0),
-    quotaResetAt: text('quota_reset_at'), // ISO 8601
+    quotaResetAt: text('quota_reset_at'),
 
-    // Stripe 信息
     stripeCustomerId: text('stripe_customer_id'),
 
-    // 时间戳
     createdAt: text('created_at')
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -44,28 +43,24 @@ export const users = sqliteTable(
 
 // ============ Voices 音色表 ============
 export const voices = sqliteTable('voices', {
-  id: text('id').primaryKey(), // 如 'openai-alloy'
+  id: text('id').primaryKey(),
   name: text('name').notNull(),
   nameZh: text('name_zh'),
   provider: text('provider', {
     enum: ['openai', 'elevenlabs', 'azure', 'tencent', 'minimax', 'siliconflow'],
   }).notNull(),
 
-  // 属性
   gender: text('gender', { enum: ['male', 'female', 'neutral'] }),
   language: text('language').default('zh-CN'),
   style: text('style'),
   description: text('description'),
 
-  // 资源
   previewUrl: text('preview_url'),
   avatarUrl: text('avatar_url'),
 
-  // 权限
   isPremium: integer('is_premium', { mode: 'boolean' }).notNull().default(false),
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
 
-  // 排序
   sortOrder: integer('sort_order').default(0),
 
   createdAt: text('created_at')
@@ -73,141 +68,75 @@ export const voices = sqliteTable('voices', {
     .default(sql`CURRENT_TIMESTAMP`),
 });
 
-// ============ Audios 音频记录表 ============
-export const audios = sqliteTable(
-  'audios',
+// ============ Jobs 统一任务表 ============
+export const jobs = sqliteTable(
+  'jobs',
   {
     id: text('id').primaryKey(),
     userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
 
-    // 内容
     title: text('title'),
-    text: text('text').notNull(),
-    textLength: integer('text_length').notNull(),
+    contentType: text('content_type', {
+      enum: ['podcast', 'audiobook', 'voiceover', 'education', 'tts'],
+    }).notNull(),
+    sourceType: text('source_type', {
+      enum: ['text', 'url', 'document'],
+    }).notNull(),
+    sourceContent: text('source_content').notNull(),
+    sourceMimeType: text('source_mime_type'),
 
-    // 音频信息
-    voiceId: text('voice_id').references(() => voices.id),
-    audioUrl: text('audio_url').notNull(),
-    audioFormat: text('audio_format', { enum: ['mp3', 'wav'] })
-      .notNull()
-      .default('mp3'),
-    duration: real('duration').notNull(), // 秒
-    fileSize: integer('file_size'), // 字节
+    // JSON settings: {duration, style, language, voices}
+    settings: text('settings').notNull().default('{}'),
 
-    // 参数
-    speed: real('speed').default(1.0),
-    pitch: real('pitch').default(0),
+    // Generated script (JSON)
+    script: text('script'),
 
-    // 类型
-    type: text('type', { enum: ['tts', 'podcast'] })
-      .notNull()
-      .default('tts'),
+    // Agent auto-detection result
+    detectedContentType: text('detected_content_type'),
 
-    // 状态
-    isDeleted: integer('is_deleted', { mode: 'boolean' }).notNull().default(false),
+    // Output
+    audioUrl: text('audio_url'),
+    audioFormat: text('audio_format').default('mp3'),
+    duration: real('duration'),
+    fileSize: integer('file_size'),
 
-    createdAt: text('created_at')
-      .notNull()
-      .default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: text('updated_at')
-      .notNull()
-      .default(sql`CURRENT_TIMESTAMP`),
-  },
-  (table) => ({
-    userIdIdx: index('idx_audios_user_id').on(table.userId),
-    createdAtIdx: index('idx_audios_created_at').on(table.createdAt),
-    typeIdx: index('idx_audios_type').on(table.type),
-  })
-);
-
-// ============ TTS Jobs 任务表 ============
-export const ttsJobs = sqliteTable(
-  'tts_jobs',
-  {
-    id: text('id').primaryKey(),
-    userId: text('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    audioId: text('audio_id').references(() => audios.id),
-
-    // 输入
-    text: text('text').notNull(),
-    voiceId: text('voice_id').notNull(),
-    speed: real('speed').default(1.0),
-    pitch: real('pitch').default(0),
-    format: text('format', { enum: ['mp3', 'wav'] })
-      .notNull()
-      .default('mp3'),
-
-    // 状态
-    status: text('status', { enum: ['pending', 'processing', 'completed', 'failed'] })
+    // Status tracking
+    status: text('status', {
+      enum: ['pending', 'classifying', 'extracting', 'analyzing', 'scripting', 'synthesizing', 'assembling', 'completed', 'failed'],
+    })
       .notNull()
       .default('pending'),
     progress: integer('progress').default(0),
+    currentStage: text('current_stage'),
 
-    // 错误信息
+    // Error info
     errorCode: text('error_code'),
     errorMessage: text('error_message'),
 
-    // 时间
+    // Flags
+    isDeleted: integer('is_deleted', { mode: 'boolean' }).default(false),
+    isQuickTts: integer('is_quick_tts', { mode: 'boolean' }).default(false),
+
+    // SSE stream token
+    streamToken: text('stream_token'),
+
+    // Timestamps
     startedAt: text('started_at'),
     completedAt: text('completed_at'),
     createdAt: text('created_at')
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
-  },
-  (table) => ({
-    userIdIdx: index('idx_tts_jobs_user_id').on(table.userId),
-    statusIdx: index('idx_tts_jobs_status').on(table.status),
-  })
-);
-
-// ============ Podcasts 播客表 ============
-export const podcasts = sqliteTable(
-  'podcasts',
-  {
-    id: text('id').primaryKey(),
-    userId: text('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-
-    // 输入
-    title: text('title'),
-    sourceType: text('source_type', { enum: ['url', 'text', 'topic'] }).notNull(),
-    sourceContent: text('source_content').notNull(),
-    targetDuration: integer('target_duration').default(600), // 秒
-    style: text('style', { enum: ['casual', 'professional', 'debate'] }).default('casual'),
-
-    // 脚本 (JSON)
-    script: text('script'), // JSON string
-
-    // 音色配置
-    hostVoiceId: text('host_voice_id').references(() => voices.id),
-    guestVoiceId: text('guest_voice_id').references(() => voices.id),
-
-    // 输出
-    audioUrl: text('audio_url'),
-    duration: real('duration'),
-
-    // 状态
-    status: text('status', {
-      enum: ['pending', 'analyzing', 'scripting', 'synthesizing', 'completed', 'failed'],
-    })
-      .notNull()
-      .default('pending'),
-
-    createdAt: text('created_at')
-      .notNull()
-      .default(sql`CURRENT_TIMESTAMP`),
     updatedAt: text('updated_at')
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({
-    userIdIdx: index('idx_podcasts_user_id').on(table.userId),
-    statusIdx: index('idx_podcasts_status').on(table.status),
+    userIdIdx: index('idx_jobs_user_id').on(table.userId),
+    statusIdx: index('idx_jobs_status').on(table.status),
+    contentTypeIdx: index('idx_jobs_content_type').on(table.contentType),
+    createdAtIdx: index('idx_jobs_created_at').on(table.createdAt),
   })
 );
 
@@ -221,15 +150,12 @@ export const subscriptions = sqliteTable(
       .unique()
       .references(() => users.id, { onDelete: 'cascade' }),
 
-    // 套餐
     plan: text('plan', { enum: ['pro', 'team'] }).notNull(),
     status: text('status', { enum: ['active', 'canceled', 'past_due', 'expired'] }).notNull(),
 
-    // Stripe
     stripeSubscriptionId: text('stripe_subscription_id'),
     stripePriceId: text('stripe_price_id'),
 
-    // 时间
     currentPeriodStart: text('current_period_start'),
     currentPeriodEnd: text('current_period_end'),
     cancelAt: text('cancel_at'),
@@ -256,16 +182,12 @@ export const usageLogs = sqliteTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
 
-    // 用量信息
-    type: text('type', { enum: ['tts', 'podcast'] }).notNull(),
+    type: text('type', { enum: ['tts', 'podcast', 'audiobook', 'voiceover', 'education'] }).notNull(),
     charsUsed: integer('chars_used').notNull(),
-    durationUsed: real('duration_used').notNull(), // 秒
+    durationUsed: real('duration_used').notNull(),
 
-    // 关联
-    audioId: text('audio_id').references(() => audios.id),
-    podcastId: text('podcast_id').references(() => podcasts.id),
+    jobId: text('job_id').references(() => jobs.id),
 
-    // API 成本
     provider: text('provider'),
     apiCost: real('api_cost'),
 
@@ -283,10 +205,7 @@ export const usageLogs = sqliteTable(
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Voice = typeof voices.$inferSelect;
-export type Audio = typeof audios.$inferSelect;
-export type NewAudio = typeof audios.$inferInsert;
-export type TTSJob = typeof ttsJobs.$inferSelect;
-export type NewTTSJob = typeof ttsJobs.$inferInsert;
-export type Podcast = typeof podcasts.$inferSelect;
+export type Job = typeof jobs.$inferSelect;
+export type NewJob = typeof jobs.$inferInsert;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type UsageLog = typeof usageLogs.$inferSelect;
