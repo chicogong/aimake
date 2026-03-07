@@ -50,6 +50,17 @@ class AudioStore {
     this.segments.delete(jobId);
     this.assembled.delete(jobId);
   }
+
+  stats(): { activeJobs: number; totalSegments: number } {
+    let totalSegments = 0;
+    for (const map of this.segments.values()) {
+      totalSegments += map.size;
+    }
+    return {
+      activeJobs: this.segments.size,
+      totalSegments,
+    };
+  }
 }
 
 export const audioStore = new AudioStore();

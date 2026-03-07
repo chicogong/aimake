@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useJobStream } from '@/hooks/useJobStream';
 import { jobsApi } from '@/services/api';
-import type { JobDetail } from '@/types';
+import type { JobDetail, GeneratedScript } from '@/types';
 import { formatDuration } from '@/lib/utils';
 
 const STAGE_LABELS: Record<string, string> = {
@@ -23,6 +23,36 @@ const STAGE_LABELS: Record<string, string> = {
   completed: '完成',
   failed: '失败',
 };
+
+function ScriptStreamView({ scriptJson }: { scriptJson: string | null }) {
+  if (!scriptJson) return null;
+
+  try {
+    const script = JSON.parse(scriptJson) as GeneratedScript;
+    if (!script.segments || script.segments.length === 0) return null;
+
+    return (
+      <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar mt-4 border-t pt-4">
+        <h3 className="text-sm font-semibold sticky top-0 bg-card py-1">实时脚本</h3>
+        <div className="space-y-3">
+          {script.segments.map((seg, i) => (
+            <div
+              key={i}
+              className="flex gap-3 text-sm animate-in fade-in slide-in-from-left-2 duration-500"
+            >
+              <div className="flex-shrink-0 w-12 font-bold text-primary/70 uppercase text-[10px] mt-1">
+                {seg.speaker}
+              </div>
+              <div className="flex-1 text-muted-foreground leading-relaxed">{seg.text}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  } catch {
+    return null;
+  }
+}
 
 export function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -48,12 +78,15 @@ export function JobDetailPage() {
   // Fetch job detail on mount
   useEffect(() => {
     if (!id) return;
-    jobsApi.getDetail(id).then((res: unknown) => {
-      const response = res as { data: JobDetail };
-      setJob(response.data);
-    }).catch(() => {
-      // Job might not exist yet
-    });
+    jobsApi
+      .getDetail(id)
+      .then((res: unknown) => {
+        const response = res as { data: JobDetail };
+        setJob(response.data);
+      })
+      .catch(() => {
+        // Job might not exist yet
+      });
   }, [id]);
 
   // Update job data when stream completes
@@ -66,8 +99,8 @@ export function JobDetailPage() {
     }
   }, [stream.status, id]);
 
-  const currentStatus = stream.status !== 'pending' ? stream.status : (job?.status || 'pending');
-  const currentProgress = stream.progress > 0 ? stream.progress : (job?.progress || 0);
+  const currentStatus = stream.status !== 'pending' ? stream.status : job?.status || 'pending';
+  const currentProgress = stream.progress > 0 ? stream.progress : job?.progress || 0;
   const currentStage = stream.currentStage || job?.currentStage;
   const audioUrl = stream.audioUrl || job?.audioUrl;
   const duration = stream.duration || job?.duration;
@@ -144,9 +177,7 @@ export function JobDetailPage() {
       <div className="space-y-6">
         {/* Title */}
         <div>
-          <h1 className="text-2xl font-bold">
-            {job?.title || '生成中...'}
-          </h1>
+          <h1 className="text-2xl font-bold">{job?.title || '生成中...'}</h1>
           {job?.contentType && (
             <span className="inline-block mt-2 px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
               {job.contentType}
@@ -168,6 +199,8 @@ export function JobDetailPage() {
               <Loader2 className="h-3 w-3 animate-spin" />
               {stream.isConnected ? '实时更新中...' : '连接中...'}
             </div>
+
+            <ScriptStreamView scriptJson={stream.script || job?.script || null} />
           </div>
         )}
 
@@ -192,13 +225,16 @@ export function JobDetailPage() {
               <div className="flex-1">
                 <p className="text-sm font-medium">{job?.title || '音频'}</p>
                 {duration && (
-                  <p className="text-xs text-muted-foreground">
-                    时长: {formatDuration(duration)}
-                  </p>
+                  <p className="text-xs text-muted-foreground">时长: {formatDuration(duration)}</p>
                 )}
               </div>
               {id && (
-                <Button variant="outline" size="sm" onClick={handleDownload} disabled={isLoadingAudio}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownload}
+                  disabled={isLoadingAudio}
+                >
                   <Download className="h-4 w-4 mr-1" />
                   下载
                 </Button>

@@ -5,7 +5,7 @@
 
 import express from 'express';
 import { startGeneration, isGenerating } from './agent/voice-agent.js';
-import type { GenerateRequest } from './types.js';
+import { GenerateRequestSchema } from './types.js';
 
 export function createServer() {
   const app = express();
@@ -24,12 +24,17 @@ export function createServer() {
       return;
     }
 
-    const body = req.body as GenerateRequest;
+    const result = GenerateRequestSchema.safeParse(req.body);
 
-    if (!body.jobId || !body.source || !body.settings) {
-      res.status(400).json({ error: 'Missing required fields: jobId, source, settings' });
+    if (!result.success) {
+      res.status(400).json({
+        error: 'Invalid request payload',
+        details: result.error.format(),
+      });
       return;
     }
+
+    const body = result.data;
 
     if (isGenerating(body.jobId)) {
       res.status(409).json({ error: 'Generation already in progress for this job' });

@@ -36,8 +36,7 @@ jobsRouter.post('/', async (c) => {
   }
 
   // Resolve content type
-  const contentType: ContentType =
-    body.contentType === 'auto' ? 'podcast' : body.contentType;
+  const contentType: ContentType = body.contentType === 'auto' ? 'podcast' : body.contentType;
 
   const db = createDb(c.env.DB);
   const jobId = generateId();
@@ -103,10 +102,7 @@ jobsRouter.get('/', async (c) => {
 
   const db = createDb(c.env.DB);
 
-  const conditions = [
-    eq(jobs.userId, user.id),
-    ne(jobs.isDeleted, true),
-  ];
+  const conditions = [eq(jobs.userId, user.id), ne(jobs.isDeleted, true)];
 
   if (contentType) {
     conditions.push(eq(jobs.contentType, contentType));
@@ -169,11 +165,7 @@ jobsStreamRouter.get('/:id/stream', async (c) => {
   const db = createDb(c.env.DB);
 
   // Verify stream token
-  const [job] = await db
-    .select()
-    .from(jobs)
-    .where(eq(jobs.id, id))
-    .limit(1);
+  const [job] = await db.select().from(jobs).where(eq(jobs.id, id)).limit(1);
 
   if (!job || job.streamToken !== token) {
     throw errors.unauthorized('Invalid stream token');
@@ -182,15 +174,12 @@ jobsStreamRouter.get('/:id/stream', async (c) => {
   return streamSSE(c, async (stream) => {
     let lastStatus = '';
     let lastProgress = -1;
+    let lastScript = '';
     let attempts = 0;
     const maxAttempts = 600; // 10 minutes max
 
     while (attempts < maxAttempts) {
-      const [current] = await db
-        .select()
-        .from(jobs)
-        .where(eq(jobs.id, id))
-        .limit(1);
+      const [current] = await db.select().from(jobs).where(eq(jobs.id, id)).limit(1);
 
       if (!current) break;
 
@@ -231,6 +220,18 @@ jobsStreamRouter.get('/:id/stream', async (c) => {
             status: current.status,
             progress: current.progress,
             currentStage: current.currentStage,
+          }),
+        });
+      }
+
+      // Send script if it changed
+      if (current.script && current.script !== lastScript) {
+        lastScript = current.script;
+        await stream.writeSSE({
+          event: 'script_update',
+          data: JSON.stringify({
+            type: 'script_update',
+            script: current.script,
           }),
         });
       }

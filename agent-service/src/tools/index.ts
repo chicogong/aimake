@@ -5,6 +5,7 @@
 import { createSdkMcpServer } from '@tencent-ai/agent-sdk';
 import { extractContentTool } from './extract-content.js';
 import { generateTtsSegmentTool } from './generate-tts-segment.js';
+import { batchGenerateTtsTool } from './batch-generate-tts.js';
 import { reportProgressTool } from './report-progress.js';
 import { saveScriptTool } from './save-script.js';
 import { assembleAudioTool } from './assemble-audio.js';
@@ -16,6 +17,7 @@ export function createToolServer() {
     tools: [
       extractContentTool,
       generateTtsSegmentTool,
+      batchGenerateTtsTool,
       reportProgressTool,
       saveScriptTool,
       assembleAudioTool,

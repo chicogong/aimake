@@ -7,6 +7,7 @@
 import { query } from '@tencent-ai/agent-sdk';
 import { createToolServer } from '../tools/index.js';
 import { VOICE_AGENT_SYSTEM_PROMPT, buildUserPrompt } from './system-prompt.js';
+import { audioStore } from '../utils/audio-store.js';
 import type { GenerateRequest } from '../types.js';
 
 const activeJobs = new Map<string, boolean>();
@@ -70,6 +71,7 @@ async function generateContent(request: GenerateRequest): Promise<void> {
       allowedTools: [
         'mcp__voice-tools__extract_content',
         'mcp__voice-tools__generate_tts_segment',
+        'mcp__voice-tools__batch_generate_tts',
         'mcp__voice-tools__report_progress',
         'mcp__voice-tools__save_script',
         'mcp__voice-tools__assemble_audio',
@@ -138,6 +140,9 @@ async function generateContent(request: GenerateRequest): Promise<void> {
     } catch {
       // Best effort
     }
+  } finally {
+    audioStore.clear(jobId);
+    console.info(`[${jobId}] AudioStore cleared.`);
   }
 }
 

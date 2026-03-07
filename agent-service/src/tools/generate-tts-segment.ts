@@ -6,19 +6,9 @@
 
 import { tool } from '@tencent-ai/agent-sdk';
 import { z } from 'zod';
-import { TTSClient } from '../utils/tts-client.js';
+import { getTTSClient } from '../utils/shared-clients.js';
 import { audioStore } from '../utils/audio-store.js';
-
-let ttsClient: TTSClient | null = null;
-
-function getClient(): TTSClient {
-  if (!ttsClient) {
-    ttsClient = new TTSClient({
-      siliconflowApiKey: process.env.SILICONFLOW_API_KEY,
-    });
-  }
-  return ttsClient;
-}
+import { toolSuccess, toolError } from './tool-helpers.js';
 
 export const generateTtsSegmentTool = tool(
   'generate_tts_segment',
@@ -34,47 +24,19 @@ export const generateTtsSegmentTool = tool(
   },
   async ({ jobId, text, voiceId, speed, index }) => {
     try {
-      const client = getClient();
+      const client = getTTSClient();
       const result = await client.generateSegment({
         text,
         voiceId,
         speed: speed ?? 1.0,
       });
 
-      audioStore.set(jobId, {
-        index,
-        audioBase64: result.audioBase64,
-        duration: result.duration,
-      });
+      const { audioBase64, duration } = result;
+      audioStore.set(jobId, { index, audioBase64, duration });
 
-      const storedCount = audioStore.count(jobId);
-
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: JSON.stringify({
-              success: true,
-              index,
-              duration: result.duration,
-              storedSegments: storedCount,
-            }),
-          },
-        ],
-      };
+      return toolSuccess({ index, duration });
     } catch (error) {
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: JSON.stringify({
-              success: false,
-              index,
-              error: error instanceof Error ? error.message : 'TTS generation failed',
-            }),
-          },
-        ],
-      };
+      return toolError(error instanceof Error ? error.message : 'TTS generation failed');
     }
   }
 );
