@@ -14,6 +14,7 @@ localhost:5173            localhost:8787                 localhost:3001
 ```
 
 三个服务：
+
 - **Frontend** — React + Vite + Tailwind + shadcn/ui
 - **API** — Cloudflare Workers + Hono + D1 + R2 + KV
 - **Agent Service** — Node.js + @tencent-ai/agent-sdk + SiliconFlow TTS
@@ -39,13 +40,13 @@ cd frontend && npm run dev         # :5173
 
 ## 技术栈
 
-| 层 | 技术 |
-|---|---|
-| 前端 | React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui, Clerk |
-| API | Cloudflare Workers, Hono, Drizzle ORM, D1, R2, KV |
-| Agent | @tencent-ai/agent-sdk, DeepSeek LLM, SiliconFlow TTS |
-| 认证 | Clerk |
-| 支付 | Stripe |
+| 层    | 技术                                                       |
+| ----- | ---------------------------------------------------------- |
+| 前端  | React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui, Clerk |
+| API   | Cloudflare Workers, Hono, Drizzle ORM, D1, R2, KV          |
+| Agent | @tencent-ai/agent-sdk, DeepSeek LLM, SiliconFlow TTS       |
+| 认证  | Clerk                                                      |
+| 支付  | Stripe                                                     |
 
 ## License
 
