@@ -4,11 +4,21 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
-import { ArrowLeft, Download, Play, Pause, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  Download,
+  Play,
+  Pause,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  Edit3,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useJobStream } from '@/hooks/useJobStream';
 import { jobsApi } from '@/services/api';
+import { ScriptEditor } from '@/components/ScriptEditor';
 import type { JobDetail, GeneratedScript } from '@/types';
 import { formatDuration } from '@/lib/utils';
 
@@ -59,7 +69,7 @@ export function JobDetailPage() {
   const [searchParams] = useSearchParams();
   const streamToken = searchParams.get('token');
 
-  const [job, setJob] = useState<JobDetail | null>(null);
+  const [job, setJob] = useState<(JobDetail & { isEditing?: boolean }) | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [audioBlobUrl, setAudioBlobUrl] = useState<string | null>(null);
@@ -80,9 +90,8 @@ export function JobDetailPage() {
     if (!id) return;
     jobsApi
       .getDetail(id)
-      .then((res: unknown) => {
-        const response = res as { data: JobDetail };
-        setJob(response.data);
+      .then((res: any) => {
+        setJob(res.data);
       })
       .catch(() => {
         // Job might not exist yet
@@ -92,9 +101,8 @@ export function JobDetailPage() {
   // Update job data when stream completes
   useEffect(() => {
     if (stream.status === 'completed' && id) {
-      jobsApi.getDetail(id).then((res: unknown) => {
-        const response = res as { data: JobDetail };
-        setJob(response.data);
+      jobsApi.getDetail(id).then((res: any) => {
+        setJob(res.data);
       });
     }
   }, [stream.status, id]);
@@ -207,50 +215,81 @@ export function JobDetailPage() {
         {/* Completed */}
         {currentStatus === 'completed' && (
           <div className="bg-card border rounded-xl p-6 space-y-4">
-            <div className="flex items-center gap-2 text-green-600">
-              <CheckCircle2 className="h-5 w-5" />
-              <span className="font-medium">生成完成</span>
-            </div>
-
-            {/* Audio player */}
-            <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handlePlayPause}
-                className="h-12 w-12 rounded-full"
-              >
-                {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
-              </Button>
-              <div className="flex-1">
-                <p className="text-sm font-medium">{job?.title || '音频'}</p>
-                {duration && (
-                  <p className="text-xs text-muted-foreground">时长: {formatDuration(duration)}</p>
-                )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-green-600">
+                <CheckCircle2 className="h-5 w-5" />
+                <span className="font-medium">生成完成</span>
               </div>
-              {id && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDownload}
-                  disabled={isLoadingAudio}
-                >
-                  <Download className="h-4 w-4 mr-1" />
-                  下载
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  setJob((prev) => (prev ? { ...prev, isEditing: !prev.isEditing } : null))
+                }
+              >
+                <Edit3 className="h-4 w-4 mr-1" />
+                {job?.isEditing ? '取消编辑' : '修改脚本'}
+              </Button>
             </div>
 
-            {/* Script preview */}
-            {job?.script && (
-              <details className="group">
-                <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
-                  查看脚本
-                </summary>
-                <pre className="mt-2 p-4 bg-muted rounded-lg text-xs overflow-auto max-h-96">
-                  {JSON.stringify(JSON.parse(job.script), null, 2)}
-                </pre>
-              </details>
+            {job?.isEditing ? (
+              <ScriptEditor
+                jobId={id!}
+                initialScript={job.script || ''}
+                onUpdate={() => {
+                  setJob((prev) => (prev ? { ...prev, isEditing: false } : null));
+                  jobsApi.getDetail(id!).then((res: any) => setJob(res.data));
+                }}
+              />
+            ) : (
+              <>
+                {/* Audio player */}
+                <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handlePlayPause}
+                    className="h-12 w-12 rounded-full"
+                  >
+                    {isPlaying ? (
+                      <Pause className="h-5 w-5" />
+                    ) : (
+                      <Play className="h-5 w-5 ml-0.5" />
+                    )}
+                  </Button>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{job?.title || '音频'}</p>
+                    {duration && (
+                      <p className="text-xs text-muted-foreground">
+                        时长: {formatDuration(duration)}
+                      </p>
+                    )}
+                  </div>
+                  {id && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDownload}
+                      disabled={isLoadingAudio}
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      下载
+                    </Button>
+                  )}
+                </div>
+
+                {/* Script preview */}
+                {job?.script && (
+                  <details className="group">
+                    <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
+                      查看脚本
+                    </summary>
+                    <pre className="mt-2 p-4 bg-muted rounded-lg text-xs overflow-auto max-h-96">
+                      {JSON.stringify(JSON.parse(job.script), null, 2)}
+                    </pre>
+                  </details>
+                )}
+              </>
             )}
           </div>
         )}

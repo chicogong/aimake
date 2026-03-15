@@ -103,6 +103,10 @@ export const jobsApi = {
 
     return response.blob();
   },
+
+  updateScript: (id: string, script: string) => api.put(`/jobs/${id}/script`, { script }),
+
+  synthesize: (id: string) => api.post(`/jobs/${id}/synthesize`),
 };
 
 // Quick TTS

@@ -25,6 +25,7 @@ export const GenerateRequestSchema = z.object({
   }),
   title: z.string().optional(),
   callbackUrl: z.string().optional(),
+  resumeStage: z.enum(['synthesizing']).optional(),
 });
 
 export interface GenerateRequest extends z.infer<typeof GenerateRequestSchema> {}

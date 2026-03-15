@@ -77,7 +77,7 @@ Generate a script based on the content type:
 - Gap between segments: 600ms
 
 **Format the script as JSON**:
-\`\`\`json
+```json
 {
   "title": "Content title",
   "segments": [
@@ -86,7 +86,7 @@ Generate a script based on the content type:
   ],
   "estimatedDuration": 300
 }
-\`\`\`
+```
 
 After generating the script:
 1. Call save_script to persist it
@@ -134,8 +134,9 @@ export function buildUserPrompt(params: {
     voices: Array<{ role: string; voiceId: string }>;
   };
   title?: string;
+  resumeStage?: string;
 }): string {
-  const { jobId, source, contentType, settings, title } = params;
+  const { jobId, source, contentType, settings, title, resumeStage } = params;
 
   const language = settings.language === 'en' ? 'English' : '中文 (Chinese)';
   const targetChars =
@@ -167,7 +168,9 @@ export function buildUserPrompt(params: {
     '',
     '---',
     '',
-    'Please follow the 6-stage pipeline to generate this content. Start with Stage 1 (Classify).'
+    resumeStage === 'synthesizing'
+      ? 'The script has been updated. Please SKIP Stages 1-4 and jump directly to Stage 5: Synthesize Audio using the updated script.'
+      : 'Please follow the 6-stage pipeline to generate this content. Start with Stage 1 (Classify).'
   );
 
   return lines.join('\n');

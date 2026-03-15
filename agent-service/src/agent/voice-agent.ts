@@ -41,7 +41,9 @@ export function startGeneration(request: GenerateRequest): void {
 async function generateContent(request: GenerateRequest): Promise<void> {
   const { jobId } = request;
 
-  console.info(`Starting generation: ${jobId} (type: ${request.contentType})`);
+  console.info(
+    `Starting generation: ${jobId} (type: ${request.contentType}${request.resumeStage ? `, resume: ${request.resumeStage}` : ''})`
+  );
 
   const toolServer = createToolServer();
   const userPrompt = buildUserPrompt(request);

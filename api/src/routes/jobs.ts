@@ -242,6 +242,92 @@ jobsStreamRouter.get('/:id/stream', async (c) => {
   });
 });
 
+// PUT /api/jobs/:id/script — Update job script and reset status
+jobsRouter.put('/:id/script', async (c) => {
+  const user = c.get('user');
+  const { id } = c.req.param();
+  const { script } = await c.req.json<{ script: string }>();
+
+  if (!script) {
+    throw errors.validation('script 不能为空');
+  }
+
+  const db = createDb(c.env.DB);
+  const [job] = await db
+    .select()
+    .from(jobs)
+    .where(and(eq(jobs.id, id), eq(jobs.userId, user.id)))
+    .limit(1);
+
+  if (!job) {
+    throw errors.notFound('任务不存在');
+  }
+
+  const now = new Date().toISOString();
+  await db
+    .update(jobs)
+    .set({
+      script,
+      status: 'scripting', // Reset to scripting to allow re-synthesis
+      progress: 50,
+      currentStage: 'scripting',
+      updatedAt: now,
+    })
+    .where(eq(jobs.id, id));
+
+  return success(c, { id, status: 'scripting' });
+});
+
+// POST /api/jobs/:id/synthesize — Trigger re-synthesis for edited script
+jobsRouter.post('/:id/synthesize', async (c) => {
+  const user = c.get('user');
+  const { id } = c.req.param();
+
+  const db = createDb(c.env.DB);
+  const [job] = await db
+    .select()
+    .from(jobs)
+    .where(and(eq(jobs.id, id), eq(jobs.userId, user.id)))
+    .limit(1);
+
+  if (!job) {
+    throw errors.notFound('任务不存在');
+  }
+
+  // Dispatch to agent service for synthesis stage only
+  if (c.env.AGENT_SERVICE_URL && c.env.INTERNAL_API_SECRET) {
+    const settings = JSON.parse(job.settings || '{}');
+    const agentPayload = {
+      jobId: job.id,
+      source: {
+        type: job.sourceType,
+        content: job.sourceContent,
+      },
+      contentType: job.contentType,
+      settings: {
+        ...settings,
+        episodeDuration: settings.duration,
+      },
+      title: job.title,
+      // NEW: Signal to agent to resume from synthesis stage
+      resumeStage: 'synthesizing',
+    };
+
+    fetch(`${c.env.AGENT_SERVICE_URL}/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Internal-Secret': c.env.INTERNAL_API_SECRET,
+      },
+      body: JSON.stringify(agentPayload),
+    }).catch((err) => {
+      console.error(`Failed to dispatch synthesize job ${id} to agent:`, err);
+    });
+  }
+
+  return success(c, { id, status: 'synthesizing' });
+});
+
 // DELETE /api/jobs/:id — Soft delete
 jobsRouter.delete('/:id', async (c) => {
   const user = c.get('user');
