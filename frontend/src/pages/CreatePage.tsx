@@ -218,7 +218,7 @@ export function CreatePage() {
                 return (
                   <button
                     key={type.id}
-                    onClick={() => setContentType(type.id)}
+                    onClick={() => { setContentType(type.id); setSelectedVoices([]); }}
                     className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${
                       contentType === type.id
                         ? 'border-primary bg-primary/5 shadow-sm'

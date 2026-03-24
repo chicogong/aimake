@@ -1,0 +1,38 @@
+name: Deploy API
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'api/**'
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    name: Deploy API to Cloudflare Workers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: cd api && npm ci
+
+      - name: Typecheck
+        run: cd api && npm run typecheck
+
+      - name: Test
+        run: cd api && npx vitest run
+
+      - name: Deploy
+        run: cd api && npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
