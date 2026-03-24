@@ -10,6 +10,7 @@ import { CreatePage } from '@/pages/CreatePage';
 import { JobDetailPage } from '@/pages/JobDetailPage';
 import { HistoryPage } from '@/pages/HistoryPage';
 import { PricingPage } from '@/pages/PricingPage';
+import { NotFoundPage } from '@/pages/NotFoundPage';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="jobs/:id" element={<JobDetailPage />} />
             <Route path="history" element={<HistoryPage />} />
             <Route path="pricing" element={<PricingPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
       </ApiAuthProvider>

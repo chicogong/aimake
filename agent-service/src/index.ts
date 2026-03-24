@@ -1,11 +1,14 @@
 /**
  * Agent Service entry point
  * Starts the Express HTTP server for content generation.
+ *
+ * R2: Graceful shutdown — marks active jobs as failed on SIGTERM/SIGINT.
  */
 
 import 'dotenv/config';
 import { createServer } from './server.js';
 import { loadConfig } from './types.js';
+import { markAllJobsFailed } from './agent/voice-agent.js';
 
 function main() {
   let config;
@@ -19,7 +22,7 @@ function main() {
 
   const app = createServer();
 
-  app.listen(config.port, () => {
+  const server = app.listen(config.port, () => {
     console.info(`Agent service running on port ${config.port}`);
     console.info(`LLM model: ${config.llmModel}`);
     console.info(`Workers API: ${config.workersApiUrl}`);
@@ -27,6 +30,32 @@ function main() {
       config.siliconflowApiKey ? 'SiliconFlow' : null,
     ].filter(Boolean).join(', ') || 'none configured'}`);
   });
+
+  // Graceful shutdown
+  let shuttingDown = false;
+
+  async function handleShutdown(signal: string) {
+    if (shuttingDown) return;
+    shuttingDown = true;
+
+    console.info(`Received ${signal}, shutting down gracefully...`);
+
+    // Stop accepting new connections
+    server.close();
+
+    // Mark all active jobs as failed
+    try {
+      await markAllJobsFailed(`Service shutdown (${signal})`);
+    } catch (error) {
+      console.error('Error during shutdown cleanup:', error);
+    }
+
+    console.info('Shutdown complete.');
+    process.exit(0);
+  }
+
+  process.on('SIGTERM', () => handleShutdown('SIGTERM'));
+  process.on('SIGINT', () => handleShutdown('SIGINT'));
 }
 
 main();

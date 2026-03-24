@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { jobsApi } from '@/services/api';
+import { useToast } from '@/hooks/useToast';
 import type { GeneratedScript } from '@/types';
 
 interface ScriptEditorProps {
@@ -13,6 +14,7 @@ interface ScriptEditorProps {
 }
 
 export function ScriptEditor({ jobId, initialScript, onUpdate }: ScriptEditorProps) {
+  const { toast } = useToast();
   const [script, setScript] = useState<GeneratedScript>(() => {
     try {
       return JSON.parse(initialScript);
@@ -55,22 +57,52 @@ export function ScriptEditor({ jobId, initialScript, onUpdate }: ScriptEditorPro
         segments: script.segments.map((s, i) => ({ ...s, index: i })),
       };
       await jobsApi.updateScript(jobId, JSON.stringify(sanitizedScript));
+      toast({ title: '脚本已保存' });
       onUpdate();
     } catch (err) {
-      console.error('Failed to save script:', err);
+      const error = err as { message?: string };
+      toast({
+        title: '保存失败',
+        description: error?.message || '请稍后再试',
+        variant: 'destructive',
+      });
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleSynthesize = async () => {
-    await handleSave();
+    setIsSaving(true);
+    try {
+      const sanitizedScript = {
+        ...script,
+        segments: script.segments.map((s, i) => ({ ...s, index: i })),
+      };
+      await jobsApi.updateScript(jobId, JSON.stringify(sanitizedScript));
+    } catch (err) {
+      const error = err as { message?: string };
+      toast({
+        title: '保存失败，无法开始合成',
+        description: error?.message || '请稍后再试',
+        variant: 'destructive',
+      });
+      setIsSaving(false);
+      return;
+    }
+    setIsSaving(false);
+
     setIsSynthesizing(true);
     try {
       await jobsApi.synthesize(jobId);
+      toast({ title: '合成已开始' });
       onUpdate();
     } catch (err) {
-      console.error('Failed to start synthesis:', err);
+      const error = err as { message?: string };
+      toast({
+        title: '合成失败',
+        description: error?.message || '请稍后再试',
+        variant: 'destructive',
+      });
     } finally {
       setIsSynthesizing(false);
     }

@@ -10,12 +10,47 @@
 
 import { Hono } from 'hono';
 import { eq, sql } from 'drizzle-orm';
-import type { Env, Variables, ProgressCallbackPayload, ScriptCallbackPayload, AudioCallbackPayload } from '../types';
+import { z } from 'zod';
+import type { Env, Variables } from '../types';
 import { createDb } from '../db';
 import { jobs, users, usageLogs } from '../db/schema';
 import { generateId } from '../utils/id';
 
 const internalRoutes = new Hono<{ Bindings: Env; Variables: Variables }>();
+
+// ============ Zod Schemas ============
+
+const JobStatusEnum = z.enum([
+  'pending',
+  'classifying',
+  'extracting',
+  'analyzing',
+  'scripting',
+  'synthesizing',
+  'assembling',
+  'completed',
+  'failed',
+]);
+
+const ProgressSchema = z.object({
+  status: JobStatusEnum,
+  progress: z.number().min(0).max(100),
+  currentStage: z.string().min(1).max(50),
+  detectedContentType: z.string().max(50).optional(),
+  errorCode: z.string().max(100).optional(),
+  errorMessage: z.string().max(1000).optional(),
+});
+
+const ScriptSchema = z.object({
+  script: z.string().min(1).max(500000), // 500KB max
+  title: z.string().max(200).optional(),
+});
+
+const AudioSchema = z.object({
+  audioBase64: z.string().min(1),
+  duration: z.number().min(0).max(7200), // max 2 hours
+  format: z.enum(['mp3', 'wav']),
+});
 
 // ============ Secret verification middleware ============
 
@@ -31,8 +66,14 @@ internalRoutes.use('*', async (c, next) => {
 
 internalRoutes.post('/jobs/:id/progress', async (c) => {
   const { id } = c.req.param();
-  const body = await c.req.json<ProgressCallbackPayload>();
+  const raw = await c.req.json();
 
+  const parsed = ProgressSchema.safeParse(raw);
+  if (!parsed.success) {
+    return c.json({ success: false, error: 'Invalid payload', details: parsed.error.format() }, 400);
+  }
+
+  const body = parsed.data;
   const db = createDb(c.env.DB);
 
   const updateData: Record<string, unknown> = {
@@ -68,8 +109,14 @@ internalRoutes.post('/jobs/:id/progress', async (c) => {
 
 internalRoutes.post('/jobs/:id/script', async (c) => {
   const { id } = c.req.param();
-  const body = await c.req.json<ScriptCallbackPayload>();
+  const raw = await c.req.json();
 
+  const parsed = ScriptSchema.safeParse(raw);
+  if (!parsed.success) {
+    return c.json({ success: false, error: 'Invalid payload', details: parsed.error.format() }, 400);
+  }
+
+  const body = parsed.data;
   const db = createDb(c.env.DB);
 
   const updateData: Record<string, unknown> = {
@@ -93,17 +140,28 @@ internalRoutes.post('/jobs/:id/script', async (c) => {
 
 internalRoutes.post('/jobs/:id/audio', async (c) => {
   const { id } = c.req.param();
-  const body = await c.req.json<AudioCallbackPayload>();
+  const raw = await c.req.json();
 
+  const parsed = AudioSchema.safeParse(raw);
+  if (!parsed.success) {
+    return c.json({ success: false, error: 'Invalid payload', details: parsed.error.format() }, 400);
+  }
+
+  const body = parsed.data;
   const db = createDb(c.env.DB);
 
-  const audioBuffer = Uint8Array.from(atob(body.audioBase64), (ch) => ch.charCodeAt(0));
+  let audioBuffer: Uint8Array;
+  try {
+    audioBuffer = Uint8Array.from(atob(body.audioBase64), (ch) => ch.charCodeAt(0));
+  } catch {
+    return c.json({ success: false, error: 'Invalid base64 audio data' }, 400);
+  }
 
   let audioUrl: string;
 
   if (c.env.R2) {
     const key = `jobs/${id}.${body.format}`;
-    await c.env.R2.put(key, audioBuffer.buffer, {
+    await c.env.R2.put(key, audioBuffer.buffer as ArrayBuffer, {
       httpMetadata: {
         contentType: body.format === 'mp3' ? 'audio/mpeg' : 'audio/wav',
       },

@@ -2,15 +2,18 @@
  * Universal voice content agent
  * Uses Agent SDK to orchestrate the full pipeline:
  * Classify → Extract → Analyze → Script → Synthesize → Assemble
+ *
+ * R2: Exports activeJobs + markAllJobsFailed for graceful shutdown.
  */
 
 import { query } from '@tencent-ai/agent-sdk';
 import { createToolServer } from '../tools/index.js';
 import { VOICE_AGENT_SYSTEM_PROMPT, buildUserPrompt } from './system-prompt.js';
 import { audioStore } from '../utils/audio-store.js';
+import { CallbackClient } from '../utils/callback-client.js';
 import type { GenerateRequest } from '../types.js';
 
-const activeJobs = new Map<string, boolean>();
+export const activeJobs = new Map<string, boolean>();
 
 /**
  * Start generation in the background.
@@ -33,6 +36,45 @@ export function startGeneration(request: GenerateRequest): void {
     .finally(() => {
       activeJobs.delete(jobId);
     });
+}
+
+/**
+ * Mark all active jobs as failed and notify the API.
+ * Called during graceful shutdown.
+ */
+export async function markAllJobsFailed(reason: string): Promise<void> {
+  const jobIds = Array.from(activeJobs.keys());
+  if (jobIds.length === 0) return;
+
+  console.warn(`Marking ${jobIds.length} active job(s) as failed: ${reason}`);
+
+  const apiUrl = process.env.WORKERS_API_URL;
+  const secret = process.env.INTERNAL_API_SECRET;
+
+  if (!apiUrl || !secret) {
+    console.error('Cannot notify API of shutdown — missing WORKERS_API_URL or INTERNAL_API_SECRET');
+    return;
+  }
+
+  const client = new CallbackClient(apiUrl, secret);
+
+  await Promise.allSettled(
+    jobIds.map((jobId) =>
+      client.updateProgress(jobId, {
+        status: 'failed',
+        progress: 0,
+        currentStage: 'failed',
+        errorCode: 'SERVICE_SHUTDOWN',
+        errorMessage: reason,
+      })
+    )
+  );
+
+  // Clean up audio stores
+  for (const jobId of jobIds) {
+    audioStore.clear(jobId);
+    activeJobs.delete(jobId);
+  }
 }
 
 /**
@@ -105,7 +147,6 @@ async function generateContent(request: GenerateRequest): Promise<void> {
           );
 
           try {
-            const { CallbackClient } = await import('../utils/callback-client.js');
             const client = new CallbackClient(
               process.env.WORKERS_API_URL!,
               process.env.INTERNAL_API_SECRET!
@@ -127,7 +168,6 @@ async function generateContent(request: GenerateRequest): Promise<void> {
     console.error(`[${jobId}] Agent SDK error:`, error);
 
     try {
-      const { CallbackClient } = await import('../utils/callback-client.js');
       const client = new CallbackClient(
         process.env.WORKERS_API_URL!,
         process.env.INTERNAL_API_SECRET!

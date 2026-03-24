@@ -88,10 +88,10 @@ export function CreatePage() {
 
       navigate(`/jobs/${id}?token=${streamToken}`);
     } catch (error: unknown) {
-      const err = error as { message?: string };
+      const err = error as { code?: string; message?: string };
       toast({
         title: '创建失败',
-        description: err.message || '请稍后再试',
+        description: err?.message || '请稍后再试',
         variant: 'destructive',
       });
     } finally {

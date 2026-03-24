@@ -11,32 +11,62 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import { eq, and, desc, sql, ne } from 'drizzle-orm';
-import type { Env, Variables, CreateJobRequest, JobResponse, ContentType } from '../types';
+import { z } from 'zod';
+import type { Env, Variables, JobResponse, ContentType } from '../types';
 import { createDb, jobs } from '../db';
 import { generateId, generateShortId } from '../utils/id';
 import { success, created } from '../utils/response';
 import { errors } from '../middleware/error';
+
+// ============ Zod Schemas ============
+
+const CreateJobSchema = z.object({
+  source: z.object({
+    type: z.enum(['text', 'url', 'document']),
+    content: z.string().min(1, 'source.content 不能为空').max(100000, '内容不能超过 10 万字符'),
+    documentId: z.string().optional(),
+  }),
+  contentType: z.enum(['auto', 'podcast', 'audiobook', 'voiceover', 'education', 'tts']),
+  settings: z.object({
+    duration: z.number().int().min(1).max(60),
+    language: z.enum(['zh', 'en']).optional(),
+    style: z.string().max(100).optional(),
+    voices: z
+      .array(
+        z.object({
+          role: z.string().min(1).max(50),
+          voiceId: z.string().min(1).max(100),
+        })
+      )
+      .min(1, '请至少选择一个音色'),
+  }),
+  title: z.string().max(200).optional(),
+});
 
 const jobsRouter = new Hono<{ Bindings: Env; Variables: Variables }>();
 
 // POST /api/jobs — Create a generation job
 jobsRouter.post('/', async (c) => {
   const user = c.get('user');
-  const body = await c.req.json<CreateJobRequest>();
+  const body = await c.req.json();
 
-  // Validation
-  if (!body.source?.content) {
-    throw errors.validation('source.content 不能为空');
+  // Zod validation
+  const parsed = CreateJobSchema.safeParse(body);
+  if (!parsed.success) {
+    const firstError = parsed.error.errors[0];
+    throw errors.validation(firstError?.message || '请求参数错误', parsed.error.format());
   }
-  if (!body.source?.type) {
-    throw errors.validation('source.type 不能为空');
-  }
-  if (!body.contentType) {
-    throw errors.validation('contentType 不能为空');
+
+  const data = parsed.data;
+
+  // Quota check
+  const remaining = user.quotaLimit - user.quotaUsed;
+  if (remaining <= 0) {
+    throw errors.quotaExceeded('配额不足，请升级套餐');
   }
 
   // Resolve content type
-  const contentType: ContentType = body.contentType === 'auto' ? 'podcast' : body.contentType;
+  const contentType: ContentType = data.contentType === 'auto' ? 'podcast' : data.contentType;
 
   const db = createDb(c.env.DB);
   const jobId = generateId();
@@ -46,11 +76,11 @@ jobsRouter.post('/', async (c) => {
   await db.insert(jobs).values({
     id: jobId,
     userId: user.id,
-    title: body.title || null,
+    title: data.title || null,
     contentType,
-    sourceType: body.source.type,
-    sourceContent: body.source.content,
-    settings: JSON.stringify(body.settings || {}),
+    sourceType: data.source.type,
+    sourceContent: data.source.content,
+    settings: JSON.stringify(data.settings),
     status: 'pending',
     progress: 0,
     streamToken,
@@ -63,13 +93,13 @@ jobsRouter.post('/', async (c) => {
   if (c.env.AGENT_SERVICE_URL && c.env.INTERNAL_API_SECRET) {
     const agentPayload = {
       jobId,
-      source: body.source,
-      contentType: body.contentType, // Pass 'auto' so agent can classify
+      source: data.source,
+      contentType: data.contentType, // Pass 'auto' so agent can classify
       settings: {
-        ...body.settings,
-        episodeDuration: body.settings.duration,
+        ...data.settings,
+        episodeDuration: data.settings.duration,
       },
-      title: body.title,
+      title: data.title,
       callbackUrl: '', // Agent uses WORKERS_API_URL env var
     };
 
@@ -167,7 +197,7 @@ jobsStreamRouter.get('/:id/stream', async (c) => {
   // Verify stream token
   const [job] = await db.select().from(jobs).where(eq(jobs.id, id)).limit(1);
 
-  if (!job || job.streamToken !== token) {
+  if (!job || !token || job.streamToken !== token) {
     throw errors.unauthorized('Invalid stream token');
   }
 
@@ -294,6 +324,18 @@ jobsRouter.post('/:id/synthesize', async (c) => {
     throw errors.notFound('任务不存在');
   }
 
+  // Status guard: only allow re-synthesis from safe states
+  const allowedStatuses = ['completed', 'failed', 'scripting'];
+  if (!allowedStatuses.includes(job.status)) {
+    throw errors.validation(`当前状态「${job.status}」不允许重新合成，请等待当前任务完成`);
+  }
+
+  // Quota check
+  const remaining = user.quotaLimit - user.quotaUsed;
+  if (remaining <= 0) {
+    throw errors.quotaExceeded('配额不足，请升级套餐');
+  }
+
   // Dispatch to agent service for synthesis stage only
   if (c.env.AGENT_SERVICE_URL && c.env.INTERNAL_API_SECRET) {
     const settings = JSON.parse(job.settings || '{}');
@@ -309,7 +351,6 @@ jobsRouter.post('/:id/synthesize', async (c) => {
         episodeDuration: settings.duration,
       },
       title: job.title,
-      // NEW: Signal to agent to resume from synthesis stage
       resumeStage: 'synthesizing',
     };
 

@@ -13,6 +13,7 @@ import {
   XCircle,
   Loader2,
   Edit3,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -70,6 +71,7 @@ export function JobDetailPage() {
   const streamToken = searchParams.get('token');
 
   const [job, setJob] = useState<(JobDetail & { isEditing?: boolean }) | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [audioBlobUrl, setAudioBlobUrl] = useState<string | null>(null);
@@ -92,9 +94,10 @@ export function JobDetailPage() {
       .getDetail(id)
       .then((res: any) => {
         setJob(res.data);
+        setFetchError(null);
       })
-      .catch(() => {
-        // Job might not exist yet
+      .catch((err: any) => {
+        setFetchError(err?.message || '无法加载任务详情');
       });
   }, [id]);
 
@@ -107,6 +110,7 @@ export function JobDetailPage() {
     }
   }, [stream.status, id]);
 
+  // Use job detail status as initial, override with stream status when stream is active
   const currentStatus = stream.status !== 'pending' ? stream.status : job?.status || 'pending';
   const currentProgress = stream.progress > 0 ? stream.progress : job?.progress || 0;
   const currentStage = stream.currentStage || job?.currentStage;
@@ -183,6 +187,22 @@ export function JobDetailPage() {
       </Link>
 
       <div className="space-y-6">
+        {/* Fetch error state */}
+        {fetchError && !job && (
+          <div className="bg-card border border-destructive/20 rounded-xl p-6 space-y-2">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              <span className="font-medium">加载失败</span>
+            </div>
+            <p className="text-sm text-muted-foreground">{fetchError}</p>
+            <Link to="/history">
+              <Button variant="outline" size="sm" className="mt-2">
+                返回历史记录
+              </Button>
+            </Link>
+          </div>
+        )}
+
         {/* Title */}
         <div>
           <h1 className="text-2xl font-bold">{job?.title || '生成中...'}</h1>

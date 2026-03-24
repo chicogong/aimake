@@ -1,12 +1,17 @@
 /**
  * Direct TTS API client for segment generation
  * Provider: SiliconFlow (FishAudio)
+ *
+ * R4: Added retry with exponential backoff + 30s timeout
  */
 
 const SILICONFLOW_CONFIG = {
   baseUrl: 'https://api.siliconflow.cn/v1/audio/speech',
   model: 'fnlp/MOSS-TTSD-v0.5',
 } as const;
+
+const MAX_RETRIES = 3;
+const TIMEOUT_MS = 30000;
 
 interface TTSConfig {
   siliconflowApiKey?: string;
@@ -115,32 +120,63 @@ export class TTSClient {
     const voice = stripVoicePrefix(voiceId);
     const voiceParam = `${SILICONFLOW_CONFIG.model}:${voice}`;
 
-    const response = await fetch(SILICONFLOW_CONFIG.baseUrl, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: SILICONFLOW_CONFIG.model,
-        input: text,
-        voice: voiceParam,
-        speed,
-        response_format: format,
-      }),
-    });
+    let lastError: Error | null = null;
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => 'unknown');
-      throw new Error(`TTS API error (siliconflow): ${response.status} — ${errorText}`);
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+        const response = await fetch(SILICONFLOW_CONFIG.baseUrl, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: SILICONFLOW_CONFIG.model,
+            input: text,
+            voice: voiceParam,
+            speed,
+            response_format: format,
+          }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeout);
+
+        if (response.ok) {
+          const buffer = await response.arrayBuffer();
+          const audioBuffer = Buffer.from(buffer);
+          const audioBase64 = audioBuffer.toString('base64');
+          const duration = calculateMp3Duration(audioBuffer);
+          return { audioBase64, duration };
+        }
+
+        const errorText = await response.text().catch(() => 'unknown');
+        lastError = new Error(`TTS API error (siliconflow): ${response.status} — ${errorText}`);
+
+        // Don't retry client errors except 429
+        if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+          throw lastError;
+        }
+      } catch (err) {
+        if (err === lastError) throw err;
+
+        if (err instanceof Error && err.name === 'AbortError') {
+          lastError = new Error(`TTS API timeout after ${TIMEOUT_MS}ms`);
+        } else {
+          lastError = err instanceof Error ? err : new Error(String(err));
+        }
+      }
+
+      if (attempt < MAX_RETRIES - 1) {
+        const delay = 1000 * Math.pow(2, attempt);
+        await new Promise((r) => setTimeout(r, delay));
+        console.warn(`[tts] Retry ${attempt + 1}/${MAX_RETRIES - 1} for segment`);
+      }
     }
 
-    const buffer = await response.arrayBuffer();
-    const audioBuffer = Buffer.from(buffer);
-    const audioBase64 = audioBuffer.toString('base64');
-
-    const duration = calculateMp3Duration(audioBuffer);
-
-    return { audioBase64, duration };
+    throw lastError || new Error('TTS generation failed after retries');
   }
 }
