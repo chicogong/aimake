@@ -2,7 +2,7 @@
  * History Page — Shows all generation jobs
  */
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@clerk/clerk-react';
 import { Link } from 'react-router-dom';
@@ -62,6 +62,7 @@ export function HistoryPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [typeFilter, setTypeFilter] = useState<string>('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const pageSize = 20;
 
@@ -85,12 +86,24 @@ export function HistoryPage() {
     mutationFn: (id: string) => jobsApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      setConfirmDeleteId(null);
       toastHelpers.success('删除成功');
     },
     onError: () => {
+      setConfirmDeleteId(null);
       toastHelpers.error('删除失败', '请稍后重试');
     },
   });
+
+  const handleDeleteClick = useCallback((id: string) => {
+    setConfirmDeleteId(id);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(() => {
+    if (confirmDeleteId) {
+      deleteMutation.mutate(confirmDeleteId);
+    }
+  }, [confirmDeleteId, deleteMutation]);
 
   if (!isSignedIn) {
     return (
@@ -196,19 +209,42 @@ export function HistoryPage() {
                           <ArrowRight className="h-4 w-4" />
                         </Button>
                       </Link>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          if (confirm('确定要删除吗？')) {
-                            deleteMutation.mutate(job.id);
-                          }
-                        }}
-                        title="删除"
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {confirmDeleteId === job.id ? (
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleDeleteConfirm}
+                            disabled={deleteMutation.isPending}
+                            className="h-8 text-xs"
+                          >
+                            {deleteMutation.isPending ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              '确认'
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setConfirmDeleteId(null)}
+                            className="h-8 text-xs"
+                          >
+                            取消
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteClick(job.id)}
+                          title="删除"
+                          aria-label="删除任务"
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>
