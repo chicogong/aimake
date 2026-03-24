@@ -77,7 +77,7 @@ Generate a script based on the content type:
 - Gap between segments: 600ms
 
 **Format the script as JSON**:
-```json
+\`\`\`json
 {
   "title": "Content title",
   "segments": [
@@ -86,7 +86,7 @@ Generate a script based on the content type:
   ],
   "estimatedDuration": 300
 }
-```
+\`\`\`
 
 After generating the script:
 1. Call save_script to persist it
