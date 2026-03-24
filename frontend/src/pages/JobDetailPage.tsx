@@ -4,12 +4,23 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
-import { ArrowLeft, Download, Play, Pause, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  Download,
+  Play,
+  Pause,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  Edit3,
+  AlertTriangle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useJobStream } from '@/hooks/useJobStream';
 import { jobsApi } from '@/services/api';
-import type { JobDetail } from '@/types';
+import { ScriptEditor } from '@/components/ScriptEditor';
+import type { JobDetail, GeneratedScript } from '@/types';
 import { formatDuration } from '@/lib/utils';
 
 const STAGE_LABELS: Record<string, string> = {
@@ -24,12 +35,43 @@ const STAGE_LABELS: Record<string, string> = {
   failed: '失败',
 };
 
+function ScriptStreamView({ scriptJson }: { scriptJson: string | null }) {
+  if (!scriptJson) return null;
+
+  try {
+    const script = JSON.parse(scriptJson) as GeneratedScript;
+    if (!script.segments || script.segments.length === 0) return null;
+
+    return (
+      <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar mt-4 border-t pt-4">
+        <h3 className="text-sm font-semibold sticky top-0 bg-card py-1">实时脚本</h3>
+        <div className="space-y-3">
+          {script.segments.map((seg, i) => (
+            <div
+              key={i}
+              className="flex gap-3 text-sm animate-in fade-in slide-in-from-left-2 duration-500"
+            >
+              <div className="flex-shrink-0 w-12 font-bold text-primary/70 uppercase text-[10px] mt-1">
+                {seg.speaker}
+              </div>
+              <div className="flex-1 text-muted-foreground leading-relaxed">{seg.text}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  } catch {
+    return null;
+  }
+}
+
 export function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const streamToken = searchParams.get('token');
 
-  const [job, setJob] = useState<JobDetail | null>(null);
+  const [job, setJob] = useState<(JobDetail & { isEditing?: boolean }) | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [audioBlobUrl, setAudioBlobUrl] = useState<string | null>(null);
@@ -48,26 +90,29 @@ export function JobDetailPage() {
   // Fetch job detail on mount
   useEffect(() => {
     if (!id) return;
-    jobsApi.getDetail(id).then((res: unknown) => {
-      const response = res as { data: JobDetail };
-      setJob(response.data);
-    }).catch(() => {
-      // Job might not exist yet
-    });
+    jobsApi
+      .getDetail(id)
+      .then((res: any) => {
+        setJob(res.data);
+        setFetchError(null);
+      })
+      .catch((err: any) => {
+        setFetchError(err?.message || '无法加载任务详情');
+      });
   }, [id]);
 
   // Update job data when stream completes
   useEffect(() => {
     if (stream.status === 'completed' && id) {
-      jobsApi.getDetail(id).then((res: unknown) => {
-        const response = res as { data: JobDetail };
-        setJob(response.data);
+      jobsApi.getDetail(id).then((res: any) => {
+        setJob(res.data);
       });
     }
   }, [stream.status, id]);
 
-  const currentStatus = stream.status !== 'pending' ? stream.status : (job?.status || 'pending');
-  const currentProgress = stream.progress > 0 ? stream.progress : (job?.progress || 0);
+  // Use job detail status as initial, override with stream status when stream is active
+  const currentStatus = stream.status !== 'pending' ? stream.status : job?.status || 'pending';
+  const currentProgress = stream.progress > 0 ? stream.progress : job?.progress || 0;
   const currentStage = stream.currentStage || job?.currentStage;
   const audioUrl = stream.audioUrl || job?.audioUrl;
   const duration = stream.duration || job?.duration;
@@ -142,11 +187,25 @@ export function JobDetailPage() {
       </Link>
 
       <div className="space-y-6">
+        {/* Fetch error state */}
+        {fetchError && !job && (
+          <div className="bg-card border border-destructive/20 rounded-xl p-6 space-y-2">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              <span className="font-medium">加载失败</span>
+            </div>
+            <p className="text-sm text-muted-foreground">{fetchError}</p>
+            <Link to="/history">
+              <Button variant="outline" size="sm" className="mt-2">
+                返回历史记录
+              </Button>
+            </Link>
+          </div>
+        )}
+
         {/* Title */}
         <div>
-          <h1 className="text-2xl font-bold">
-            {job?.title || '生成中...'}
-          </h1>
+          <h1 className="text-2xl font-bold">{job?.title || '生成中...'}</h1>
           {job?.contentType && (
             <span className="inline-block mt-2 px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
               {job.contentType}
@@ -168,53 +227,89 @@ export function JobDetailPage() {
               <Loader2 className="h-3 w-3 animate-spin" />
               {stream.isConnected ? '实时更新中...' : '连接中...'}
             </div>
+
+            <ScriptStreamView scriptJson={stream.script || job?.script || null} />
           </div>
         )}
 
         {/* Completed */}
         {currentStatus === 'completed' && (
           <div className="bg-card border rounded-xl p-6 space-y-4">
-            <div className="flex items-center gap-2 text-green-600">
-              <CheckCircle2 className="h-5 w-5" />
-              <span className="font-medium">生成完成</span>
-            </div>
-
-            {/* Audio player */}
-            <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handlePlayPause}
-                className="h-12 w-12 rounded-full"
-              >
-                {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
-              </Button>
-              <div className="flex-1">
-                <p className="text-sm font-medium">{job?.title || '音频'}</p>
-                {duration && (
-                  <p className="text-xs text-muted-foreground">
-                    时长: {formatDuration(duration)}
-                  </p>
-                )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-green-600">
+                <CheckCircle2 className="h-5 w-5" />
+                <span className="font-medium">生成完成</span>
               </div>
-              {id && (
-                <Button variant="outline" size="sm" onClick={handleDownload} disabled={isLoadingAudio}>
-                  <Download className="h-4 w-4 mr-1" />
-                  下载
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  setJob((prev) => (prev ? { ...prev, isEditing: !prev.isEditing } : null))
+                }
+              >
+                <Edit3 className="h-4 w-4 mr-1" />
+                {job?.isEditing ? '取消编辑' : '修改脚本'}
+              </Button>
             </div>
 
-            {/* Script preview */}
-            {job?.script && (
-              <details className="group">
-                <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
-                  查看脚本
-                </summary>
-                <pre className="mt-2 p-4 bg-muted rounded-lg text-xs overflow-auto max-h-96">
-                  {JSON.stringify(JSON.parse(job.script), null, 2)}
-                </pre>
-              </details>
+            {job?.isEditing ? (
+              <ScriptEditor
+                jobId={id!}
+                initialScript={job.script || ''}
+                onUpdate={() => {
+                  setJob((prev) => (prev ? { ...prev, isEditing: false } : null));
+                  jobsApi.getDetail(id!).then((res: any) => setJob(res.data));
+                }}
+              />
+            ) : (
+              <>
+                {/* Audio player */}
+                <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handlePlayPause}
+                    className="h-12 w-12 rounded-full"
+                  >
+                    {isPlaying ? (
+                      <Pause className="h-5 w-5" />
+                    ) : (
+                      <Play className="h-5 w-5 ml-0.5" />
+                    )}
+                  </Button>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{job?.title || '音频'}</p>
+                    {duration && (
+                      <p className="text-xs text-muted-foreground">
+                        时长: {formatDuration(duration)}
+                      </p>
+                    )}
+                  </div>
+                  {id && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDownload}
+                      disabled={isLoadingAudio}
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      下载
+                    </Button>
+                  )}
+                </div>
+
+                {/* Script preview */}
+                {job?.script && (
+                  <details className="group">
+                    <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
+                      查看脚本
+                    </summary>
+                    <pre className="mt-2 p-4 bg-muted rounded-lg text-xs overflow-auto max-h-96">
+                      {JSON.stringify(JSON.parse(job.script), null, 2)}
+                    </pre>
+                  </details>
+                )}
+              </>
             )}
           </div>
         )}

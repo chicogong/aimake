@@ -171,4 +171,9 @@ export interface SSEErrorEvent {
   message: string;
 }
 
-export type SSEEvent = SSEProgressEvent | SSECompleteEvent | SSEErrorEvent;
+export interface SSEScriptUpdateEvent {
+  type: 'script_update';
+  script: string;
+}
+
+export type SSEEvent = SSEProgressEvent | SSECompleteEvent | SSEScriptUpdateEvent | SSEErrorEvent;

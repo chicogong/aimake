@@ -5,6 +5,7 @@
 
 import { tool } from '@tencent-ai/agent-sdk';
 import { z } from 'zod';
+import { toolSuccess, toolError } from './tool-helpers.js';
 
 export const extractContentTool = tool(
   'extract_content',
@@ -20,20 +21,12 @@ export const extractContentTool = tool(
     try {
       if (type === 'text' || type === 'document') {
         const language = detectLanguage(content);
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: JSON.stringify({
-                success: true,
-                title: null,
-                text: content,
-                charCount: content.length,
-                language,
-              }),
-            },
-          ],
-        };
+        return toolSuccess({
+          title: null,
+          text: content,
+          charCount: content.length,
+          language,
+        });
       }
 
       // URL extraction
@@ -44,17 +37,7 @@ export const extractContentTool = tool(
       });
 
       if (!response.ok) {
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: JSON.stringify({
-                success: false,
-                error: `Failed to fetch URL: ${response.status} ${response.statusText}`,
-              }),
-            },
-          ],
-        };
+        return toolError(`Failed to fetch URL: ${response.status} ${response.statusText}`);
       }
 
       const html = await response.text();
@@ -62,32 +45,14 @@ export const extractContentTool = tool(
       const title = extractTitle(html);
       const language = detectLanguage(text);
 
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: JSON.stringify({
-              success: true,
-              title,
-              text,
-              charCount: text.length,
-              language,
-            }),
-          },
-        ],
-      };
+      return toolSuccess({
+        title,
+        text: text,
+        charCount: text.length,
+        language: language,
+      });
     } catch (error) {
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: JSON.stringify({
-              success: false,
-              error: error instanceof Error ? error.message : 'Content extraction failed',
-            }),
-          },
-        ],
-      };
+      return toolError(error instanceof Error ? error.message : 'Content extraction failed');
     }
   }
 );

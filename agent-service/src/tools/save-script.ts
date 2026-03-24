@@ -5,21 +5,8 @@
 
 import { tool } from '@tencent-ai/agent-sdk';
 import { z } from 'zod';
-import { CallbackClient } from '../utils/callback-client.js';
-
-let client: CallbackClient | null = null;
-
-function getClient(): CallbackClient {
-  if (!client) {
-    const baseUrl = process.env.WORKERS_API_URL;
-    const secret = process.env.INTERNAL_API_SECRET;
-    if (!baseUrl || !secret) {
-      throw new Error('WORKERS_API_URL and INTERNAL_API_SECRET must be set');
-    }
-    client = new CallbackClient(baseUrl, secret);
-  }
-  return client;
-}
+import { getCallbackClient } from '../utils/shared-clients.js';
+import { toolSuccess, toolError } from './tool-helpers.js';
 
 export const saveScriptTool = tool(
   'save_script',
@@ -35,33 +22,14 @@ export const saveScriptTool = tool(
     try {
       JSON.parse(script);
 
-      const callbackClient = getClient();
+      const callbackClient = getCallbackClient();
       await callbackClient.saveScript(jobId, { script, title });
-      return {
-        content: [{ type: 'text' as const, text: JSON.stringify({ success: true }) }],
-      };
+      return toolSuccess();
     } catch (error) {
       if (error instanceof SyntaxError) {
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: JSON.stringify({ success: false, error: 'Invalid JSON in script' }),
-            },
-          ],
-        };
+        return toolError('Invalid JSON in script');
       }
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: JSON.stringify({
-              success: false,
-              error: error instanceof Error ? error.message : 'Script save failed',
-            }),
-          },
-        ],
-      };
+      return toolError(error instanceof Error ? error.message : 'Script save failed');
     }
   }
 );

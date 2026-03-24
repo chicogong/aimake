@@ -17,6 +17,7 @@ export interface Env {
   CLERK_PUBLISHABLE_KEY: string;
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
+  CLERK_WEBHOOK_SECRET?: string;
 
   SILICONFLOW_API_KEY?: string;
 

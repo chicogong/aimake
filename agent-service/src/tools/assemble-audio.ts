@@ -5,8 +5,9 @@
 
 import { tool } from '@tencent-ai/agent-sdk';
 import { z } from 'zod';
-import { concatenateSegments } from '../utils/audio.js';
 import { audioStore } from '../utils/audio-store.js';
+import { concatenateSegments } from '../utils/audio.js';
+import { toolSuccess, toolError } from './tool-helpers.js';
 
 export const assembleAudioTool = tool(
   'assemble_audio',
@@ -26,50 +27,17 @@ export const assembleAudioTool = tool(
       const segments = audioStore.getAll(jobId);
 
       if (segments.length === 0) {
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: JSON.stringify({
-                success: false,
-                error: 'No audio segments found. Generate segments first.',
-              }),
-            },
-          ],
-        };
+        return toolError('No audio segments found for this job');
       }
 
       const result = concatenateSegments(segments, gapMs ?? 500);
+      const { audioBase64: assembledBase64, totalDuration } = result;
 
-      audioStore.setAssembled(jobId, {
-        audioBase64: result.audioBase64,
-        totalDuration: result.totalDuration,
-      });
+      audioStore.setAssembled(jobId, { audioBase64: assembledBase64, totalDuration });
 
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: JSON.stringify({
-              success: true,
-              segmentCount: segments.length,
-              totalDuration: result.totalDuration,
-            }),
-          },
-        ],
-      };
+      return toolSuccess({ duration: totalDuration, segmentsCount: segments.length });
     } catch (error) {
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: JSON.stringify({
-              success: false,
-              error: error instanceof Error ? error.message : 'Audio assembly failed',
-            }),
-          },
-        ],
-      };
+      return toolError(error instanceof Error ? error.message : 'Audio assembly failed');
     }
   }
 );

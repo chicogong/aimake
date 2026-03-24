@@ -43,6 +43,47 @@ export default auth;
 
 export const clerkWebhook = new Hono<{ Bindings: Env; Variables: Variables }>();
 
+/**
+ * Verify Clerk/Svix webhook signature using Web Crypto API.
+ * No external dependencies — works natively in CF Workers.
+ */
+async function verifyWebhookSignature(
+  body: string,
+  secret: string,
+  svixId: string,
+  svixTimestamp: string,
+  svixSignature: string
+): Promise<boolean> {
+  // Reject stale timestamps (> 5 minutes)
+  const timestamp = parseInt(svixTimestamp, 10);
+  if (isNaN(timestamp)) return false;
+  const now = Math.floor(Date.now() / 1000);
+  if (Math.abs(now - timestamp) > 300) return false;
+
+  // Decode secret (strip "whsec_" prefix, base64 decode)
+  const rawSecret = secret.startsWith('whsec_') ? secret.slice(6) : secret;
+  const secretBytes = Uint8Array.from(atob(rawSecret), (ch) => ch.charCodeAt(0));
+
+  // Build signed content
+  const signedContent = `${svixId}.${svixTimestamp}.${body}`;
+  const encoder = new TextEncoder();
+
+  // HMAC-SHA256
+  const key = await crypto.subtle.importKey(
+    'raw',
+    secretBytes,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(signedContent));
+  const expectedSig = btoa(String.fromCharCode(...new Uint8Array(sig)));
+
+  // Compare against all provided signatures (format: "v1,<base64>")
+  const signatures = svixSignature.split(' ').map((s) => s.split(',')[1]).filter(Boolean);
+  return signatures.some((s) => s === expectedSig);
+}
+
 clerkWebhook.post('/clerk', async (c) => {
   const svixId = c.req.header('svix-id');
   const svixTimestamp = c.req.header('svix-timestamp');
@@ -52,7 +93,29 @@ clerkWebhook.post('/clerk', async (c) => {
     return c.json({ success: false, error: 'Missing webhook headers' }, 400);
   }
 
-  const body = await c.req.json<{
+  // Read raw body for signature verification
+  const rawBody = await c.req.text();
+
+  // Verify signature
+  const webhookSecret = c.env.CLERK_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error('CLERK_WEBHOOK_SECRET not configured');
+    return c.json({ success: false, error: 'Webhook not configured' }, 500);
+  }
+
+  const isValid = await verifyWebhookSignature(
+    rawBody,
+    webhookSecret,
+    svixId,
+    svixTimestamp,
+    svixSignature
+  );
+
+  if (!isValid) {
+    return c.json({ success: false, error: 'Invalid signature' }, 401);
+  }
+
+  const body = JSON.parse(rawBody) as {
     type: string;
     data: {
       id: string;
@@ -61,7 +124,7 @@ clerkWebhook.post('/clerk', async (c) => {
       last_name?: string | null;
       image_url?: string | null;
     };
-  }>();
+  };
 
   const db = createDb(c.env.DB);
 

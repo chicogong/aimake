@@ -13,6 +13,7 @@ You have access to the following tools:
 - report_progress: Update the backend with your current progress
 - save_script: Save the generated script to the database
 - generate_tts_segment: Convert a script segment to audio
+- batch_generate_tts: Convert multiple script segments to audio in parallel
 - assemble_audio: Combine audio segments into final audio
 - upload_audio: Upload the final audio to storage
 
@@ -92,14 +93,12 @@ After generating the script:
 2. Call report_progress with stage="scripting", progress=50
 
 ### Stage 5: Synthesize Audio (progress 50-90%)
-For each segment in the script:
-1. Call generate_tts_segment with jobId, text, voiceId, speed, and index
-2. Audio is stored internally — you do NOT need to collect audio data
+ALWAYS prefer batch_generate_tts to process all script segments in parallel for speed.
+1. Prepare segment list from generated script mapping roles to voice IDs.
+2. Call batch_generate_tts.
+3. Update progress to 90% after completion.
 
-Map speakers to voice IDs from the request settings.
-Process segments sequentially to maintain order.
-
-After every 5 segments, call report_progress to update progress (interpolate between 50-90%).
+For single corrections, use generate_tts_segment.
 
 ### Stage 6: Assemble & Upload (progress 90-100%)
 1. Call assemble_audio with jobId and the appropriate gap duration
@@ -135,8 +134,9 @@ export function buildUserPrompt(params: {
     voices: Array<{ role: string; voiceId: string }>;
   };
   title?: string;
+  resumeStage?: string;
 }): string {
-  const { jobId, source, contentType, settings, title } = params;
+  const { jobId, source, contentType, settings, title, resumeStage } = params;
 
   const language = settings.language === 'en' ? 'English' : '中文 (Chinese)';
   const targetChars =
@@ -144,15 +144,9 @@ export function buildUserPrompt(params: {
       ? settings.episodeDuration * 60 * 20
       : settings.episodeDuration * 60 * 150;
 
-  const voiceAssignments = settings.voices
-    .map((v) => `- ${v.role}: ${v.voiceId}`)
-    .join('\n');
+  const voiceAssignments = settings.voices.map((v) => `- ${v.role}: ${v.voiceId}`).join('\n');
 
-  const lines = [
-    '## Voice Content Generation Request',
-    '',
-    `**Job ID**: ${jobId}`,
-  ];
+  const lines = ['## Voice Content Generation Request', '', `**Job ID**: ${jobId}`];
 
   if (title) {
     lines.push(`**Title**: ${title}`);
@@ -174,7 +168,9 @@ export function buildUserPrompt(params: {
     '',
     '---',
     '',
-    'Please follow the 6-stage pipeline to generate this content. Start with Stage 1 (Classify).',
+    resumeStage === 'synthesizing'
+      ? 'The script has been updated. Please SKIP Stages 1-4 and jump directly to Stage 5: Synthesize Audio using the updated script.'
+      : 'Please follow the 6-stage pipeline to generate this content. Start with Stage 1 (Classify).'
   );
 
   return lines.join('\n');

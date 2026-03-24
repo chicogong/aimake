@@ -5,21 +5,8 @@
 
 import { tool } from '@tencent-ai/agent-sdk';
 import { z } from 'zod';
-import { CallbackClient } from '../utils/callback-client.js';
-
-let client: CallbackClient | null = null;
-
-function getClient(): CallbackClient {
-  if (!client) {
-    const baseUrl = process.env.WORKERS_API_URL;
-    const secret = process.env.INTERNAL_API_SECRET;
-    if (!baseUrl || !secret) {
-      throw new Error('WORKERS_API_URL and INTERNAL_API_SECRET must be set');
-    }
-    client = new CallbackClient(baseUrl, secret);
-  }
-  return client;
-}
+import { getCallbackClient } from '../utils/shared-clients.js';
+import { toolSuccess, toolError } from './tool-helpers.js';
 
 export const reportProgressTool = tool(
   'report_progress',
@@ -40,18 +27,16 @@ export const reportProgressTool = tool(
         'failed',
       ])
       .describe('Current pipeline stage'),
-    progress: z
-      .number()
-      .int()
-      .min(0)
-      .max(100)
-      .describe('Progress percentage (0-100)'),
+    progress: z.number().int().min(0).max(100).describe('Progress percentage (0-100)'),
     message: z.string().optional().describe('Optional status message or error detail'),
-    detectedContentType: z.string().optional().describe('Content type detected during classify stage'),
+    detectedContentType: z
+      .string()
+      .optional()
+      .describe('Content type detected during classify stage'),
   },
   async ({ jobId, stage, progress, message, detectedContentType }) => {
     try {
-      const callbackClient = getClient();
+      const callbackClient = getCallbackClient();
       await callbackClient.updateProgress(jobId, {
         status: stage,
         progress,
@@ -61,21 +46,9 @@ export const reportProgressTool = tool(
           ? { errorCode: 'GENERATION_FAILED', errorMessage: message }
           : {}),
       });
-      return {
-        content: [{ type: 'text' as const, text: JSON.stringify({ success: true }) }],
-      };
+      return toolSuccess();
     } catch (error) {
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: JSON.stringify({
-              success: false,
-              error: error instanceof Error ? error.message : 'Progress update failed',
-            }),
-          },
-        ],
-      };
+      return toolError(error instanceof Error ? error.message : 'Progress update failed');
     }
   }
 );

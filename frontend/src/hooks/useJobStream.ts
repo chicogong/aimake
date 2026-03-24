@@ -12,6 +12,7 @@ interface JobStreamState {
   currentStage: string | null;
   audioUrl: string | null;
   duration: number | null;
+  script: string | null;
   error: { code: string; message: string } | null;
   isConnected: boolean;
 }
@@ -23,6 +24,7 @@ export function useJobStream(jobId: string | null, streamToken: string | null) {
     currentStage: null,
     audioUrl: null,
     duration: null,
+    script: null,
     error: null,
     isConnected: false,
   });
@@ -56,6 +58,16 @@ export function useJobStream(jobId: string | null, streamToken: string | null) {
           status: data.status,
           progress: data.progress,
           currentStage: data.currentStage,
+        }));
+      }
+    });
+
+    es.addEventListener('script_update', (e) => {
+      const data: SSEEvent = JSON.parse(e.data);
+      if (data.type === 'script_update') {
+        setState((prev) => ({
+          ...prev,
+          script: data.script,
         }));
       }
     });

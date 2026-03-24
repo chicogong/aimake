@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master, develop]
+
+jobs:
+  api:
+    name: API — Test & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install root deps
+        run: npm ci
+
+      - name: Install API deps
+        run: cd api && npm ci
+
+      - name: Typecheck
+        run: cd api && npm run typecheck
+
+      - name: Test
+        run: cd api && npx vitest run
+
+  agent-service:
+    name: Agent — Test & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: cd agent-service && npm ci
+
+      - name: Typecheck
+        run: cd agent-service && npm run typecheck
+
+      - name: Test
+        run: cd agent-service && npx vitest run
+
+  frontend:
+    name: Frontend — Test, Typecheck & Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: cd frontend && npm ci
+
+      - name: Typecheck
+        run: cd frontend && npm run typecheck
+
+      - name: Test
+        run: cd frontend && npx vitest run
+
+      - name: Build
+        run: cd frontend && npm run build

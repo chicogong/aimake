@@ -1,28 +1,34 @@
-/**
- * Shared types for the agent service
- */
+import { z } from 'zod';
 
 // ============ Request from Workers API ============
 
 export type ContentType = 'auto' | 'podcast' | 'audiobook' | 'voiceover' | 'education' | 'tts';
 
-export interface GenerateRequest {
-  jobId: string;
-  source: {
-    type: 'text' | 'url' | 'document';
-    content: string;
-    documentId?: string;
-  };
-  contentType: ContentType;
-  settings: {
-    episodeDuration: number; // minutes
-    style?: string;
-    language?: 'zh' | 'en';
-    voices: Array<{ role: string; voiceId: string }>;
-  };
-  title?: string;
-  callbackUrl: string;
-}
+export const GenerateRequestSchema = z.object({
+  jobId: z.string(),
+  source: z.object({
+    type: z.enum(['text', 'url', 'document']),
+    content: z.string(),
+    documentId: z.string().optional(),
+  }),
+  contentType: z.enum(['auto', 'podcast', 'audiobook', 'voiceover', 'education', 'tts']),
+  settings: z.object({
+    episodeDuration: z.number(),
+    style: z.string().optional(),
+    language: z.enum(['zh', 'en']).optional().default('zh'),
+    voices: z.array(
+      z.object({
+        role: z.string(),
+        voiceId: z.string(),
+      })
+    ),
+  }),
+  title: z.string().optional(),
+  callbackUrl: z.string().optional(),
+  resumeStage: z.enum(['synthesizing']).optional(),
+});
+
+export interface GenerateRequest extends z.infer<typeof GenerateRequestSchema> {}
 
 // ============ Script Types ============
 
