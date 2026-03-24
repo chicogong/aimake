@@ -2,7 +2,7 @@
  * JobDetailPage — Real-time SSE progress + audio result
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Slider } from '@/components/ui/slider';
 import { useJobStream } from '@/hooks/useJobStream';
 import { jobsApi } from '@/services/api';
 import { ScriptEditor } from '@/components/ScriptEditor';
@@ -76,14 +77,28 @@ export function JobDetailPage() {
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [audioBlobUrl, setAudioBlobUrl] = useState<string | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const rafRef = useRef<number>(0);
 
   const stream = useJobStream(id ?? null, streamToken);
+
+  // Audio time tracking
+  const updateTime = useCallback(() => {
+    if (audioElement) {
+      setCurrentTime(audioElement.currentTime);
+      if (!audioElement.paused) {
+        rafRef.current = requestAnimationFrame(updateTime);
+      }
+    }
+  }, [audioElement]);
 
   // Cleanup blob URL on unmount
   useEffect(() => {
     return () => {
       if (audioBlobUrl) URL.revokeObjectURL(audioBlobUrl);
       audioElement?.pause();
+      cancelAnimationFrame(rafRef.current);
     };
   }, [audioBlobUrl, audioElement]);
 
@@ -144,9 +159,11 @@ export function JobDetailPage() {
       if (isPlaying) {
         audioElement.pause();
         setIsPlaying(false);
+        cancelAnimationFrame(rafRef.current);
       } else {
         audioElement.play();
         setIsPlaying(true);
+        rafRef.current = requestAnimationFrame(updateTime);
       }
       return;
     }
@@ -155,10 +172,31 @@ export function JobDetailPage() {
     if (!blobUrl) return;
 
     const audio = new Audio(blobUrl);
-    audio.onended = () => setIsPlaying(false);
+    audio.onended = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+      cancelAnimationFrame(rafRef.current);
+    };
+    audio.onloadedmetadata = () => {
+      setAudioDuration(audio.duration);
+    };
     audio.play();
     setIsPlaying(true);
     setAudioElement(audio);
+    rafRef.current = requestAnimationFrame(updateTime);
+  };
+
+  const handleSeek = (value: number[]) => {
+    if (audioElement) {
+      audioElement.currentTime = value[0];
+      setCurrentTime(value[0]);
+    }
+  };
+
+  const formatTime = (seconds: number): string => {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
   const handleDownload = async () => {
@@ -264,37 +302,61 @@ export function JobDetailPage() {
             ) : (
               <>
                 {/* Audio player */}
-                <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handlePlayPause}
-                    className="h-12 w-12 rounded-full"
-                  >
-                    {isPlaying ? (
-                      <Pause className="h-5 w-5" />
-                    ) : (
-                      <Play className="h-5 w-5 ml-0.5" />
-                    )}
-                  </Button>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{job?.title || '音频'}</p>
-                    {duration && (
-                      <p className="text-xs text-muted-foreground">
-                        时长: {formatDuration(duration)}
-                      </p>
-                    )}
-                  </div>
-                  {id && (
+                <div className="p-4 bg-muted rounded-lg space-y-3">
+                  <div className="flex items-center gap-4">
                     <Button
                       variant="outline"
-                      size="sm"
-                      onClick={handleDownload}
+                      size="icon"
+                      onClick={handlePlayPause}
                       disabled={isLoadingAudio}
+                      className="h-12 w-12 rounded-full flex-shrink-0"
+                      aria-label={isPlaying ? '暂停' : '播放'}
                     >
-                      <Download className="h-4 w-4 mr-1" />
-                      下载
+                      {isLoadingAudio ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : isPlaying ? (
+                        <Pause className="h-5 w-5" />
+                      ) : (
+                        <Play className="h-5 w-5 ml-0.5" />
+                      )}
                     </Button>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{job?.title || '音频'}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {duration ? formatDuration(duration) : '--:--'}
+                      </p>
+                    </div>
+                    {id && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDownload}
+                        disabled={isLoadingAudio}
+                        aria-label="下载音频"
+                      >
+                        <Download className="h-4 w-4 mr-1" />
+                        下载
+                      </Button>
+                    )}
+                  </div>
+                  {/* Seek bar + time display */}
+                  {audioElement && audioDuration > 0 && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-muted-foreground tabular-nums w-10 text-right">
+                        {formatTime(currentTime)}
+                      </span>
+                      <Slider
+                        value={[currentTime]}
+                        max={audioDuration}
+                        step={0.1}
+                        onValueChange={handleSeek}
+                        className="flex-1"
+                        aria-label="音频进度"
+                      />
+                      <span className="text-xs text-muted-foreground tabular-nums w-10">
+                        {formatTime(audioDuration)}
+                      </span>
+                    </div>
                   )}
                 </div>
 

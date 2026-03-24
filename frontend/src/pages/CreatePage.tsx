@@ -55,9 +55,25 @@ export function CreatePage() {
     });
   };
 
+  const MAX_TEXT_LENGTH = 100000;
+
   const handleSubmit = async () => {
     if (!sourceContent.trim()) {
       toast({ title: '请输入内容', variant: 'destructive' });
+      return;
+    }
+
+    if (sourceType === 'url') {
+      try {
+        new URL(sourceContent.trim());
+      } catch {
+        toast({ title: '请输入有效的 URL', variant: 'destructive' });
+        return;
+      }
+    }
+
+    if (sourceType === 'text' && sourceContent.length > MAX_TEXT_LENGTH) {
+      toast({ title: `文本不能超过 ${MAX_TEXT_LENGTH.toLocaleString()} 字`, variant: 'destructive' });
       return;
     }
 
@@ -157,12 +173,18 @@ export function CreatePage() {
 
             {/* Input field */}
             {sourceType === 'text' ? (
-              <textarea
-                value={sourceContent}
-                onChange={(e) => setSourceContent(e.target.value)}
-                placeholder="粘贴文章、故事、新闻或任何你想转化为声音的文本..."
-                className="w-full h-48 p-4 border rounded-xl bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
+              <div className="relative">
+                <textarea
+                  value={sourceContent}
+                  onChange={(e) => setSourceContent(e.target.value)}
+                  placeholder="粘贴文章、故事、新闻或任何你想转化为声音的文本..."
+                  className="w-full h-48 p-4 pb-8 border rounded-xl bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  maxLength={MAX_TEXT_LENGTH}
+                />
+                <span className={`absolute bottom-2 right-3 text-xs ${sourceContent.length > MAX_TEXT_LENGTH * 0.9 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                  {sourceContent.length.toLocaleString()} / {MAX_TEXT_LENGTH.toLocaleString()}
+                </span>
+              </div>
             ) : (
               <input
                 type="url"
