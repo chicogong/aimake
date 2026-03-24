@@ -5,15 +5,19 @@
 
 import { Link } from 'react-router-dom';
 import { SignedIn, SignedOut, UserButton, SignInButton } from '@clerk/clerk-react';
-import { Mic, Menu, X, Zap } from 'lucide-react';
+import { Mic, Menu, X, Zap, Sun, Moon, Monitor } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUserStore } from '@/stores/userStore';
+import { useTheme } from '@/hooks/useTheme';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const user = useUserStore((state) => state.user);
+  const { theme, toggleTheme } = useTheme();
+
+  const ThemeIcon = theme === 'dark' ? Moon : theme === 'light' ? Sun : Monitor;
 
   const navLinks = [
     { href: '/', label: '创建' },
@@ -52,7 +56,17 @@ export function Header() {
           </nav>
 
           {/* Right side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              aria-label={`当前主题: ${theme === 'dark' ? '深色' : theme === 'light' ? '浅色' : '跟随系统'}，点击切换`}
+              title={theme === 'dark' ? '深色模式' : theme === 'light' ? '浅色模式' : '跟随系统'}
+            >
+              <ThemeIcon className="h-4 w-4" />
+            </button>
+
             {/* Quota display */}
             <SignedIn>
               {user && (
