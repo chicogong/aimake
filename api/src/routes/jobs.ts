@@ -205,18 +205,35 @@ jobsStreamRouter.get('/:id/stream', async (c) => {
     let lastStatus = '';
     let lastProgress = -1;
     let lastScript = '';
-    let attempts = 0;
-    const maxAttempts = 600; // 10 minutes max
+    let elapsed = 0;
+    const maxDuration = 600; // 10 minutes max (seconds)
+    let heartbeatCounter = 0;
 
-    while (attempts < maxAttempts) {
+    // Adaptive polling: fast during active synthesis, slow during idle stages
+    function getInterval(status: string): number {
+      switch (status) {
+        case 'synthesizing':
+        case 'assembling':
+          return 1; // 1s — progress changes rapidly
+        case 'scripting':
+          return 2; // 2s — moderate updates
+        default:
+          return 3; // 3s — pending/classifying/extracting/analyzing
+      }
+    }
+
+    while (elapsed < maxDuration) {
       const [current] = await db.select().from(jobs).where(eq(jobs.id, id)).limit(1);
 
       if (!current) break;
+
+      const interval = getInterval(current.status);
 
       // Send update if something changed
       if (current.status !== lastStatus || current.progress !== lastProgress) {
         lastStatus = current.status;
         lastProgress = current.progress ?? 0;
+        heartbeatCounter = 0;
 
         if (current.status === 'completed') {
           await stream.writeSSE({
@@ -266,8 +283,15 @@ jobsStreamRouter.get('/:id/stream', async (c) => {
         });
       }
 
-      attempts++;
-      await stream.sleep(1000);
+      // Heartbeat to keep connection alive
+      heartbeatCounter += interval;
+      if (heartbeatCounter >= 15) {
+        await stream.writeSSE({ event: 'ping', data: '' });
+        heartbeatCounter = 0;
+      }
+
+      elapsed += interval;
+      await stream.sleep(interval * 1000);
     }
   });
 });
