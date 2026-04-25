@@ -5,6 +5,8 @@ on:
     branches: [master]
     paths:
       - 'api/**'
+      - '.github/workflows/deploy-api.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
