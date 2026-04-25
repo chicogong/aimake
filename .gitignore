@@ -23,6 +23,9 @@ pnpm-debug.log*
 .env.development.local
 .env.test.local
 .env.production.local
+# Exception: frontend/.env.production carries only publishable values
+# (Clerk pk_, public API URL) and is read by Vite at build time in CI.
+!frontend/.env.production
 
 # Cloudflare Workers
 .dev.vars
