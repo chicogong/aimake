@@ -7,7 +7,7 @@ import { tool } from '@tencent-ai/agent-sdk';
 import { z } from 'zod';
 import { audioStore } from '../utils/audio-store.js';
 import { concatenateSegments } from '../utils/audio.js';
-import { toolSuccess, toolError } from './tool-helpers.js';
+import { toolSuccess, toolError, withErrorHandling } from './tool-helpers.js';
 
 export const assembleAudioTool = tool(
   'assemble_audio',
@@ -22,22 +22,16 @@ export const assembleAudioTool = tool(
       .optional()
       .describe('Silence gap between segments in milliseconds (default: 500)'),
   },
-  async ({ jobId, gapMs }) => {
-    try {
+  ({ jobId, gapMs }) =>
+    withErrorHandling(async () => {
       const segments = audioStore.getAll(jobId);
-
       if (segments.length === 0) {
         return toolError('No audio segments found for this job');
       }
 
-      const result = concatenateSegments(segments, gapMs ?? 500);
-      const { audioBase64: assembledBase64, totalDuration } = result;
-
-      audioStore.setAssembled(jobId, { audioBase64: assembledBase64, totalDuration });
+      const { audioBase64, totalDuration } = concatenateSegments(segments, gapMs ?? 500);
+      audioStore.setAssembled(jobId, { audioBase64, totalDuration });
 
       return toolSuccess({ duration: totalDuration, segmentsCount: segments.length });
-    } catch (error) {
-      return toolError(error instanceof Error ? error.message : 'Audio assembly failed');
-    }
-  }
+    }, 'Audio assembly failed')
 );

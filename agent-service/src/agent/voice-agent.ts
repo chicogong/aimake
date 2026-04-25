@@ -1,16 +1,14 @@
 /**
- * Universal voice content agent
+ * Universal voice content agent.
  * Uses Agent SDK to orchestrate the full pipeline:
- * Classify → Extract → Analyze → Script → Synthesize → Assemble
- *
- * R2: Exports activeJobs + markAllJobsFailed for graceful shutdown.
+ * Classify → Extract → Analyze → Script → Synthesize → Assemble.
  */
 
 import { query } from '@tencent-ai/agent-sdk';
 import { createToolServer } from '../tools/index.js';
 import { VOICE_AGENT_SYSTEM_PROMPT, buildUserPrompt } from './system-prompt.js';
 import { audioStore } from '../utils/audio-store.js';
-import { CallbackClient } from '../utils/callback-client.js';
+import { getCallbackClient, getServiceConfig } from '../utils/shared-clients.js';
 import type { GenerateRequest } from '../types.js';
 
 export const activeJobs = new Map<string, boolean>();
@@ -48,15 +46,7 @@ export async function markAllJobsFailed(reason: string): Promise<void> {
 
   console.warn(`Marking ${jobIds.length} active job(s) as failed: ${reason}`);
 
-  const apiUrl = process.env.WORKERS_API_URL;
-  const secret = process.env.INTERNAL_API_SECRET;
-
-  if (!apiUrl || !secret) {
-    console.error('Cannot notify API of shutdown — missing WORKERS_API_URL or INTERNAL_API_SECRET');
-    return;
-  }
-
-  const client = new CallbackClient(apiUrl, secret);
+  const client = getCallbackClient();
 
   await Promise.allSettled(
     jobIds.map((jobId) =>
@@ -70,7 +60,6 @@ export async function markAllJobsFailed(reason: string): Promise<void> {
     )
   );
 
-  // Clean up audio stores
   for (const jobId of jobIds) {
     audioStore.clear(jobId);
     activeJobs.delete(jobId);
@@ -82,35 +71,29 @@ export async function markAllJobsFailed(reason: string): Promise<void> {
  */
 async function generateContent(request: GenerateRequest): Promise<void> {
   const { jobId } = request;
+  const config = getServiceConfig();
 
   console.info(
-    `Starting generation: ${jobId} (type: ${request.contentType}${request.resumeStage ? `, resume: ${request.resumeStage}` : ''})`
+    `[${jobId}] starting generation: type=${request.contentType}` +
+      (request.resumeStage ? `, resume=${request.resumeStage}` : '')
   );
 
-  const toolServer = createToolServer();
-  const userPrompt = buildUserPrompt(request);
-
-  const model = process.env.LLM_MODEL || 'deepseek-v3.1';
-
-  const env: Record<string, string> = {};
-  if (process.env.CODEBUDDY_API_KEY) {
-    env.CODEBUDDY_API_KEY = process.env.CODEBUDDY_API_KEY;
-  }
+  const env: Record<string, string> = {
+    CODEBUDDY_API_KEY: config.codebuddyApiKey,
+  };
   if (process.env.CODEBUDDY_INTERNET_ENVIRONMENT) {
     env.CODEBUDDY_INTERNET_ENVIRONMENT = process.env.CODEBUDDY_INTERNET_ENVIRONMENT;
   }
 
   const q = query({
-    prompt: userPrompt,
+    prompt: buildUserPrompt(request),
     options: {
-      model,
+      model: config.llmModel,
       systemPrompt: VOICE_AGENT_SYSTEM_PROMPT,
       maxTurns: 200,
       permissionMode: 'bypassPermissions',
       env,
-      mcpServers: {
-        'voice-tools': toolServer,
-      },
+      mcpServers: { 'voice-tools': createToolServer() },
       settingSources: [],
       allowedTools: [
         'mcp__voice-tools__extract_content',
@@ -132,56 +115,28 @@ async function generateContent(request: GenerateRequest): Promise<void> {
         );
         for (const block of textBlocks) {
           if ('text' in block) {
-            console.info(`[${jobId}] Agent: ${(block.text as string).slice(0, 200)}`);
+            console.info(`[${jobId}] agent: ${(block.text as string).slice(0, 200)}`);
           }
         }
       } else if (message.type === 'result') {
         if (message.subtype === 'success') {
           console.info(
-            `[${jobId}] Generation completed. Cost: $${message.total_cost_usd}, Turns: ${message.num_turns}`
+            `[${jobId}] generation completed. cost=$${message.total_cost_usd}, turns=${message.num_turns}`
           );
         } else {
-          console.error(
-            `[${jobId}] Generation ended with: ${message.subtype}`,
-            'errors' in message ? message.errors : ''
-          );
-
-          try {
-            const client = new CallbackClient(
-              process.env.WORKERS_API_URL!,
-              process.env.INTERNAL_API_SECRET!
-            );
-            await client.updateProgress(jobId, {
-              status: 'failed',
-              progress: 0,
-              currentStage: 'failed',
-              errorCode: 'AGENT_ERROR',
-              errorMessage: `Agent stopped: ${message.subtype}`,
-            });
-          } catch {
-            // Best effort
-          }
+          await reportFailure(jobId, 'AGENT_ERROR', `Agent stopped: ${message.subtype}`, {
+            errors: 'errors' in message ? message.errors : undefined,
+          });
         }
       }
     }
   } catch (error) {
-    console.error(`[${jobId}] Agent SDK error:`, error);
-
-    try {
-      const client = new CallbackClient(
-        process.env.WORKERS_API_URL!,
-        process.env.INTERNAL_API_SECRET!
-      );
-      await client.updateProgress(jobId, {
-        status: 'failed',
-        progress: 0,
-        currentStage: 'failed',
-        errorCode: 'SDK_ERROR',
-        errorMessage: error instanceof Error ? error.message : 'Unknown SDK error',
-      });
-    } catch {
-      // Best effort
-    }
+    await reportFailure(
+      jobId,
+      'SDK_ERROR',
+      error instanceof Error ? error.message : 'Unknown SDK error',
+      { error }
+    );
   } finally {
     audioStore.clear(jobId);
     console.info(`[${jobId}] AudioStore cleared.`);
@@ -189,8 +144,45 @@ async function generateContent(request: GenerateRequest): Promise<void> {
 }
 
 /**
- * Check if a job generation is currently active.
+ * Report a fatal failure to the API. Logged structurally regardless of callback success
+ * so an operator can locate the job even when the API is unreachable.
  */
+async function reportFailure(
+  jobId: string,
+  errorCode: string,
+  errorMessage: string,
+  context?: Record<string, unknown>
+): Promise<void> {
+  console.error(
+    JSON.stringify({
+      level: 'error',
+      jobId,
+      errorCode,
+      errorMessage,
+      context,
+    })
+  );
+
+  try {
+    await getCallbackClient().updateProgress(jobId, {
+      status: 'failed',
+      progress: 0,
+      currentStage: 'failed',
+      errorCode,
+      errorMessage,
+    });
+  } catch (callbackErr) {
+    console.error(
+      JSON.stringify({
+        level: 'error',
+        jobId,
+        message: 'failure callback exhausted retries — job will appear stuck until manual intervention',
+        callbackError: callbackErr instanceof Error ? callbackErr.message : String(callbackErr),
+      })
+    );
+  }
+}
+
 export function isGenerating(jobId: string): boolean {
   return activeJobs.has(jobId);
 }

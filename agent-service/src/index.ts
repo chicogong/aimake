@@ -9,6 +9,8 @@ import 'dotenv/config';
 import { createServer } from './server.js';
 import { loadConfig } from './types.js';
 import { markAllJobsFailed } from './agent/voice-agent.js';
+import { initSharedClients } from './utils/shared-clients.js';
+import { audioStore } from './utils/audio-store.js';
 
 function main() {
   let config;
@@ -19,6 +21,9 @@ function main() {
     console.error('Copy .env.example to .env and fill in the required values.');
     process.exit(1);
   }
+
+  initSharedClients(config);
+  audioStore.startSweeper();
 
   const app = createServer();
 
@@ -42,6 +47,7 @@ function main() {
 
     // Stop accepting new connections
     server.close();
+    audioStore.stopSweeper();
 
     // Mark all active jobs as failed
     try {

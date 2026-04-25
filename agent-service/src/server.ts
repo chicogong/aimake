@@ -6,6 +6,7 @@
 import express from 'express';
 import { startGeneration, isGenerating } from './agent/voice-agent.js';
 import { GenerateRequestSchema } from './types.js';
+import { getServiceConfig } from './utils/shared-clients.js';
 
 export function createServer() {
   const app = express();
@@ -19,7 +20,7 @@ export function createServer() {
   // Start content generation
   app.post('/generate', (req, res) => {
     const secret = req.headers['x-internal-secret'];
-    if (secret !== process.env.INTERNAL_API_SECRET) {
+    if (secret !== getServiceConfig().internalApiSecret) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }

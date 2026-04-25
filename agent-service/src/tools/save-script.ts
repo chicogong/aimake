@@ -6,7 +6,7 @@
 import { tool } from '@tencent-ai/agent-sdk';
 import { z } from 'zod';
 import { getCallbackClient } from '../utils/shared-clients.js';
-import { toolSuccess, toolError } from './tool-helpers.js';
+import { toolSuccess, toolError, withErrorHandling } from './tool-helpers.js';
 
 export const saveScriptTool = tool(
   'save_script',
@@ -18,18 +18,14 @@ export const saveScriptTool = tool(
     script: z.string().describe('JSON string of the script'),
     title: z.string().optional().describe('Generated title for the content'),
   },
-  async ({ jobId, script, title }) => {
-    try {
-      JSON.parse(script);
-
-      const callbackClient = getCallbackClient();
-      await callbackClient.saveScript(jobId, { script, title });
-      return toolSuccess();
-    } catch (error) {
-      if (error instanceof SyntaxError) {
+  ({ jobId, script, title }) =>
+    withErrorHandling(async () => {
+      try {
+        JSON.parse(script);
+      } catch {
         return toolError('Invalid JSON in script');
       }
-      return toolError(error instanceof Error ? error.message : 'Script save failed');
-    }
-  }
+      await getCallbackClient().saveScript(jobId, { script, title });
+      return toolSuccess();
+    }, 'Script save failed')
 );

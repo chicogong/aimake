@@ -1,16 +1,16 @@
 /**
- * Direct TTS API client for segment generation
- * Provider: SiliconFlow (FishAudio)
- *
- * R4: Added retry with exponential backoff + 30s timeout
+ * Direct TTS API client for segment generation.
+ * Provider: SiliconFlow (FishAudio).
  */
+
+import { withRetry, HttpError, httpRetryPolicy } from './with-retry.js';
 
 const SILICONFLOW_CONFIG = {
   baseUrl: 'https://api.siliconflow.cn/v1/audio/speech',
   model: 'fnlp/MOSS-TTSD-v0.5',
 } as const;
 
-const MAX_RETRIES = 3;
+const MAX_ATTEMPTS = 3;
 const TIMEOUT_MS = 30000;
 
 interface TTSConfig {
@@ -120,13 +120,8 @@ export class TTSClient {
     const voice = stripVoicePrefix(voiceId);
     const voiceParam = `${SILICONFLOW_CONFIG.model}:${voice}`;
 
-    let lastError: Error | null = null;
-
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
+    return withRetry(
+      async (signal) => {
         const response = await fetch(SILICONFLOW_CONFIG.baseUrl, {
           method: 'POST',
           headers: {
@@ -140,10 +135,8 @@ export class TTSClient {
             speed,
             response_format: format,
           }),
-          signal: controller.signal,
+          signal,
         });
-
-        clearTimeout(timeout);
 
         if (response.ok) {
           const buffer = await response.arrayBuffer();
@@ -154,29 +147,20 @@ export class TTSClient {
         }
 
         const errorText = await response.text().catch(() => 'unknown');
-        lastError = new Error(`TTS API error (siliconflow): ${response.status} — ${errorText}`);
-
-        // Don't retry client errors except 429
-        if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-          throw lastError;
-        }
-      } catch (err) {
-        if (err === lastError) throw err;
-
-        if (err instanceof Error && err.name === 'AbortError') {
-          lastError = new Error(`TTS API timeout after ${TIMEOUT_MS}ms`);
-        } else {
-          lastError = err instanceof Error ? err : new Error(String(err));
-        }
+        throw new HttpError(
+          response.status,
+          `TTS API error (siliconflow): ${response.status} — ${errorText}`
+        );
+      },
+      {
+        maxAttempts: MAX_ATTEMPTS,
+        timeoutMs: TIMEOUT_MS,
+        shouldRetry: httpRetryPolicy,
+        label: 'tts segment',
+        onRetry: (attempt) => {
+          console.warn(`[tts] retry ${attempt}/${MAX_ATTEMPTS - 1} for segment`);
+        },
       }
-
-      if (attempt < MAX_RETRIES - 1) {
-        const delay = 1000 * Math.pow(2, attempt);
-        await new Promise((r) => setTimeout(r, delay));
-        console.warn(`[tts] Retry ${attempt + 1}/${MAX_RETRIES - 1} for segment`);
-      }
-    }
-
-    throw lastError || new Error('TTS generation failed after retries');
+    );
   }
 }

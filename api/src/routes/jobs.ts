@@ -13,10 +13,67 @@ import { streamSSE } from 'hono/streaming';
 import { eq, and, desc, sql, ne } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Env, Variables, JobResponse, ContentType } from '../types';
-import { createDb, jobs } from '../db';
+import { createDb, jobs, type Database } from '../db';
 import { generateId, generateShortId } from '../utils/id';
 import { success, created } from '../utils/response';
 import { errors } from '../middleware/error';
+
+interface AgentDispatchPayload {
+  jobId: string;
+  source: { type: 'text' | 'url' | 'document'; content: string; documentId?: string };
+  contentType: 'auto' | 'podcast' | 'audiobook' | 'voiceover' | 'education' | 'tts';
+  settings: Record<string, unknown>;
+  title?: string | null;
+  callbackUrl?: string;
+  resumeStage?: 'synthesizing';
+}
+
+/**
+ * Dispatch a job to the agent service.
+ * Fire-and-forget at the request level (we return immediately to the user),
+ * but a dispatch failure marks the job as failed so the UI can surface it
+ * instead of leaving the user staring at a permanently `pending` job.
+ */
+async function dispatchToAgent(
+  db: Database,
+  env: Env,
+  payload: AgentDispatchPayload
+): Promise<void> {
+  const markFailed = async (errorMessage: string) => {
+    console.error(`[jobs] dispatch failed for ${payload.jobId}: ${errorMessage}`);
+    await db
+      .update(jobs)
+      .set({
+        status: 'failed',
+        errorCode: 'AGENT_UNAVAILABLE',
+        errorMessage: 'Agent service is unreachable. Please try again later.',
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(jobs.id, payload.jobId));
+  };
+
+  if (!env.AGENT_SERVICE_URL || !env.INTERNAL_API_SECRET) {
+    await markFailed('AGENT_SERVICE_URL or INTERNAL_API_SECRET is not configured');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${env.AGENT_SERVICE_URL}/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Internal-Secret': env.INTERNAL_API_SECRET,
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const text = await response.text().catch(() => 'unknown');
+      await markFailed(`Agent dispatch returned ${response.status}: ${text}`);
+    }
+  } catch (err) {
+    await markFailed(err instanceof Error ? err.message : 'Agent dispatch failed');
+  }
+}
 
 // ============ Zod Schemas ============
 
@@ -89,31 +146,16 @@ jobsRouter.post('/', async (c) => {
     updatedAt: now,
   });
 
-  // Fire-and-forget: dispatch to agent service
-  if (c.env.AGENT_SERVICE_URL && c.env.INTERNAL_API_SECRET) {
-    const agentPayload = {
-      jobId,
-      source: data.source,
-      contentType: data.contentType, // Pass 'auto' so agent can classify
-      settings: {
-        ...data.settings,
-        episodeDuration: data.settings.duration,
-      },
-      title: data.title,
-      callbackUrl: '', // Agent uses WORKERS_API_URL env var
-    };
-
-    fetch(`${c.env.AGENT_SERVICE_URL}/generate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Internal-Secret': c.env.INTERNAL_API_SECRET,
-      },
-      body: JSON.stringify(agentPayload),
-    }).catch((err) => {
-      console.error(`Failed to dispatch job ${jobId} to agent:`, err);
-    });
-  }
+  // Fire-and-forget at the response level — dispatch + failure handling
+  // run via waitUntil so the worker doesn't terminate before they finish.
+  const dispatch = dispatchToAgent(db, c.env, {
+    jobId,
+    source: data.source,
+    contentType: data.contentType,
+    settings: { ...data.settings, episodeDuration: data.settings.duration },
+    title: data.title,
+  });
+  c.executionCtx.waitUntil(dispatch);
 
   return created(c, {
     id: jobId,
@@ -222,7 +264,7 @@ jobsStreamRouter.get('/:id/stream', async (c) => {
       }
     }
 
-    while (elapsed < maxDuration) {
+    while (elapsed < maxDuration && !stream.aborted) {
       const [current] = await db.select().from(jobs).where(eq(jobs.id, id)).limit(1);
 
       if (!current) break;
@@ -360,38 +402,32 @@ jobsRouter.post('/:id/synthesize', async (c) => {
     throw errors.quotaExceeded('配额不足，请升级套餐');
   }
 
-  // Dispatch to agent service for synthesis stage only
-  if (c.env.AGENT_SERVICE_URL && c.env.INTERNAL_API_SECRET) {
-    const settings = JSON.parse(job.settings || '{}');
-    const agentPayload = {
-      jobId: job.id,
-      source: {
-        type: job.sourceType,
-        content: job.sourceContent,
-      },
-      contentType: job.contentType,
-      settings: {
-        ...settings,
-        episodeDuration: settings.duration,
-      },
-      title: job.title,
-      resumeStage: 'synthesizing',
-    };
-
-    fetch(`${c.env.AGENT_SERVICE_URL}/generate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Internal-Secret': c.env.INTERNAL_API_SECRET,
-      },
-      body: JSON.stringify(agentPayload),
-    }).catch((err) => {
-      console.error(`Failed to dispatch synthesize job ${id} to agent:`, err);
-    });
-  }
+  const settings = parseSettings(job.settings);
+  const dispatch = dispatchToAgent(db, c.env, {
+    jobId: job.id,
+    source: {
+      type: job.sourceType as 'text' | 'url' | 'document',
+      content: job.sourceContent,
+    },
+    contentType: job.contentType as AgentDispatchPayload['contentType'],
+    settings: { ...settings, episodeDuration: settings.duration },
+    title: job.title,
+    resumeStage: 'synthesizing',
+  });
+  c.executionCtx.waitUntil(dispatch);
 
   return success(c, { id, status: 'synthesizing' });
 });
+
+function parseSettings(raw: string | null): Record<string, unknown> {
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : {};
+  } catch {
+    return {};
+  }
+}
 
 // DELETE /api/jobs/:id — Soft delete
 jobsRouter.delete('/:id', async (c) => {

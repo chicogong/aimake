@@ -15,6 +15,7 @@ import type { Env, Variables } from '../types';
 import { createDb } from '../db';
 import { jobs, users, usageLogs } from '../db/schema';
 import { generateId } from '../utils/id';
+import { errors } from '../middleware/error';
 
 const internalRoutes = new Hono<{ Bindings: Env; Variables: Variables }>();
 
@@ -57,7 +58,7 @@ const AudioSchema = z.object({
 internalRoutes.use('*', async (c, next) => {
   const secret = c.req.header('X-Internal-Secret');
   if (!c.env.INTERNAL_API_SECRET || secret !== c.env.INTERNAL_API_SECRET) {
-    return c.json({ success: false, error: 'Unauthorized' }, 401);
+    throw errors.unauthorized('Unauthorized');
   }
   await next();
 });
@@ -70,37 +71,35 @@ internalRoutes.post('/jobs/:id/progress', async (c) => {
 
   const parsed = ProgressSchema.safeParse(raw);
   if (!parsed.success) {
-    return c.json({ success: false, error: 'Invalid payload', details: parsed.error.format() }, 400);
+    throw errors.validation('Invalid payload', parsed.error.format());
   }
 
   const body = parsed.data;
   const db = createDb(c.env.DB);
+  const now = new Date().toISOString();
 
-  const updateData: Record<string, unknown> = {
+  const baseUpdate = {
     status: body.status,
     progress: body.progress,
     currentStage: body.currentStage,
-    errorCode: body.errorCode || null,
-    errorMessage: body.errorMessage || null,
-    updatedAt: new Date().toISOString(),
-  };
+    errorCode: body.errorCode ?? null,
+    errorMessage: body.errorMessage ?? null,
+    updatedAt: now,
+    ...(body.detectedContentType ? { detectedContentType: body.detectedContentType } : {}),
+  } as const;
 
-  if (body.detectedContentType) {
-    updateData.detectedContentType = body.detectedContentType;
-  }
+  // For non-pending/failed statuses, set startedAt atomically iff still null.
+  // Using SQL CASE prevents the read-then-write race where two concurrent
+  // callbacks both observed startedAt=null and both wrote a value.
+  const update =
+    body.status === 'pending' || body.status === 'failed'
+      ? baseUpdate
+      : {
+          ...baseUpdate,
+          startedAt: sql`COALESCE(${jobs.startedAt}, ${now})`,
+        };
 
-  if (body.status !== 'pending' && body.status !== 'failed') {
-    // Set startedAt on first non-pending status
-    const [job] = await db.select().from(jobs).where(eq(jobs.id, id)).limit(1);
-    if (job && !job.startedAt) {
-      updateData.startedAt = new Date().toISOString();
-    }
-  }
-
-  await db
-    .update(jobs)
-    .set(updateData)
-    .where(eq(jobs.id, id));
+  await db.update(jobs).set(update).where(eq(jobs.id, id));
 
   return c.json({ success: true });
 });
@@ -113,24 +112,19 @@ internalRoutes.post('/jobs/:id/script', async (c) => {
 
   const parsed = ScriptSchema.safeParse(raw);
   if (!parsed.success) {
-    return c.json({ success: false, error: 'Invalid payload', details: parsed.error.format() }, 400);
+    throw errors.validation('Invalid payload', parsed.error.format());
   }
 
   const body = parsed.data;
   const db = createDb(c.env.DB);
 
-  const updateData: Record<string, unknown> = {
-    script: body.script,
-    updatedAt: new Date().toISOString(),
-  };
-
-  if (body.title) {
-    updateData.title = body.title;
-  }
-
   await db
     .update(jobs)
-    .set(updateData)
+    .set({
+      script: body.script,
+      updatedAt: new Date().toISOString(),
+      ...(body.title ? { title: body.title } : {}),
+    })
     .where(eq(jobs.id, id));
 
   return c.json({ success: true });
@@ -144,7 +138,7 @@ internalRoutes.post('/jobs/:id/audio', async (c) => {
 
   const parsed = AudioSchema.safeParse(raw);
   if (!parsed.success) {
-    return c.json({ success: false, error: 'Invalid payload', details: parsed.error.format() }, 400);
+    throw errors.validation('Invalid payload', parsed.error.format());
   }
 
   const body = parsed.data;
@@ -154,7 +148,7 @@ internalRoutes.post('/jobs/:id/audio', async (c) => {
   try {
     audioBuffer = Uint8Array.from(atob(body.audioBase64), (ch) => ch.charCodeAt(0));
   } catch {
-    return c.json({ success: false, error: 'Invalid base64 audio data' }, 400);
+    throw errors.validation('Invalid base64 audio data');
   }
 
   let audioUrl: string;
@@ -176,27 +170,37 @@ internalRoutes.post('/jobs/:id/audio', async (c) => {
   }
 
   const now = new Date().toISOString();
+  const quotaDelta = Math.ceil(body.duration);
 
-  // Update job record
-  await db
-    .update(jobs)
-    .set({
-      audioUrl,
-      audioFormat: body.format,
-      duration: body.duration,
-      fileSize: audioBuffer.byteLength,
-      status: 'completed',
-      progress: 100,
-      currentStage: 'completed',
-      completedAt: now,
-      updatedAt: now,
-    })
-    .where(eq(jobs.id, id));
-
-  // Log usage
+  // Look up the job once to get userId / contentType / source size for the usage log.
+  // Quota and usage writes go through db.batch() so they apply atomically.
   const [job] = await db.select().from(jobs).where(eq(jobs.id, id)).limit(1);
-  if (job) {
-    await db.insert(usageLogs).values({
+  if (!job) {
+    throw errors.notFound('Job not found');
+  }
+
+  // Idempotency: a retried agent callback after a successful prior commit must not
+  // re-charge quota or insert a duplicate usage log.
+  if (job.status === 'completed' && job.audioUrl) {
+    return c.json({ success: true, audioUrl: job.audioUrl, idempotent: true });
+  }
+
+  await db.batch([
+    db
+      .update(jobs)
+      .set({
+        audioUrl,
+        audioFormat: body.format,
+        duration: body.duration,
+        fileSize: audioBuffer.byteLength,
+        status: 'completed',
+        progress: 100,
+        currentStage: 'completed',
+        completedAt: now,
+        updatedAt: now,
+      })
+      .where(eq(jobs.id, id)),
+    db.insert(usageLogs).values({
       id: generateId(),
       userId: job.userId,
       type: job.contentType as 'tts' | 'podcast' | 'audiobook' | 'voiceover' | 'education',
@@ -205,17 +209,15 @@ internalRoutes.post('/jobs/:id/audio', async (c) => {
       jobId: id,
       provider: 'agent',
       createdAt: now,
-    });
-
-    // Update user quota
-    await db
+    }),
+    db
       .update(users)
       .set({
-        quotaUsed: sql`${users.quotaUsed} + ${Math.ceil(body.duration)}`,
+        quotaUsed: sql`${users.quotaUsed} + ${quotaDelta}`,
         updatedAt: now,
       })
-      .where(eq(users.id, job.userId));
-  }
+      .where(eq(users.id, job.userId)),
+  ]);
 
   return c.json({ success: true, audioUrl });
 });

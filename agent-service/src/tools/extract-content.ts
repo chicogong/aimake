@@ -5,7 +5,10 @@
 
 import { tool } from '@tencent-ai/agent-sdk';
 import { z } from 'zod';
-import { toolSuccess, toolError } from './tool-helpers.js';
+import { toolSuccess, toolError, withErrorHandling } from './tool-helpers.js';
+
+const FETCH_TIMEOUT_MS = 30_000;
+const MAX_HTML_BYTES = 5 * 1024 * 1024; // 5 MB ceiling on remote pages
 
 export const extractContentTool = tool(
   'extract_content',
@@ -17,44 +20,53 @@ export const extractContentTool = tool(
     type: z.enum(['url', 'text', 'document']).describe('Source type'),
     content: z.string().describe('The URL to fetch or the raw text content'),
   },
-  async ({ type, content }) => {
-    try {
+  ({ type, content }) =>
+    withErrorHandling(async () => {
       if (type === 'text' || type === 'document') {
-        const language = detectLanguage(content);
         return toolSuccess({
           title: null,
           text: content,
           charCount: content.length,
-          language,
+          language: detectLanguage(content),
         });
       }
 
-      // URL extraction
-      const response = await fetch(content, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; AIMake/1.0; +https://aimake.cc)',
-        },
-      });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
-      if (!response.ok) {
-        return toolError(`Failed to fetch URL: ${response.status} ${response.statusText}`);
+      try {
+        const response = await fetch(content, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; AIMake/1.0; +https://aimake.cc)',
+          },
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          return toolError(`Failed to fetch URL: ${response.status} ${response.statusText}`);
+        }
+
+        const declaredLength = Number(response.headers.get('content-length') || '0');
+        if (declaredLength > MAX_HTML_BYTES) {
+          return toolError(`URL content too large: ${declaredLength} bytes (max ${MAX_HTML_BYTES})`);
+        }
+
+        const html = await response.text();
+        if (html.length > MAX_HTML_BYTES) {
+          return toolError(`URL content too large: ${html.length} bytes (max ${MAX_HTML_BYTES})`);
+        }
+
+        const text = stripHtml(html);
+        return toolSuccess({
+          title: extractTitle(html),
+          text,
+          charCount: text.length,
+          language: detectLanguage(text),
+        });
+      } finally {
+        clearTimeout(timeout);
       }
-
-      const html = await response.text();
-      const text = stripHtml(html);
-      const title = extractTitle(html);
-      const language = detectLanguage(text);
-
-      return toolSuccess({
-        title,
-        text: text,
-        charCount: text.length,
-        language: language,
-      });
-    } catch (error) {
-      return toolError(error instanceof Error ? error.message : 'Content extraction failed');
-    }
-  }
+    }, 'Content extraction failed')
 );
 
 export function stripHtml(html: string): string {

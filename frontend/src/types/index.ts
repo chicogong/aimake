@@ -30,7 +30,8 @@ export interface User {
   name: string | null;
   avatarUrl: string | null;
   plan: Plan;
-  quota: QuotaInfo;
+  /** Loaded asynchronously from /api/user/quota — may be absent right after rehydrate. */
+  quota?: QuotaInfo;
   createdAt: string;
 }
 

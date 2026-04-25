@@ -10,7 +10,7 @@ import { tool } from '@tencent-ai/agent-sdk';
 import { z } from 'zod';
 import { getTTSClient } from '../utils/shared-clients.js';
 import { audioStore } from '../utils/audio-store.js';
-import { toolSuccess, toolError } from './tool-helpers.js';
+import { toolSuccess, toolError, withErrorHandling } from './tool-helpers.js';
 
 const MAX_CONCURRENCY = 5;
 
@@ -58,85 +58,81 @@ export const batchGenerateTtsTool = tool(
           index: z.number().int().describe('The sequence index of this segment'),
           text: z.string().describe('The text to synthesize'),
           voiceId: z.string().describe('The voice ID to use for this segment'),
+          speed: z.number().optional().describe('Speech speed multiplier (default: 1.0)'),
         })
       )
       .describe('List of segments to synthesize in parallel'),
   },
-  async (params) => {
-    return batchGenerateTtsHandler(params);
-  }
+  (params) => batchGenerateTtsHandler(params)
 );
+
+interface BatchSegment {
+  index: number;
+  text: string;
+  voiceId: string;
+  speed?: number;
+}
 
 export async function batchGenerateTtsHandler({
   jobId,
   segments,
 }: {
   jobId: string;
-  segments: Array<{ index: number; text: string; voiceId: string }>;
+  segments: BatchSegment[];
 }) {
-  try {
+  return withErrorHandling(async () => {
     const ttsClient = getTTSClient();
 
-    console.info(`[${jobId}] Batch TTS: Processing ${segments.length} segments (concurrency: ${MAX_CONCURRENCY})...`);
+    console.info(
+      `[${jobId}] batch tts: ${segments.length} segments (concurrency ${MAX_CONCURRENCY})`
+    );
 
     const results = await mapWithConcurrency(
       segments,
       async (seg) => {
-        const result = await ttsClient.generateSegment({
+        const { audioBase64, duration } = await ttsClient.generateSegment({
           text: seg.text,
           voiceId: seg.voiceId,
+          speed: seg.speed ?? 1.0,
         });
-        audioStore.set(jobId, {
-          index: seg.index,
-          audioBase64: result.audioBase64,
-          duration: result.duration,
-        });
-        return { index: seg.index, duration: result.duration };
+        audioStore.set(jobId, { index: seg.index, audioBase64, duration });
+        return { index: seg.index, duration };
       },
       MAX_CONCURRENCY
     );
 
-    const succeeded = results.filter(
-      (r): r is PromiseSettledResult<{ index: number; duration: number }> & { status: 'fulfilled' } =>
-        r.status === 'fulfilled'
-    );
-    const failed = results.filter((r) => r.status === 'rejected');
+    const succeeded = results
+      .map((r, i) => (r.status === 'fulfilled' ? { ...r.value } : null))
+      .filter((r): r is { index: number; duration: number } => r !== null);
+
+    const failedIndices = results
+      .map((r, i) => (r.status === 'rejected' ? segments[i].index : null))
+      .filter((i): i is number => i !== null);
 
     if (succeeded.length === 0) {
-      const firstErr = failed[0] && 'reason' in failed[0]
-        ? (failed[0].reason as Error)?.message || 'Unknown error'
-        : 'All segments failed';
+      const reason =
+        results.find((r) => r.status === 'rejected') as PromiseRejectedResult | undefined;
+      const firstErr = reason?.reason instanceof Error ? reason.reason.message : 'Unknown error';
       return toolError(`All ${segments.length} TTS segments failed. First error: ${firstErr}`);
     }
 
-    const totalDuration = succeeded.reduce((acc, r) => acc + r.value.duration, 0);
+    const totalDuration = succeeded.reduce((acc, r) => acc + r.duration, 0);
 
     console.info(
-      `[${jobId}] Batch TTS done: ${succeeded.length}/${segments.length} succeeded, ` +
-        `${failed.length} failed, total duration: ${totalDuration.toFixed(1)}s`
+      `[${jobId}] batch tts done: ${succeeded.length}/${segments.length} succeeded, ` +
+        `${failedIndices.length} failed, total ${totalDuration.toFixed(1)}s`
     );
-
-    if (failed.length > 0) {
-      const failedIndices = results
-        .map((r, i) => (r.status === 'rejected' ? segments[i].index : null))
-        .filter((i) => i !== null);
-
-      return toolSuccess({
-        count: succeeded.length,
-        failedCount: failed.length,
-        failedIndices,
-        totalDurationEstimate: totalDuration,
-        message: `${succeeded.length} segments synthesized, ${failed.length} failed (indices: ${failedIndices.join(', ')}). Use generate_tts_segment to retry failed ones individually.`,
-      });
-    }
 
     return toolSuccess({
       count: succeeded.length,
-      failedCount: 0,
+      failedCount: failedIndices.length,
+      ...(failedIndices.length > 0
+        ? {
+            failedIndices,
+            message: `${succeeded.length} segments synthesized, ${failedIndices.length} failed (indices: ${failedIndices.join(', ')}). Use generate_tts_segment to retry failed ones individually.`,
+          }
+        : {}),
       totalDurationEstimate: totalDuration,
     });
-  } catch (error) {
-    console.error(`[${jobId}] Batch TTS failed:`, error);
-    return toolError(error instanceof Error ? error.message : 'Batch TTS failed');
-  }
+  }, `[${jobId}] Batch TTS failed`);
 }

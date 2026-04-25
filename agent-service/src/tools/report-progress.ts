@@ -6,7 +6,7 @@
 import { tool } from '@tencent-ai/agent-sdk';
 import { z } from 'zod';
 import { getCallbackClient } from '../utils/shared-clients.js';
-import { toolSuccess, toolError } from './tool-helpers.js';
+import { toolSuccess, withErrorHandling } from './tool-helpers.js';
 
 export const reportProgressTool = tool(
   'report_progress',
@@ -34,10 +34,9 @@ export const reportProgressTool = tool(
       .optional()
       .describe('Content type detected during classify stage'),
   },
-  async ({ jobId, stage, progress, message, detectedContentType }) => {
-    try {
-      const callbackClient = getCallbackClient();
-      await callbackClient.updateProgress(jobId, {
+  ({ jobId, stage, progress, message, detectedContentType }) =>
+    withErrorHandling(async () => {
+      await getCallbackClient().updateProgress(jobId, {
         status: stage,
         progress,
         currentStage: stage,
@@ -47,8 +46,5 @@ export const reportProgressTool = tool(
           : {}),
       });
       return toolSuccess();
-    } catch (error) {
-      return toolError(error instanceof Error ? error.message : 'Progress update failed');
-    }
-  }
+    }, 'Progress update failed')
 );

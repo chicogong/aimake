@@ -73,7 +73,9 @@ export function Header() {
                 <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg">
                   <Zap className="h-4 w-4 text-amber-500" />
                   <span className="text-sm font-medium">
-                    {Math.floor(user.quota.remaining / 60)}分钟
+                    {user.quota
+                      ? `${Math.floor(user.quota.remaining / 60)}分钟`
+                      : '— 分钟'}
                   </span>
                 </div>
               )}

@@ -1,6 +1,6 @@
 /**
  * User Store
- * Zustand store for user state management
+ * Zustand store for user state management.
  */
 
 import { create } from 'zustand';
@@ -12,7 +12,6 @@ interface UserState {
   isLoading: boolean;
   error: string | null;
 
-  // Actions
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -28,26 +27,30 @@ export const useUserStore = create<UserState>()(
       error: null,
 
       setUser: (user) => set({ user, error: null }),
-
       setLoading: (isLoading) => set({ isLoading }),
-
       setError: (error) => set({ error }),
 
       updateQuota: (quota) =>
-        set((state) => ({
-          user: state.user
-            ? {
-                ...state.user,
-                quota: { ...state.user.quota, ...quota },
-              }
-            : null,
-        })),
+        set((state) => {
+          if (!state.user) return state;
+          const merged = { ...(state.user.quota ?? {}), ...quota } as QuotaInfo;
+          return { user: { ...state.user, quota: merged } };
+        }),
 
       clearUser: () => set({ user: null, error: null }),
     }),
     {
       name: 'aimake-user',
-      partialize: (state) => ({ user: state.user }),
+      // Persist identity only. Quota is server-authoritative; persisting it would
+      // surface a stale value before /api/auth/me responds on the next page load.
+      partialize: (state) => ({
+        user: state.user
+          ? (() => {
+              const { quota: _quota, ...rest } = state.user;
+              return rest as User;
+            })()
+          : null,
+      }),
     }
   )
 );
