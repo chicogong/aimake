@@ -44,4 +44,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: aimake-app
           directory: frontend/dist
+          # Must match the project's production branch in the Cloudflare dashboard,
+          # otherwise the deploy lands as a preview alias (e.g. master.aimake-app.pages.dev).
+          branch: master
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
