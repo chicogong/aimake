@@ -1,0 +1,43 @@
+name: Check DNS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      CF_API: https://api.cloudflare.com/client/v4
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: List zones for aimake.cc
+        run: |
+          curl -sS \
+            -H "Authorization: Bearer $CF_TOKEN" \
+            "$CF_API/zones?name=aimake.cc" \
+            | jq '.result | map({id, name, status, account: .account.id})'
+
+      - name: List DNS records on aimake.cc zone
+        run: |
+          set -euo pipefail
+          zone_id=$(curl -sS \
+            -H "Authorization: Bearer $CF_TOKEN" \
+            "$CF_API/zones?name=aimake.cc" \
+            | jq -r '.result[0].id // empty')
+          if [ -z "$zone_id" ]; then
+            echo "::error::No zone for aimake.cc accessible by this token"
+            exit 1
+          fi
+          echo "Zone ID: $zone_id"
+          curl -sS \
+            -H "Authorization: Bearer $CF_TOKEN" \
+            "$CF_API/zones/$zone_id/dns_records?per_page=50" \
+            | jq '.result | map({type, name, content, proxied})'
+
+      - name: Inspect aimake.cc Pages domain detail
+        run: |
+          curl -sS \
+            -H "Authorization: Bearer $CF_TOKEN" \
+            "$CF_API/accounts/$CF_ACCOUNT/pages/projects/aimake-app/domains/aimake.cc" \
+            | jq .
