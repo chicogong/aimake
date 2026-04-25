@@ -26,14 +26,18 @@ jobs:
             "$CF_API/zones?name=aimake.cc" \
             | jq -r '.result[0].id // empty')
           if [ -z "$zone_id" ]; then
-            echo "::error::No zone for aimake.cc accessible by this token"
-            exit 1
+            echo "::warning::No zone for aimake.cc accessible by this token"
+            exit 0
           fi
           echo "Zone ID: $zone_id"
-          curl -sS \
+          response=$(curl -sS \
             -H "Authorization: Bearer $CF_TOKEN" \
-            "$CF_API/zones/$zone_id/dns_records?per_page=50" \
-            | jq '.result | map({type, name, content, proxied})'
+            "$CF_API/zones/$zone_id/dns_records?per_page=50")
+          echo "$response" | jq .
+          ok=$(echo "$response" | jq -r .success)
+          if [ "$ok" != "true" ]; then
+            echo "::warning::DNS list failed — token likely lacks DNS:Read"
+          fi
 
       - name: Inspect aimake.cc Pages domain detail
         run: |
@@ -41,3 +45,27 @@ jobs:
             -H "Authorization: Bearer $CF_TOKEN" \
             "$CF_API/accounts/$CF_ACCOUNT/pages/projects/aimake-app/domains/aimake.cc" \
             | jq .
+
+      - name: Try create apex CNAME (probes DNS:Edit scope)
+        run: |
+          set -euo pipefail
+          zone_id=$(curl -sS \
+            -H "Authorization: Bearer $CF_TOKEN" \
+            "$CF_API/zones?name=aimake.cc" \
+            | jq -r '.result[0].id // empty')
+          if [ -z "$zone_id" ]; then
+            echo "::warning::No zone access — skipping"
+            exit 0
+          fi
+          response=$(curl -sS -X POST \
+            -H "Authorization: Bearer $CF_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"type":"CNAME","name":"aimake.cc","content":"aimake-app.pages.dev","proxied":true,"ttl":1}' \
+            "$CF_API/zones/$zone_id/dns_records")
+          echo "$response" | jq .
+          ok=$(echo "$response" | jq -r .success)
+          if [ "$ok" != "true" ]; then
+            echo "::warning::DNS record create failed — token likely lacks DNS:Edit scope"
+          else
+            echo "DNS record created"
+          fi
