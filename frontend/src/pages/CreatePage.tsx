@@ -15,8 +15,8 @@ import { VoiceSelector } from '@/components/tts/VoiceSelector';
 import { MAX_TEXT_LENGTH, validateCreateJobInput } from '@/lib/validation';
 
 const CONTENT_TYPES = [
+  { id: 'podcast' as const, label: '播客', icon: Radio, description: '双人对话，支持发布到 Spotify / Apple Podcasts' },
   { id: 'auto' as const, label: '自动检测', icon: Sparkles, description: 'AI 自动判断最佳类型' },
-  { id: 'podcast' as const, label: '播客', icon: Radio, description: '双人对话式节目' },
   { id: 'audiobook' as const, label: '有声书', icon: BookOpen, description: '叙述式朗读' },
   { id: 'voiceover' as const, label: '配音', icon: Film, description: '精炼旁白' },
   { id: 'education' as const, label: '教育', icon: GraduationCap, description: '讲解式内容' },
@@ -38,7 +38,7 @@ export function CreatePage() {
   // Step state
   const [sourceType, setSourceType] = useState<SourceType>('text');
   const [sourceContent, setSourceContent] = useState('');
-  const [contentType, setContentType] = useState<'auto' | ContentType>('auto');
+  const [contentType, setContentType] = useState<'auto' | ContentType>('podcast');
   const [duration, setDuration] = useState(5);
   const [title, setTitle] = useState('');
   const [selectedVoices, setSelectedVoices] = useState<Array<{ role: string; voiceId: string }>>(

@@ -166,3 +166,9 @@ export const userApi = {
 export function getJobStreamUrl(jobId: string, streamToken: string): string {
   return `${API_BASE}/jobs/${jobId}/stream?token=${streamToken}`;
 }
+
+// RSS URL helper
+export function getJobRssUrl(jobId: string): string {
+  const base = API_BASE.startsWith('http') ? API_BASE : `${window.location.origin}${API_BASE}`;
+  return `${base}/jobs/${jobId}/rss`;
+}

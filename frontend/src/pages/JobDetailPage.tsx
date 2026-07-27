@@ -14,12 +14,16 @@ import {
   Loader2,
   Edit3,
   AlertTriangle,
+  Rss,
+  Copy,
+  Share2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
+import { useToast } from '@/hooks/useToast';
 import { useJobStream } from '@/hooks/useJobStream';
-import { jobsApi } from '@/services/api';
+import { jobsApi, getJobRssUrl } from '@/services/api';
 import { ScriptEditor } from '@/components/ScriptEditor';
 import type { JobDetail } from '@/types';
 import { formatDuration, parseScript } from '@/lib/utils';
@@ -66,6 +70,7 @@ export function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const streamToken = searchParams.get('token');
+  const { toast } = useToast();
 
   const [job, setJob] = useState<(JobDetail & { isEditing?: boolean }) | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -76,6 +81,9 @@ export function JobDetailPage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
   const rafRef = useRef<number>(0);
+
+  const [isGeneratingRss, setIsGeneratingRss] = useState(false);
+  const [generatedRssUrl, setGeneratedRssUrl] = useState<string | null>(null);
 
   const stream = useJobStream(id ?? null, streamToken);
 
@@ -207,6 +215,34 @@ export function JobDetailPage() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  };
+
+  const handleGenerateRss = async () => {
+    if (!id) return;
+    setIsGeneratingRss(true);
+    try {
+      const url = getJobRssUrl(id);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to generate RSS');
+      
+      setGeneratedRssUrl(url);
+      await navigator.clipboard.writeText(url);
+      toast({ title: '✅ RSS 链接已复制', description: '您现在可以将其提交到 Apple Podcasts 或 Spotify' });
+    } catch (err) {
+      toast({ title: '❌ 生成失败', description: '无法生成或复制 RSS 链接', variant: 'destructive' });
+    } finally {
+      setIsGeneratingRss(false);
+    }
+  };
+
+  const handleCopyPodcastLink = async () => {
+    if (!generatedRssUrl) return;
+    try {
+      await navigator.clipboard.writeText(generatedRssUrl);
+      toast({ title: '✅ RSS 链接已复制' });
+    } catch (err) {
+      toast({ title: '❌ 复制失败', variant: 'destructive' });
+    }
   };
 
   return (
@@ -354,6 +390,43 @@ export function JobDetailPage() {
                       </span>
                     </div>
                   )}
+                </div>
+
+                {/* 发布与分发 Card */}
+                <div className="p-4 border rounded-lg space-y-4 bg-card mt-4">
+                  <div className="flex items-center gap-2">
+                    <Share2 className="h-5 w-5 text-primary" />
+                    <h3 className="font-semibold text-sm">发布与分发</h3>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button 
+                      className="flex-1 bg-[#F97316] hover:bg-[#EA580C] text-white" 
+                      onClick={handleGenerateRss}
+                      disabled={isGeneratingRss}
+                    >
+                      {isGeneratingRss ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Rss className="h-4 w-4 mr-2" />}
+                      生成 RSS Feed
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={handleDownload}
+                      disabled={isLoadingAudio}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      下载 MP3
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      className="flex-1"
+                      onClick={handleCopyPodcastLink}
+                      disabled={!generatedRssUrl}
+                      title={generatedRssUrl ? "复制专属播客链接" : "发布后即可获得专属播客链接"}
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      复制播客链接
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Script preview */}
